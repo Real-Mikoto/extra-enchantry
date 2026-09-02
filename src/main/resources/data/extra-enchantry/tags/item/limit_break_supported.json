@@ -1,0 +1,14 @@
+{
+	"values": [
+		"#minecraft:enchantable/armor",
+		"#minecraft:enchantable/melee_weapon",
+		"#minecraft:enchantable/sharp_weapon",
+		"#minecraft:enchantable/mining",
+		"#minecraft:enchantable/mining_loot",
+		"#minecraft:enchantable/bow",
+		"#minecraft:enchantable/crossbow",
+		"#minecraft:enchantable/trident",
+		"#minecraft:enchantable/mace",
+		"#minecraft:enchantable/fishing"
+	]
+}

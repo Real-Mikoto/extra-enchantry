@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "extra-enchantry",
+	"version": "${version}",
+	"name": "Extra Enchantry",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/extra-enchantry/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"realmikoto.extraenchantry.ExtraEnchantry"
+		],
+		"client": [
+			"realmikoto.extraenchantry.client.ExtraEnchantryClient"
+		]
+	},
+	"mixins": [
+		"extra-enchantry.mixins.json",
+		{
+			"config": "extra-enchantry.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

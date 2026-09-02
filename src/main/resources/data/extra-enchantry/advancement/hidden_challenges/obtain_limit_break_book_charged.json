@@ -1,0 +1,26 @@
+{
+	"parent": "extra-enchantry:hidden_challenges/root",
+	"criteria": {
+		"extra-enchantry:obtained": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"announce_to_chat": true,
+		"description": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.description"
+		},
+		"icon": {
+			"id": "minecraft:creeper_head"
+		},
+		"show_toast": true,
+		"title": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.title"
+		}
+	},
+	"requirements": [
+		[
+			"extra-enchantry:obtained"
+		]
+	]
+}

@@ -1,0 +1,44 @@
+{
+	"anvil_cost": 2,
+	"description": {
+		"translate": "enchantment.extra-enchantry.reach"
+	},
+	"effects": {
+		"minecraft:attributes": [
+			{
+				"amount": {
+					"type": "minecraft:linear",
+					"base": 0.5,
+					"per_level_above_first": 0.5
+				},
+				"attribute": "minecraft:entity_interaction_range",
+				"id": "extra-enchantry:enchantment.reach/entity",
+				"operation": "add_value"
+			},
+			{
+				"amount": {
+					"type": "minecraft:linear",
+					"base": 0.5,
+					"per_level_above_first": 0.5
+				},
+				"attribute": "minecraft:block_interaction_range",
+				"id": "extra-enchantry:enchantment.reach/block",
+				"operation": "add_value"
+			}
+		]
+	},
+	"max_cost": {
+		"base": 60,
+		"per_level_above_first": 100
+	},
+	"max_level": 10,
+	"min_cost": {
+		"base": 5,
+		"per_level_above_first": 100
+	},
+	"slots": [
+		"mainhand"
+	],
+	"supported_items": "#extra-enchantry:reach_supported",
+	"weight": 5
+}

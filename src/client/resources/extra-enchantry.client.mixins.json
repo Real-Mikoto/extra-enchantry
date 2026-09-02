@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "realmikoto.extraenchantry.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"ExampleClientMixin",
+		"FontPreparedTextBuilderMixin",
+		"HudMixin",
+		"LocalPlayerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

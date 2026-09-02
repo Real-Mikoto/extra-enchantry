@@ -1,0 +1,25 @@
+{
+	"criteria": {
+		"impossible": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"announce_to_chat": false,
+		"description": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.root.description"
+		},
+		"icon": {
+			"id": "minecraft:enchanted_book"
+		},
+		"show_toast": false,
+		"title": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.root.title"
+		}
+	},
+	"requirements": [
+		[
+			"impossible"
+		]
+	]
+}

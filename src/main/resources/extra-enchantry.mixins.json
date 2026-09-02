@@ -1,0 +1,28 @@
+{
+	"required": true,
+	"package": "realmikoto.extraenchantry.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"ExampleMixin",
+		"LivingEntityMixin",
+		"ServerPlayerMixin",
+		"AnvilMenuMixin",
+		"EnchantmentHelperMixin",
+		"ItemStackMixin",
+		"BlockBehaviourMixin",
+		"EnchantmentMixin",
+		"EnchantRandomlyFunctionMixin",
+		"MobMixin",
+		"GrindstoneMenuMixin",
+		"DeathProtectionMixin",
+		"PlayerMixin",
+		"EntityMixin",
+		"FireworkRocketEntityMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
