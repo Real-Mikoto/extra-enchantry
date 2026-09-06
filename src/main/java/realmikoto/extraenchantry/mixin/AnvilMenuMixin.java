@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import realmikoto.extraenchantry.CavalryManager;
 import realmikoto.extraenchantry.ExtraEnchantry;
 
 /**
@@ -32,6 +33,32 @@ public abstract class AnvilMenuMixin {
 	@Shadow
 	@Final
 	private net.minecraft.world.inventory.DataSlot cost;
+
+	/**
+	 * 破限门禁：未击败守护骑兵队（「无敌」进度未达成）时，破限附魔书不可使用。
+	 * 附加物（1 号槽）携带破限即视为使用——应用/合并/升级都走这条路径；
+	 * 拒绝时清空产出与费用并给动作栏提示。创造模式豁免（与原版铁砧的
+	 * hasInfiniteMaterials 豁免规则一致）。
+	 */
+	@Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
+	private void extraenchantry$gateLimitBreakBook(CallbackInfo ci) {
+		AnvilMenu menu = (AnvilMenu) (Object) this;
+		ItemStack addition = menu.getSlot(1).getItem();
+		if (addition.isEmpty() || !CavalryManager.carriesLimitBreak(addition)) {
+			return;
+		}
+		net.minecraft.world.entity.player.Player menuPlayer =
+				((ItemCombinerMenuAccessor) menu).extraenchantry$player();
+		if (!(menuPlayer instanceof net.minecraft.server.level.ServerPlayer serverPlayer)
+				|| serverPlayer.hasInfiniteMaterials()
+				|| CavalryManager.isLimitBreakUnlocked(serverPlayer)) {
+			return;
+		}
+		menu.getSlot(2).set(ItemStack.EMPTY);
+		this.cost.set(0);
+		CavalryManager.notifyLimitBreakLocked(serverPlayer);
+		ci.cancel();
+	}
 
 	/** 判断铁砧两侧输入中是否有带破限的物品 */
 	private boolean extraenchantry$hasLimitBreakInput(AnvilMenu menu) {

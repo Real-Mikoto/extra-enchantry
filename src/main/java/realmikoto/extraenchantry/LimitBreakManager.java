@@ -5,6 +5,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -112,10 +113,14 @@ public final class LimitBreakManager {
 		if (!hasLimitBreakEnchantment(stack)) {
 			return;
 		}
+		ExtraEnchantry.LOGGER.info("[extra-enchantry] 检测到 {} 获得破限附魔书", player.getName().getString());
 		boolean chargedSource = Boolean.TRUE.equals(stack.get(ExtraEnchantry.LIMIT_BREAK_SOURCE));
 		ResourceKey<net.minecraft.advancements.Advancement> target =
 				chargedSource ? ADVANCE_CHARGED : ADVANCE_NORMAL;
 		awardAdvancement(player, target);
+		// 破限书进度触发：同步召唤僵尸马骑兵队与强化骷髅小队
+		// （CavalryManager 内含每玩家刷新保护与和平难度跳过）
+		CavalryManager.onLimitBreakBookAchieved(player);
 	}
 
 	/** 判断附魔书的存储附魔是否包含破限 */
@@ -132,13 +137,21 @@ public final class LimitBreakManager {
 		return false;
 	}
 
-	/** 按 ResourceKey 授予进度（幂等：原版 award 已获得时不会重复触发） */
+	/**
+	 * 按 ResourceKey 授予进度（幂等：原版 award 已获得时不会重复触发）。
+	 * 26.2 的进度不是注册表（ServerAdvancementManager 按 Identifier 查
+	 * AdvancementHolder），走 level.registryAccess() 会报 Missing registry。
+	 */
 	private static void awardAdvancement(ServerPlayer player, ResourceKey<net.minecraft.advancements.Advancement> key) {
-		ServerLevel level = player.level();
-		Registry<net.minecraft.advancements.Advancement> registry =
-				level.registryAccess().lookupOrThrow(Registries.ADVANCEMENT);
-		Optional<Holder.Reference<net.minecraft.advancements.Advancement>> holder = registry.get(key);
-		holder.ifPresent(h -> player.getAdvancements().award(
-				new net.minecraft.advancements.AdvancementHolder(key.identifier(), h.value()), CRITERION));
+		MinecraftServer server = player.level().getServer();
+		if (server == null) {
+			return;
+		}
+		net.minecraft.advancements.AdvancementHolder holder = server.getAdvancements().get(key.identifier());
+		if (holder != null) {
+			player.getAdvancements().award(holder, CRITERION);
+		} else {
+			ExtraEnchantry.LOGGER.warn("[extra-enchantry] 进度未找到: {}", key.identifier());
+		}
 	}
 }

@@ -3,6 +3,7 @@ package realmikoto.extraenchantry.mixin;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -10,6 +11,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -27,12 +29,15 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import realmikoto.extraenchantry.CavalryManager;
 import realmikoto.extraenchantry.CleaveManager;
 import realmikoto.extraenchantry.DecoyManager;
 import realmikoto.extraenchantry.EmberfallManager;
 import realmikoto.extraenchantry.ExtraEnchantry;
 import realmikoto.extraenchantry.JudgementManager;
 import realmikoto.extraenchantry.OathboundManager;
+import realmikoto.extraenchantry.SanctuaryManager;
+import realmikoto.extraenchantry.ShieldChargeManager;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -47,6 +52,9 @@ public abstract class LivingEntityMixin {
 	/** 蚀命各等级的目标最大生命值伤害比例（下标 = 等级 - 1） */
 	private static final float[] EXTRAENCHANTRY$LIFE_EROSION_RATIO = {0.14F, 0.15F, 0.17F};
 
+	/** 坚壁各等级的不可格挡类伤害减免比例（下标 = 等级 - 1） */
+	private static final float[] EXTRAENCHANTRY$AEGIS_REDUCTION = {0.30F, 0.45F, 0.60F};
+
 	/** 当前已应用的活力加成（-1 = 未初始化，用于变更检测） */
 	@Unique
 	private int extraenchantry$vitalityBonus = -1;
@@ -56,16 +64,15 @@ public abstract class LivingEntityMixin {
 	private double extraenchantry$galeBonus = -1.0D;
 
 	/**
-	 * 活力（Vitality）：玩家每 tick 校验护甲上的活力总等级，向 MAX_HEALTH
+	 * 活力（Vitality）：每 tick 校验护甲上的活力总等级，向 MAX_HEALTH
 	 * 属性写入/更新瞬态修改器（+4/级，多件叠加上限 +50，破限可突破上限）。
+	 * 26.2 的 isArmor() 同时覆盖人形四件套与动物 BODY 槽——马铠上的活力
+	 * 直接对马生效；骑兵等持械生物的下界合金套同样照常结算。
 	 * tick 在双端运行，客户端同步获得正确的最大生命值供 HUD 使用。
 	 */
 	@Inject(method = "tick", at = @At("HEAD"))
 	private void extraenchantry$applyVitalityHealth(CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (!(self instanceof Player)) {
-			return;
-		}
 		int bonus = ExtraEnchantry.getVitalityBonus(self);
 		if (bonus == extraenchantry$vitalityBonus) {
 			return;
@@ -84,6 +91,17 @@ public abstract class LivingEntityMixin {
 		// 加成减少时钳制当前生命值，避免血量残留超出上限
 		if (self.getHealth() > self.getMaxHealth()) {
 			self.setHealth(self.getMaxHealth());
+		}
+	}
+
+	/**
+	 * 庇护（Sanctuary）：格挡时 8 格内所有玩家每 2 秒回复 1/2/4 HP（团队光环），
+	 * 每次脉冲消耗盾牌耐久并伴随心形/光点粒子；仅服务端执行,细节在 SanctuaryManager。
+	 */
+	@Inject(method = "tick", at = @At("HEAD"))
+	private void extraenchantry$sanctuaryAura(CallbackInfo ci) {
+		if ((Object) this instanceof ServerPlayer player) {
+			SanctuaryManager.tick(player);
 		}
 	}
 
@@ -151,6 +169,38 @@ public abstract class LivingEntityMixin {
 		}
 		LivingEntity self = (LivingEntity) (Object) this;
 		return amount + self.getMaxHealth() * ratio;
+	}
+
+	/**
+	 * 冲阵（Shield Charge）：疾跑持盾近战撞击——命中额外 4/6/8 伤害 + 强力击退，
+	 * 攻击者 1 秒冷却。定义在蚀命之后、断罪之前：冲阵加伤参与断罪斩杀阈值结算。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$shieldChargeBonus(float amount, ServerLevel level, DamageSource source) {
+		return ShieldChargeManager.applyCharge((LivingEntity) (Object) this, source, amount);
+	}
+
+	/**
+	 * 坚壁（Aegis）：格挡中受到"不可格挡类伤害"（bypasses_shield 标签：音波/魔法等）
+	 * 时按盾牌坚壁等级减免 30/45/60%——原版格挡对这类伤害完全无效
+	 * （BlocksAttacks#bypassedBy 直接放行），此处直接在伤害入口打折。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$aegisReduction(float amount, ServerLevel level, DamageSource source) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		if (amount <= 0.0F || !(self instanceof Player player) || !player.isBlocking()) {
+			return amount;
+		}
+		ItemStack blocking = player.getItemBlockingWith();
+		if (blocking == null) {
+			return amount;
+		}
+		int aegisLevel = ExtraEnchantry.getAegisLevel(blocking);
+		if (aegisLevel <= 0 || aegisLevel > EXTRAENCHANTRY$AEGIS_REDUCTION.length
+				|| !source.is(DamageTypeTags.BYPASSES_SHIELD)) {
+			return amount;
+		}
+		return amount * (1.0F - EXTRAENCHANTRY$AEGIS_REDUCTION[aegisLevel - 1]);
 	}
 
 	/**
@@ -327,6 +377,20 @@ public abstract class LivingEntityMixin {
 			CallbackInfo ci) {
 		if (EmberfallManager.isLocked((LivingEntity) (Object) this)) {
 			ci.cancel();
+		}
+	}
+
+	/**
+	 * 诸界浩劫：挑战生物掉落经验翻倍。
+	 * getExperienceReward 是 26.2 统一的经验结算入口（dropExperience 内部调用，
+	 * public final——所有生物共用这一份实现，单点注入全覆盖）。
+	 */
+	@Inject(method = "getExperienceReward", at = @At("RETURN"), cancellable = true)
+	private void extraenchantry$cataclysmDoubleXp(ServerLevel level, Entity killer,
+			CallbackInfoReturnable<Integer> cir) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		if (self instanceof Mob mob && CavalryManager.isChallengeMob(mob)) {
+			cir.setReturnValue(cir.getReturnValueI() * 2);
 		}
 	}
 

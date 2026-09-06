@@ -13,10 +13,17 @@
 		"base": 15,
 		"per_level_above_first": 0
 	},
-	"primary_items": "minecraft:golden_chestplate",
-	"slots": [
-		"chest"
+	"primary_items": [
+		"minecraft:golden_chestplate",
+		"minecraft:golden_horse_armor"
 	],
-	"supported_items": "minecraft:golden_chestplate",
+	"slots": [
+		"chest",
+		"body"
+	],
+	"supported_items": [
+		"minecraft:golden_chestplate",
+		"minecraft:golden_horse_armor"
+	],
 	"weight": 2
 }

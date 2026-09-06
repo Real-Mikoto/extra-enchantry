@@ -18,6 +18,10 @@
 	"enchantment.extra-enchantry.judgement": "断罪",
 	"enchantment.extra-enchantry.gale": "疾风",
 	"enchantment.extra-enchantry.emberfall": "余烬",
+	"enchantment.extra-enchantry.shield_charge": "冲阵",
+	"enchantment.extra-enchantry.defiance": "不屈",
+	"enchantment.extra-enchantry.sanctuary": "庇护",
+	"enchantment.extra-enchantry.aegis": "坚壁",
 	"effect.extra-enchantry.afterglow": "余辉",
 	"effect.extra-enchantry.emberfall": "余烬",
 	"itemGroup.extra-enchantry.enchantments": "额外附魔书",
@@ -26,5 +30,16 @@
 	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book.title": "极限之证",
 	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book.description": "从监守者手中夺得破限附魔书",
 	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.title": "雷霆之礼",
-	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.description": "借闪电苦力怕之力击倒监守者，夺得破限附魔书"
+	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.description": "借闪电苦力怕之力击倒监守者，夺得破限附魔书",
+	"advancement.extra-enchantry.hidden_challenges.defeat_limit_break_cavalry.title": "无敌",
+	"advancement.extra-enchantry.hidden_challenges.defeat_limit_break_cavalry.description": "击败为破限附魔书而来的僵尸马骑兵队——从此，无人能挡",
+	"advancement.extra-enchantry.hidden_challenges.defeat_trap_cavalry.title": "全歼",
+	"advancement.extra-enchantry.hidden_challenges.defeat_trap_cavalry.description": "歼灭雷雨陷阱召唤的整支骷髅马僵尸马骑兵队",
+	"message.extra-enchantry.limit_break_locked": "破限附魔书尚未认可你——先击败来犯的僵尸马骑兵队",
+	"event.extra-enchantry.cataclysm": "诸界浩劫",
+	"message.extra-enchantry.cataclysm.started": "破限附魔书引来了诸界浩劫——守住它的认可！",
+	"message.extra-enchantry.cataclysm.wave_start": "诸界浩劫 · 第 %s 波",
+	"message.extra-enchantry.cataclysm.success": "浩劫平息——破限附魔书认可了你。从此，无人能挡！",
+	"message.extra-enchantry.cataclysm.fail_timeout": "挑战超时，浩劫未平——破限附魔书化为灰烬",
+	"message.extra-enchantry.cataclysm.fail_death": "你倒下了，浩劫未平——破限附魔书化为灰烬"
 }

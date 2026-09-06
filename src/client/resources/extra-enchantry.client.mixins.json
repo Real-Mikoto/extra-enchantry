@@ -6,7 +6,8 @@
 		"ExampleClientMixin",
 		"FontPreparedTextBuilderMixin",
 		"HudMixin",
-		"LocalPlayerMixin"
+		"LocalPlayerMixin",
+		"ClientAdvancementsAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

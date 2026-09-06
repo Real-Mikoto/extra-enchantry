@@ -13,10 +13,15 @@
 		"EnchantmentMixin",
 		"EnchantRandomlyFunctionMixin",
 		"MobMixin",
+		"BlocksAttacksMixin",
 		"GrindstoneMenuMixin",
 		"DeathProtectionMixin",
 		"PlayerMixin",
+		"InventoryMixin",
 		"EntityMixin",
+		"SkeletonTrapGoalMixin",
+		"ItemCombinerMenuAccessor",
+		"CreeperAccessor",
 		"FireworkRocketEntityMixin"
 	],
 	"injectors": {

@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.minecraft.world.damagesource.DamageSource;
+import realmikoto.extraenchantry.CavalryManager;
 import realmikoto.extraenchantry.OathboundManager;
 
 /**
@@ -36,6 +38,15 @@ public abstract class ServerPlayerMixin {
 	@Shadow
 	private void transferInventoryXpAndScore(Player player) {
 		throw new AssertionError("Shadowed method body was not transformed");
+	}
+
+	/**
+	 * 诸界浩劫：玩家死亡瞬间（die HEAD，背包掉落之前）结算挑战失败——
+	 * 此刻背包尚在，破限附魔书可就地销毁；若等 tick 级检查，背包已掉落，书会留在地上。
+	 */
+	@Inject(method = "die(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At("HEAD"))
+	private void extraenchantry$cataclysmFailOnDeath(DamageSource source, CallbackInfo ci) {
+		CavalryManager.onPlayerDie((ServerPlayer) (Object) this);
 	}
 
 	@Inject(method = "restoreFrom", at = @At("TAIL"))

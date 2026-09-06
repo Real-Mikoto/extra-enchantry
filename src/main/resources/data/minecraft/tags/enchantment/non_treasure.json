@@ -11,6 +11,9 @@
 		"extra-enchantry:skyward",
 		"extra-enchantry:cleave",
 		"extra-enchantry:judgement",
-		"extra-enchantry:gale"
+		"extra-enchantry:gale",
+		"extra-enchantry:shield_charge",
+		"extra-enchantry:defiance",
+		"extra-enchantry:aegis"
 	]
 }

@@ -1,0 +1,26 @@
+{
+	"parent": "extra-enchantry:hidden_challenges/root",
+	"criteria": {
+		"extra-enchantry:defeated": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"announce_to_chat": true,
+		"description": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.defeat_limit_break_cavalry.description"
+		},
+		"icon": {
+			"id": "minecraft:netherite_spear"
+		},
+		"show_toast": true,
+		"title": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.defeat_limit_break_cavalry.title"
+		}
+	},
+	"requirements": [
+		[
+			"extra-enchantry:defeated"
+		]
+	]
+}

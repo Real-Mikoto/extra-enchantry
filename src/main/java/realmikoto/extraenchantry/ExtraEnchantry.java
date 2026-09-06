@@ -2,7 +2,9 @@ package realmikoto.extraenchantry;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.EnchantmentEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.util.TriState;
 
 import net.minecraft.core.Holder;
@@ -17,7 +19,15 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.SetEnchantmentsFunction;
+import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import org.slf4j.Logger;
@@ -110,6 +120,22 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final ResourceKey<Enchantment> EMBERFALL =
 			ResourceKey.create(Registries.ENCHANTMENT, id("emberfall"));
 
+	// 冲阵附魔（数据驱动定义于 data/extra-enchantry/enchantment/shield_charge.json）
+	public static final ResourceKey<Enchantment> SHIELD_CHARGE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("shield_charge"));
+
+	// 不屈附魔（数据驱动定义于 data/extra-enchantry/enchantment/defiance.json）
+	public static final ResourceKey<Enchantment> DEFIANCE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("defiance"));
+
+	// 庇护附魔（数据驱动定义于 data/extra-enchantry/enchantment/sanctuary.json）
+	public static final ResourceKey<Enchantment> SANCTUARY =
+			ResourceKey.create(Registries.ENCHANTMENT, id("sanctuary"));
+
+	// 坚壁附魔（数据驱动定义于 data/extra-enchantry/enchantment/aegis.json）
+	public static final ResourceKey<Enchantment> AEGIS =
+			ResourceKey.create(Registries.ENCHANTMENT, id("aegis"));
+
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
@@ -138,6 +164,13 @@ public class ExtraEnchantry implements ModInitializer {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
 				LimitBreakManager.onWardenDeath(entity, source));
 
+		// 陷阱混编队成员死亡判定：击败计数凑满整队 → 「全歼」进度
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
+				CavalryManager.onTrapRiderDeath(entity, source));
+
+		// 诸界浩劫挑战节拍：超时/死亡判定、苦力怕生成、清波检测、下一波启动
+		ServerTickEvents.END_SERVER_TICK.register(CavalryManager::tickCataclysms);
+
 		// 破限腿甲跨部位解锁：可附魔原版摔落保护（经 fabric-item-api 的官方事件，
 		// 避免 Mixin Redirect 与其 AnvilMenuMixin 冲突）
 		EnchantmentEvents.ALLOW_ENCHANTING.register((enchantment, stack, context) -> {
@@ -147,6 +180,28 @@ public class ExtraEnchantry implements ModInitializer {
 				return TriState.TRUE;
 			}
 			return TriState.DEFAULT;
+		});
+
+		// 庇护（Sanctuary）：追加进试炼密室基础/稀有奖励箱
+		// （26.2 盾牌机制为 BlocksAttacks 数据组件，庇护走 fabric-loot-api-v3 的
+		// MODIFY 事件追加战利品池，避免整表覆盖丢失原版内容）
+		LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
+			if (!source.isBuiltin()
+					|| (!key.equals(BuiltInLootTables.TRIAL_CHAMBERS_REWARD)
+							&& !key.equals(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_RARE))) {
+				return;
+			}
+			Holder<Enchantment> sanctuary =
+					registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(SANCTUARY);
+			tableBuilder.withPool(LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(EmptyLootItem.emptyItem().setWeight(90))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(7)
+							.apply(new SetEnchantmentsFunction.Builder()
+									.withEnchantment(sanctuary, ConstantValue.exactly(1.0F))))
+					.add(LootItem.lootTableItem(Items.SHIELD).setWeight(3)
+							.apply(new SetEnchantmentsFunction.Builder()
+									.withEnchantment(sanctuary, UniformGenerator.between(1.0F, 3.0F)))));
 		});
 
 		LOGGER.info("Hello Fabric world!");
@@ -172,7 +227,10 @@ public class ExtraEnchantry implements ModInitializer {
 		if (reduced <= 0.0F) {
 			return reduced;
 		}
-		int level = getBulwarkLevel(entity.getItemBySlot(EquipmentSlot.CHEST));
+		// 玩家看胸甲（BODY 槽恒空）；马匹看 BODY 槽的马铠（CHEST 槽恒空），二者取其一
+		int level = Math.max(
+				getBulwarkLevel(entity.getItemBySlot(EquipmentSlot.CHEST)),
+				getBulwarkLevel(entity.getItemBySlot(EquipmentSlot.BODY)));
 		if (level <= 0 || level > BULWARK_CAP.length) {
 			return reduced;
 		}
@@ -386,6 +444,26 @@ public class ExtraEnchantry implements ModInitializer {
 	/** 获取物品上的余烬附魔等级（无则返回 0） */
 	public static int getEmberfallLevel(ItemStack stack) {
 		return getEnchantmentLevel(stack, EMBERFALL);
+	}
+
+	/** 获取盾牌上的冲阵附魔等级（无则返回 0） */
+	public static int getShieldChargeLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, SHIELD_CHARGE);
+	}
+
+	/** 获取盾牌上的不屈附魔等级（无则返回 0） */
+	public static int getDefianceLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, DEFIANCE);
+	}
+
+	/** 获取盾牌上的庇护附魔等级（无则返回 0） */
+	public static int getSanctuaryLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, SANCTUARY);
+	}
+
+	/** 获取盾牌上的坚壁附魔等级（无则返回 0） */
+	public static int getAegisLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, AEGIS);
 	}
 
 	/** 靴子上的无踪等级（Entity/LivingEntity 注入点快速判定用） */

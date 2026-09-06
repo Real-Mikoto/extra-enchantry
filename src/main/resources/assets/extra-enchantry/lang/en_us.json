@@ -18,6 +18,10 @@
 	"enchantment.extra-enchantry.judgement": "Judgement",
 	"enchantment.extra-enchantry.gale": "Gale",
 	"enchantment.extra-enchantry.emberfall": "Emberfall",
+	"enchantment.extra-enchantry.shield_charge": "Shield Charge",
+	"enchantment.extra-enchantry.defiance": "Defiance",
+	"enchantment.extra-enchantry.sanctuary": "Sanctuary",
+	"enchantment.extra-enchantry.aegis": "Aegis",
 	"effect.extra-enchantry.afterglow": "Afterglow",
 	"effect.extra-enchantry.emberfall": "Emberfall",
 	"itemGroup.extra-enchantry.enchantments": "Extra Enchantry Books",
@@ -26,5 +30,16 @@
 	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book.title": "Proof of the Limit",
 	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book.description": "Claim a Limit Break book from a Warden",
 	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.title": "Gift of Thunder",
-	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.description": "Claim a Limit Break book by felling a Warden with a charged Creeper"
+	"advancement.extra-enchantry.hidden_challenges.obtain_limit_break_book_charged.description": "Claim a Limit Break book by felling a Warden with a charged Creeper",
+	"advancement.extra-enchantry.hidden_challenges.defeat_limit_break_cavalry.title": "Invincible",
+	"advancement.extra-enchantry.hidden_challenges.defeat_limit_break_cavalry.description": "Defeat the zombie horse cavalry that came for the Limit Break book — nothing can stop you now",
+	"advancement.extra-enchantry.hidden_challenges.defeat_trap_cavalry.title": "Annihilation",
+	"advancement.extra-enchantry.hidden_challenges.defeat_trap_cavalry.description": "Wipe out an entire skeleton-and-zombie horse cavalry summoned by a thunderstorm trap",
+	"message.extra-enchantry.limit_break_locked": "The Limit Break book does not acknowledge you yet — defeat the zombie horse cavalry first",
+	"event.extra-enchantry.cataclysm": "Cataclysm of Realms",
+	"message.extra-enchantry.cataclysm.started": "The Limit Break book has drawn the Cataclysm of Realms — hold its recognition!",
+	"message.extra-enchantry.cataclysm.wave_start": "Cataclysm of Realms · Wave %s",
+	"message.extra-enchantry.cataclysm.success": "The Cataclysm is quelled — the Limit Break book acknowledges you. Nothing can stop you now!",
+	"message.extra-enchantry.cataclysm.fail_timeout": "Time is up and the Cataclysm rages on — the Limit Break book crumbles to ash",
+	"message.extra-enchantry.cataclysm.fail_death": "You have fallen and the Cataclysm rages on — the Limit Break book crumbles to ash"
 }

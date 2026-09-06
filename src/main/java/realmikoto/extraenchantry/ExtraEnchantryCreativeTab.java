@@ -45,7 +45,11 @@ public final class ExtraEnchantryCreativeTab {
 			new EnchantmentEntry(ExtraEnchantry.UNSEEN, 2),
 			new EnchantmentEntry(ExtraEnchantry.JUDGEMENT, 2),
 			new EnchantmentEntry(ExtraEnchantry.GALE, 3),
-			new EnchantmentEntry(ExtraEnchantry.EMBERFALL, 1)
+			new EnchantmentEntry(ExtraEnchantry.EMBERFALL, 1),
+			new EnchantmentEntry(ExtraEnchantry.SHIELD_CHARGE, 3),
+			new EnchantmentEntry(ExtraEnchantry.DEFIANCE, 2),
+			new EnchantmentEntry(ExtraEnchantry.SANCTUARY, 3),
+			new EnchantmentEntry(ExtraEnchantry.AEGIS, 3)
 	);
 
 	public static final ResourceKey<CreativeModeTab> TAB_KEY =

@@ -17,6 +17,6 @@
 	"slots": [
 		"armor"
 	],
-	"supported_items": "#minecraft:enchantable/armor",
+	"supported_items": "#extra-enchantry:vitality_supported",
 	"weight": 10
 }

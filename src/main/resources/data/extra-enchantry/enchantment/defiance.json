@@ -1,0 +1,22 @@
+{
+	"anvil_cost": 4,
+	"description": {
+		"translate": "enchantment.extra-enchantry.defiance"
+	},
+	"effects": {},
+	"max_cost": {
+		"base": 40,
+		"per_level_above_first": 12
+	},
+	"max_level": 2,
+	"min_cost": {
+		"base": 5,
+		"per_level_above_first": 12
+	},
+	"primary_items": "minecraft:shield",
+	"slots": [
+		"hand"
+	],
+	"supported_items": "minecraft:shield",
+	"weight": 2
+}

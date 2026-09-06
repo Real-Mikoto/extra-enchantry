@@ -42,3 +42,4 @@ replay_*.log
 # agent session notes (not part of the mod)
 
 .workbuddy/
+.zcode/

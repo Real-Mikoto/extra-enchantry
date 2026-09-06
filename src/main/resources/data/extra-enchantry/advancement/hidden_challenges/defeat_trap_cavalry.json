@@ -1,0 +1,26 @@
+{
+	"parent": "extra-enchantry:hidden_challenges/root",
+	"criteria": {
+		"extra-enchantry:defeated": {
+			"trigger": "minecraft:impossible"
+		}
+	},
+	"display": {
+		"announce_to_chat": true,
+		"description": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.defeat_trap_cavalry.description"
+		},
+		"icon": {
+			"id": "minecraft:skeleton_skull"
+		},
+		"show_toast": true,
+		"title": {
+			"translate": "advancement.extra-enchantry.hidden_challenges.defeat_trap_cavalry.title"
+		}
+	},
+	"requirements": [
+		[
+			"extra-enchantry:defeated"
+		]
+	]
+}

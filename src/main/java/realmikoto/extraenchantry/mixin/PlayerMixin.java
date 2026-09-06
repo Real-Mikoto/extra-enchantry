@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import realmikoto.extraenchantry.AfterglowManager;
 import realmikoto.extraenchantry.EmberfallManager;
+import realmikoto.extraenchantry.ExtraEnchantry;
 import realmikoto.extraenchantry.LimitBreakManager;
 import realmikoto.extraenchantry.OathboundManager;
 
@@ -90,14 +91,19 @@ public abstract class PlayerMixin {
 
 	/**
 	 * 破限（Limit Break）隐藏进度判定：玩家获得物品的统一入口 {@code Player#addItem}
-	 * （拾取、漏斗、合成、命令都会走到）。若拿到的是破限附魔书，授予对应隐藏进度。
+	 * （拾取、漏斗、合成、命令都会走到）。若拿到的是破限附魔书，授予对应隐藏进度，
+	 * 并由 CavalryManager 召唤守护骑兵队（破限需击败骑兵队后方可使用）。
 	 * 见 {@link LimitBreakManager#onItemObtained}。
 	 */
 	@Inject(method = "addItem", at = @At("HEAD"))
 	private void extraenchantry$detectLimitBreakBook(ItemStack stack,
 			CallbackInfoReturnable<Boolean> cir) {
-		if ((Object) this instanceof ServerPlayer serverPlayer) {
-			LimitBreakManager.onItemObtained(serverPlayer, stack);
+		try {
+			if ((Object) this instanceof ServerPlayer serverPlayer) {
+				LimitBreakManager.onItemObtained(serverPlayer, stack);
+			}
+		} catch (Exception e) {
+			ExtraEnchantry.LOGGER.error("[extra-enchantry] 破限书获取检测(Player#addItem)异常", e);
 		}
 	}
 }
