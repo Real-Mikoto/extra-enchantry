@@ -123,8 +123,25 @@ public abstract class AnvilMenuMixin {
 		AnvilMenu menu = (AnvilMenu) (Object) this;
 		// 仅在实际产出合成结果时固定费用
 		if (!menu.getSlot(2).getItem().isEmpty() && extraenchantry$hasLimitBreakInput(menu)) {
-			this.cost.set(5);
+			// v1.1.0 平衡：触及 XI 级（破限突破产物）费用特判为 15 级经验——
+			// +5.5 格攻击距离在 PvP 是质变，5 级经验过于廉价（机制不动，只动价格）
+			this.cost.set(extraenchantry$isReachEleven(menu.getSlot(2).getItem()) ? 15 : 5);
 		}
+	}
+
+	/** 产出是否带 XI 级触及（破限把 X 级上限突破到 XI 级的产物） */
+	private boolean extraenchantry$isReachEleven(ItemStack result) {
+		Player player = ((ItemCombinerMenuAccessor) ((AnvilMenu) (Object) this)).extraenchantry$player();
+		if (player == null) {
+			return false;
+		}
+		ItemEnchantments enchantments = result.getEnchantments();
+		for (Holder<Enchantment> enchantment : enchantments.keySet()) {
+			if (enchantment.is(ExtraEnchantry.REACH)) {
+				return enchantments.getLevel(enchantment) >= 11;
+			}
+		}
+		return false;
 	}
 
 	/**

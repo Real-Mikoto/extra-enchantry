@@ -52,15 +52,60 @@ public abstract class FontPreparedTextBuilderMixin {
 		if (resource.id().equals(ExtraEnchantry.id("fancy"))) {
 			return extraenchantry$goldShine(index);
 		}
-		return original;
+		// T1 主题族波浪（色相中心 / 振幅 / 饱和度 / 亮度基线各不相同，见 DESIGN_aesthetics 字体章）
+		TextColor family = extraenchantry$familyShine(resource, index);
+		return family != null ? family : original;
 	}
 
 	/** 金色邻域色相波动（33°~57°）+ 亮度脉动，沿文字方向传播的波浪 */
 	private static TextColor extraenchantry$goldShine(int index) {
+		return extraenchantry$shine(index, 45.0F, 12.0F, 1.0F, 0.81F, 0.19F);
+	}
+
+	/**
+	 * 主题族波浪分发：按字体 ID 匹配族色相参数，未命中返回 null。
+	 * 各族的设计意图：
+	 * - 灵魂族（185°青蓝）：高饱和 + 深亮度波动，幽冥流转；
+	 * - 雷光族（190°青白）：低饱和高亮度，接近白光的电弧感；
+	 * - 锋刃族（230°银白）：极低饱和 + 剧烈亮度波动，金属寒光一闪一闪；
+	 * - 自然族（120°翠绿）：中等饱和，平和的生命脉动；
+	 * - 深渊族（220°深蓝）：高饱和低亮度，深海暗涌；
+	 * - 风族（180°风白）：低饱和高亮度基线，近乎透明的气流；
+	 * - 守护族（210°钢青）：中饱和低波动，沉稳的盾墙质感；
+	 * - 火焰族（20°焰橙）：高饱和 + 快速闪烁（波动频率翻倍），火苗跳动。
+	 */
+	private static TextColor extraenchantry$familyShine(FontDescription.Resource resource, int index) {
+		String path = resource.id().getPath();
+		return switch (path) {
+			case "fancy_soul" -> extraenchantry$shine(index, 185.0F, 10.0F, 0.85F, 0.70F, 0.25F);
+			case "fancy_storm" -> extraenchantry$shine(index, 190.0F, 8.0F, 0.35F, 0.90F, 0.10F);
+			case "fancy_blade" -> extraenchantry$shine(index, 230.0F, 8.0F, 0.15F, 0.75F, 0.25F);
+			case "fancy_nature" -> extraenchantry$shine(index, 120.0F, 15.0F, 0.80F, 0.78F, 0.18F);
+			case "fancy_water" -> extraenchantry$shine(index, 220.0F, 8.0F, 0.90F, 0.62F, 0.20F);
+			case "fancy_wind" -> extraenchantry$shine(index, 180.0F, 10.0F, 0.25F, 0.92F, 0.08F);
+			case "fancy_guard" -> extraenchantry$shine(index, 210.0F, 6.0F, 0.50F, 0.72F, 0.10F);
+			case "fancy_fire" -> extraenchantry$shineFast(index, 20.0F, 12.0F, 0.95F, 0.80F, 0.20F);
+			default -> null;
+		};
+	}
+
+	/** 通用波浪：色相中心 ± 振幅 + 亮度基线 ± 亮度振幅，沿文字方向传播 */
+	private static TextColor extraenchantry$shine(int index, float hueCenter, float hueRange,
+			float saturation, float brightBase, float brightRange) {
 		float time = (System.currentTimeMillis() % 4000L) / 1000.0F;
 		float phase = time * (float) (Math.PI * 2.0) * 1.5F + index * 0.7F;
-		float hue = (45.0F + 12.0F * Mth.sin(phase)) / 360.0F;
-		float brightness = 0.81F + 0.19F * Mth.sin(phase * 2.0F);
-		return TextColor.fromRgb(Mth.hsvToRgb(hue, 1.0F, brightness));
+		float hue = (hueCenter + hueRange * Mth.sin(phase)) / 360.0F;
+		float brightness = brightBase + brightRange * Mth.sin(phase * 2.0F);
+		return TextColor.fromRgb(Mth.hsvToRgb(hue, saturation, brightness));
+	}
+
+	/** 快速波浪（火焰族专用）：波动频率翻倍，火苗跳动感 */
+	private static TextColor extraenchantry$shineFast(int index, float hueCenter, float hueRange,
+			float saturation, float brightBase, float brightRange) {
+		float time = (System.currentTimeMillis() % 4000L) / 1000.0F;
+		float phase = time * (float) (Math.PI * 2.0) * 3.0F + index * 1.1F;
+		float hue = (hueCenter + hueRange * Mth.sin(phase)) / 360.0F;
+		float brightness = brightBase + brightRange * Mth.sin(phase * 2.0F);
+		return TextColor.fromRgb(Mth.hsvToRgb(hue, saturation, brightness));
 	}
 }

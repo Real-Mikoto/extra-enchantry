@@ -29,8 +29,8 @@ public final class JudgementManager {
 	/** 各等级的斩杀生命阈值（占目标最大生命比例，下标 = 等级 - 1） */
 	private static final float[] EXECUTE_THRESHOLD = {0.10F, 0.20F};
 
-	/** 对 boss 的伤害倍率（不斩杀，改为双倍伤害） */
-	private static final float BOSS_DAMAGE_MULTIPLIER = 2.0F;
+	/** 对 boss 的伤害倍率（不斩杀；v1.1.0 由 ×2 下调为 ×1.75，缓解与蚀命叠加后的 boss 战节奏崩坏） */
+	private static final float BOSS_DAMAGE_MULTIPLIER = 1.75F;
 
 	/** 斩杀冷却（毫秒）——按攻击者计 */
 	private static final long COOLDOWN_MS = 5000L;
@@ -58,8 +58,10 @@ public final class JudgementManager {
 		if (enchantLevel <= 0 || enchantLevel > EXECUTE_THRESHOLD.length) {
 			return amount;
 		}
-		// boss 不斩杀，改为双倍伤害（无冷却）
+		// boss 不斩杀，改为 ×1.75 伤害（无冷却）——附远古守卫诅咒低音区分"触发了 boss 变体"
 		if (ExtraEnchantry.isBossLike(victim)) {
+			FxHelper.play(serverLevel, victim, net.minecraft.sounds.SoundEvents.ELDER_GUARDIAN_CURSE,
+					0.2F, 1.0F);
 			return amount * BOSS_DAMAGE_MULTIPLIER;
 		}
 		float current = victim.getHealth() + victim.getAbsorptionAmount();
@@ -70,6 +72,10 @@ public final class JudgementManager {
 			return amount; // 冷却中：不斩杀，按普通伤害结算
 		}
 		spawnExecuteEffects(serverLevel, victim);
+		// 实战成就「处刑者」：断罪首次触发处决
+		if (attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			Advancements.award(serverPlayer, Advancements.EXECUTOR);
+		}
 		// 放大到必死量：足以穿透伤害吸收与护甲减免（壁垒仍会在减免后钳制，见类注释）
 		return victim.getMaxHealth() * 4.0F + 100.0F;
 	}
@@ -86,11 +92,12 @@ public final class JudgementManager {
 		return true;
 	}
 
-	/** 斩杀视觉：目标身体中心爆发一圈灵魂粒子（服务端生成，自动广播附近玩家） */
+	/** 斩杀视听（L3）：灵魂爆发 + 灵魂逸散处决音（服务端生成，自动广播附近玩家） */
 	private static void spawnExecuteEffects(ServerLevel level, LivingEntity victim) {
 		level.sendParticles(ParticleTypes.SOUL,
 				victim.getX(), victim.getY(victim.getBbHeight() * 0.5D), victim.getZ(),
 				EXECUTE_PARTICLES,
 				victim.getBbWidth() * 0.5D, victim.getBbHeight() * 0.4D, victim.getBbWidth() * 0.5D, 0.03D);
+		FxHelper.play(level, victim, net.minecraft.sounds.SoundEvents.SOUL_ESCAPE, 1.0F, 1.0F);
 	}
 }

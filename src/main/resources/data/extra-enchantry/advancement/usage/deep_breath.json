@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.usage.deep_breath.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:prismarine_shard"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.usage.deep_breath.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

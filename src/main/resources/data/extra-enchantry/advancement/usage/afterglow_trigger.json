@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.usage.afterglow_trigger.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:totem_of_undying"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.usage.afterglow_trigger.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

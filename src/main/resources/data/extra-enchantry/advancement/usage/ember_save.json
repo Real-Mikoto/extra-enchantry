@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.usage.ember_save.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:golden_chestplate"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.usage.ember_save.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

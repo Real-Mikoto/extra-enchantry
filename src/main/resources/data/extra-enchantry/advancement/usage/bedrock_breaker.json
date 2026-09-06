@@ -1,0 +1,28 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.usage.bedrock_breaker.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "minecraft:bedrock"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.usage.bedrock_breaker.title"
+    },
+    "hidden": true
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

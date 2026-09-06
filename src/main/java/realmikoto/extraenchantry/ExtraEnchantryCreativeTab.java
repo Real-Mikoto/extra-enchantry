@@ -49,7 +49,13 @@ public final class ExtraEnchantryCreativeTab {
 			new EnchantmentEntry(ExtraEnchantry.SHIELD_CHARGE, 3),
 			new EnchantmentEntry(ExtraEnchantry.DEFIANCE, 2),
 			new EnchantmentEntry(ExtraEnchantry.SANCTUARY, 3),
-			new EnchantmentEntry(ExtraEnchantry.AEGIS, 3)
+			new EnchantmentEntry(ExtraEnchantry.AEGIS, 3),
+			new EnchantmentEntry(ExtraEnchantry.HOMING_PLUME, 2),
+			new EnchantmentEntry(ExtraEnchantry.STARFALL, 1),
+			new EnchantmentEntry(ExtraEnchantry.STORMSURGE, 2),
+			new EnchantmentEntry(ExtraEnchantry.SHEATHED_EDGE, 3),
+			new EnchantmentEntry(ExtraEnchantry.TIDEHEART, 3),
+			new EnchantmentEntry(ExtraEnchantry.LOAM, 3)
 	);
 
 	public static final ResourceKey<CreativeModeTab> TAB_KEY =

@@ -37,7 +37,8 @@ public final class DecoyManager {
 	private static final DecoyConfig[] CONFIGS = {
 			new DecoyConfig(0.25F, 1, 8.0F, 240, 25_000L),
 			new DecoyConfig(0.40F, 1, 16.0F, 360, 20_000L),
-			new DecoyConfig(0.55F, 2, 20.0F, 500, 15_000L)
+			// v1.1.0 平衡：III 级触发率 55% → 50%、冷却 15s → 18s（PvP 双诱饵脱战频率过高）
+			new DecoyConfig(0.50F, 2, 20.0F, 500, 18_000L)
 	};
 
 	/** 判定间隔（毫秒） */
@@ -98,6 +99,8 @@ public final class DecoyManager {
 
 		spawnDecoys(player, config, 0);
 		state.cooldownUntilMs = now + config.cooldownMs();
+		// 实战成就「金蝉脱壳」：假象首次替身逃脱
+		Advancements.award(player, Advancements.DECOY_ESCAPE);
 		return true;
 	}
 

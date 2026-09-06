@@ -26,8 +26,8 @@ import java.util.List;
  */
 public final class CleaveManager {
 
-	/** 各等级的溅射伤害比例（下标 = 等级 - 1） */
-	private static final float[] SPLASH_RATIO = {0.50F, 0.60F, 0.70F};
+	/** 各等级的溅射伤害比例（下标 = 等级 - 1，v1.1.0 由 50/60/70% 下调，缩小与横扫之刃的差距） */
+	private static final float[] SPLASH_RATIO = {0.45F, 0.55F, 0.65F};
 
 	/** 溅射目标选取范围：主目标碰撞箱外扩格数 */
 	private static final double SPLASH_RANGE = 2.0D;

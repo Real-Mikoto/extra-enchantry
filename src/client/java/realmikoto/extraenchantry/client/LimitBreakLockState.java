@@ -23,7 +23,7 @@ public final class LimitBreakLockState {
 			return true;
 		}
 		ClientAdvancements advancements = minecraft.getConnection().getAdvancements();
-		AdvancementHolder holder = advancements.get(ExtraEnchantry.id("defeat_limit_break_cavalry"));
+		AdvancementHolder holder = advancements.get(ExtraEnchantry.id("hidden_challenges/defeat_limit_break_cavalry"));
 		if (holder == null) {
 			return true;
 		}

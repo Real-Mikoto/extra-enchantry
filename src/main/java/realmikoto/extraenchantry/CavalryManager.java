@@ -209,11 +209,11 @@ public final class CavalryManager {
 
 	/** 「无敌」进度：完成诸界浩劫挑战；同时是破限附魔书的解锁标记 */
 	private static final ResourceKey<Advancement> ADVANCE_INVINCIBLE =
-			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("defeat_limit_break_cavalry"));
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/defeat_limit_break_cavalry"));
 
 	/** 「全歼」进度：击败雷雨陷阱召唤的整支混编骑兵队 */
 	private static final ResourceKey<Advancement> ADVANCE_ANNIHILATION =
-			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("defeat_trap_cavalry"));
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/defeat_trap_cavalry"));
 
 	private static final String CRITERION_DEFEATED = "extra-enchantry:defeated";
 

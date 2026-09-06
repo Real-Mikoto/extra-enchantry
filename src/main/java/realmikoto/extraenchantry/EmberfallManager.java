@@ -71,6 +71,13 @@ public final class EmberfallManager {
 		return false;
 	}
 
+	/** 免死生效后的统一收尾：实战成就「余烬不灭」（仅被救者是玩家时授予） */
+	private static void awardEmberSave(LivingEntity saved) {
+		if (saved instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			Advancements.award(serverPlayer, Advancements.EMBER_SAVE);
+		}
+	}
+
 	/** 金胸甲路径：耐久消耗 + 免死 + 效果（原版行为） */
 	private static boolean triggerChestplate(LivingEntity entity, ItemStack chest, ServerLevel level) {
 		int cost = Math.max(1, chest.getMaxDamage() / 2);
@@ -81,6 +88,7 @@ public final class EmberfallManager {
 		chest.setDamageValue(chest.getDamageValue() + cost);
 		applySurvivalEffects(entity);
 		playSaveFx(entity, level);
+		awardEmberSave(entity);
 		return true;
 	}
 
@@ -105,6 +113,7 @@ public final class EmberfallManager {
 				SoundEvents.ITEM_BREAK, SoundSource.NEUTRAL, 1.0F,
 				0.8F + level.getRandom().nextFloat() * 0.4F);
 		playSaveFx(saved, level);
+		awardEmberSave(saved);
 		return true;
 	}
 

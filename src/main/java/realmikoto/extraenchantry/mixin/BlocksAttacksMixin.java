@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import realmikoto.extraenchantry.ExtraEnchantry;
+import realmikoto.extraenchantry.FxHelper;
 
 /**
  * 不屈（Defiance）——26.2 的盾牌机制已组件化（{@code DataComponents.BLOCKS_ATTACKS}），
@@ -30,12 +31,15 @@ import realmikoto.extraenchantry.ExtraEnchantry;
 @Mixin(BlocksAttacks.class)
 public abstract class BlocksAttacksMixin {
 
-	/** 不屈 II：完全免疫破盾 */
+	/** 不屈 II：完全免疫破盾（附"盾没脱手"的金属就位声与附魔打击粒子，P1） */
 	@Inject(method = "disable", at = @At("HEAD"), cancellable = true)
 	private void extraenchantry$defianceImmunity(ServerLevel level, LivingEntity user, float baseSeconds,
 			ItemStack blockingWith, CallbackInfo ci) {
 		if (ExtraEnchantry.getDefianceLevel(blockingWith) >= 2) {
 			ci.cancel();
+			FxHelper.burst(level, user, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT, 4, 0.3D);
+			FxHelper.play(level, user, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, 1.0F, 1.0F);
+			FxHelper.play(level, user, net.minecraft.sounds.SoundEvents.ANVIL_PLACE, 0.2F, 1.0F);
 		}
 	}
 
@@ -52,6 +56,8 @@ public abstract class BlocksAttacksMixin {
 		if (ExtraEnchantry.getDefianceLevel(blockingWith) == 1 && baseSeconds > 0.0F) {
 			user.addEffect(new MobEffectInstance(MobEffects.RESISTANCE,
 					Math.round(baseSeconds * 10.0F), 0));
+			FxHelper.burst(level, user, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT, 4, 0.3D);
+			FxHelper.play(level, user, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, 1.0F, 1.0F);
 			return baseSeconds * 0.5F;
 		}
 		return baseSeconds;

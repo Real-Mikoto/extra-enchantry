@@ -34,10 +34,13 @@ import realmikoto.extraenchantry.CleaveManager;
 import realmikoto.extraenchantry.DecoyManager;
 import realmikoto.extraenchantry.EmberfallManager;
 import realmikoto.extraenchantry.ExtraEnchantry;
+import realmikoto.extraenchantry.FxHelper;
 import realmikoto.extraenchantry.JudgementManager;
 import realmikoto.extraenchantry.OathboundManager;
 import realmikoto.extraenchantry.SanctuaryManager;
+import realmikoto.extraenchantry.SheathedEdgeManager;
 import realmikoto.extraenchantry.ShieldChargeManager;
+import realmikoto.extraenchantry.StormsurgeManager;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -77,6 +80,13 @@ public abstract class LivingEntityMixin {
 		if (bonus == extraenchantry$vitalityBonus) {
 			return;
 		}
+		// 活力穿戴确认（P2）：加成上升时一次性心形 + 轻竖琴音
+		// （previous < 0 是登录/生成的首次初始化，不播）
+		if (extraenchantry$vitalityBonus >= 0 && bonus > extraenchantry$vitalityBonus
+				&& self.level() instanceof ServerLevel serverLevel) {
+			FxHelper.burst(serverLevel, self, net.minecraft.core.particles.ParticleTypes.HEART, 3, 0.3D);
+			FxHelper.play(serverLevel, self, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_HARP, 0.2F, 1.0F);
+		}
 		extraenchantry$vitalityBonus = bonus;
 		AttributeInstance maxHealth = self.getAttribute(Attributes.MAX_HEALTH);
 		if (maxHealth == null) {
@@ -106,6 +116,42 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
+	 * 疾风 / 炽焰行者的足下氛围粒子（P2，L1 常驻级，15 tick 节流）：
+	 * - 疾风：移速加成生效且地面移动中 → 脚下云雾（III 级升级为 POOF 烟缕，"足下生风"）；
+	 * - 炽焰行者：站在岩浆块 / 岩浆上 → 脚下火苗 + 偶发熔岩滴（"每一步都有火迹"）。
+	 */
+	@Inject(method = "tick", at = @At("HEAD"))
+	private void extraenchantry$ambientFootFx(CallbackInfo ci) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		if (!(self.level() instanceof ServerLevel serverLevel)
+				|| serverLevel.getGameTime() % 15L != 0L) {
+			return;
+		}
+		// 疾风：足下生风
+		int galeLevel = ExtraEnchantry.getGaleLevel(self.getItemBySlot(EquipmentSlot.LEGS));
+		if (galeLevel > 0 && !self.isCrouching() && self.onGround()
+				&& self.getDeltaMovement().horizontalDistanceSqr() > 0.01D) {
+			FxHelper.burstAt(serverLevel, self.getX(), self.getY() + 0.1D, self.getZ(),
+					galeLevel >= 3
+							? net.minecraft.core.particles.ParticleTypes.POOF
+							: net.minecraft.core.particles.ParticleTypes.CLOUD,
+					1, 0.15D);
+		}
+		// 炽焰行者：火迹
+		if (ExtraEnchantry.getBlazingWalkerLevel(self.getItemBySlot(EquipmentSlot.FEET)) > 0 && self.onGround()
+				&& (self.level().getBlockState(self.blockPosition().below())
+						.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
+						|| self.isInLava())) {
+			FxHelper.burstAt(serverLevel, self.getX(), self.getY() + 0.05D, self.getZ(),
+					net.minecraft.core.particles.ParticleTypes.FLAME, 2, 0.2D);
+			if (serverLevel.getGameTime() % 30L == 0L) {
+				FxHelper.burstAt(serverLevel, self.getX(), self.getY() + 0.1D, self.getZ(),
+						net.minecraft.core.particles.ParticleTypes.LAVA, 1, 0.1D);
+			}
+		}
+	}
+
+	/**
 	 * 疾风（Gale）：护腿带疾风时移动速度 +5%/级（I/II/III → 5%/10%/15%），
 	 * 潜行时不生效（getGaleSpeedBonus 返回 0，修改器被移除）。
 	 * 疾风 III 级仅能由两个 II 级在带破限的铁砧上融合得到（见 AnvilMenuMixin）。
@@ -130,6 +176,63 @@ public abstract class LivingEntityMixin {
 		} else {
 			speed.addOrUpdateTransientModifier(new AttributeModifier(
 					ExtraEnchantry.id("gale"), bonus, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+		}
+	}
+
+	/** 当前已应用的渊息水下挖掘加成（-1 = 未初始化，用于变更检测） */
+	@Unique
+	private double extraenchantry$tideheartMiningBonus = -1.0D;
+
+	/** 渊息：上一 tick 眼部是否在水中（入水沿检测用） */
+	@Unique
+	private boolean extraenchantry$wasEyeInWater = false;
+
+	/**
+	 * 渊息（Tideheart）III 级——水下挖掘不再减速：
+	 * 26.2 反编译确认，水下挖掘惩罚是 {@code Player#getDestroySpeed} 里的
+	 * {@code Attributes.SUBMERGED_MINING_SPEED} 属性乘算（原版基础值 0.2），
+	 * 不是分支代码——写入 +0.8 瞬态修改器即恢复到 1.0（与活力/疾风同一模式，
+	 * 双端执行保证客户端挖掘进度预测一致）。
+	 *
+	 * 附带入水反馈（P1）：佩戴渊息头盔首次没入水中时气泡柱 + 水下环境音。
+	 */
+	@Inject(method = "tick", at = @At("HEAD"))
+	private void extraenchantry$applyTideheartMining(CallbackInfo ci) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		if (!(self instanceof Player)) {
+			return;
+		}
+		int tideheartLevel = ExtraEnchantry.getTideheartLevel(self.getItemBySlot(EquipmentSlot.HEAD));
+		// 入水沿反馈：眼部从无水→有水且佩戴渊息
+		boolean eyeInWater = self.isEyeInFluid(net.minecraft.tags.FluidTags.WATER);
+		if (eyeInWater && !extraenchantry$wasEyeInWater && tideheartLevel > 0
+				&& self.level() instanceof ServerLevel serverLevel) {
+			FxHelper.burst(serverLevel, self,
+					net.minecraft.core.particles.ParticleTypes.BUBBLE_COLUMN_UP, 8, 0.3D);
+			FxHelper.play(serverLevel, self, net.minecraft.sounds.SoundEvents.AMBIENT_UNDERWATER_ENTER,
+					0.6F, 1.0F);
+			// 实战成就「深海呼吸」：渊息首次入水换气
+			if (self instanceof ServerPlayer serverPlayer) {
+				realmikoto.extraenchantry.Advancements.award(serverPlayer,
+						realmikoto.extraenchantry.Advancements.DEEP_BREATH);
+			}
+		}
+		extraenchantry$wasEyeInWater = eyeInWater;
+
+		double bonus = tideheartLevel >= 3 ? 0.8D : 0.0D;
+		if (bonus == extraenchantry$tideheartMiningBonus) {
+			return;
+		}
+		extraenchantry$tideheartMiningBonus = bonus;
+		AttributeInstance submerged = self.getAttribute(Attributes.SUBMERGED_MINING_SPEED);
+		if (submerged == null) {
+			return;
+		}
+		if (bonus <= 0.0D) {
+			submerged.removeModifier(ExtraEnchantry.id("tideheart_mining"));
+		} else {
+			submerged.addOrUpdateTransientModifier(new AttributeModifier(
+					ExtraEnchantry.id("tideheart_mining"), bonus, AttributeModifier.Operation.ADD_VALUE));
 		}
 	}
 
@@ -168,6 +271,12 @@ public abstract class LivingEntityMixin {
 			ratio *= 0.75F;
 		}
 		LivingEntity self = (LivingEntity) (Object) this;
+		// 蚀命反馈（P1）：受害者灵魂粒子 + 极轻灵魂逸散音（节流 10 tick）——
+		// 受害者视角才知道自己被侵蚀了（与断罪同族但量级减半，不串味）
+		if (self.level() instanceof ServerLevel erosionLevel2 && FxHelper.throttle(self, "life_erosion", 10)) {
+			FxHelper.burst(erosionLevel2, self, net.minecraft.core.particles.ParticleTypes.SOUL, 4, 0.3D);
+			FxHelper.play(erosionLevel2, self, net.minecraft.sounds.SoundEvents.SOUL_ESCAPE, 0.2F, 1.2F);
+		}
 		return amount + self.getMaxHealth() * ratio;
 	}
 
@@ -178,6 +287,24 @@ public abstract class LivingEntityMixin {
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float extraenchantry$shieldChargeBonus(float amount, ServerLevel level, DamageSource source) {
 		return ShieldChargeManager.applyCharge((LivingEntity) (Object) this, source, amount);
+	}
+
+	/**
+	 * 霆霓（Stormsurge）：雨天/水中掷出的三叉戟命中额外 2/4 伤害并连锁 2 格内 1 个目标。
+	 * 定义在冲阵之后、断罪之前：霆霓加伤参与断罪斩杀阈值结算。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$stormsurgeBonus(float amount, ServerLevel level, DamageSource source) {
+		return StormsurgeManager.applyBonus((LivingEntity) (Object) this, level, source, amount);
+	}
+
+	/**
+	 * 藏锋（Sheathed Edge）：脱战 5 秒后的首次近战命中额外 2/4/6 伤害。
+	 * 定义在霆霓之后、断罪之前：藏锋加伤参与断罪斩杀阈值结算。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$sheathedEdgeBonus(float amount, ServerLevel level, DamageSource source) {
+		return SheathedEdgeManager.applyBonus((LivingEntity) (Object) this, level, source, amount);
 	}
 
 	/**
@@ -199,6 +326,12 @@ public abstract class LivingEntityMixin {
 		if (aegisLevel <= 0 || aegisLevel > EXTRAENCHANTRY$AEGIS_REDUCTION.length
 				|| !source.is(DamageTypeTags.BYPASSES_SHIELD)) {
 			return amount;
+		}
+		// 坚壁反馈（P1）：附魔打击粒子 + 高音盾格挡音（"魔法被弹开"，与壁垒的"重击硬吃"区分）
+		if (self.level() instanceof ServerLevel aegisServerLevel && FxHelper.throttle(self, "aegis", 10)) {
+			FxHelper.burst(aegisServerLevel, self, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT,
+					4, 0.3D);
+			FxHelper.play(aegisServerLevel, self, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, 1.0F, 1.2F);
 		}
 		return amount * (1.0F - EXTRAENCHANTRY$AEGIS_REDUCTION[aegisLevel - 1]);
 	}
@@ -254,6 +387,13 @@ public abstract class LivingEntityMixin {
 			hearts *= 0.5F;
 		}
 		attacker.heal(hearts * 2.0F);
+		// 汲取反馈（P1）：攻击者心形 ×2 + 极轻竖琴音（节流 5 tick，回血不该吵）
+		if (attacker.level() instanceof ServerLevel attackerLevel
+				&& FxHelper.throttle(attacker, "siphon", 5)) {
+			FxHelper.burst(attackerLevel, attacker, net.minecraft.core.particles.ParticleTypes.HEART, 2, 0.3D);
+			FxHelper.play(attackerLevel, attacker, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_HARP,
+					0.3F, 1.2F);
+		}
 	}
 
 	/**
@@ -264,6 +404,45 @@ public abstract class LivingEntityMixin {
 	private void extraenchantry$cleaveSplash(ServerLevel level, DamageSource source, float amount,
 			CallbackInfoReturnable<Boolean> cir) {
 		CleaveManager.tryCleave(level, (LivingEntity) (Object) this, source, amount, cir.getReturnValueZ());
+	}
+
+	/**
+	 * 藏锋（Sheathed Edge）战斗记账：伤害实际生效后，受害者与攻击者
+	 * 双方都刷新"最近参与战斗"时间戳（脱战 5 秒判定的数据源）。
+	 */
+	@Inject(method = "hurtServer", at = @At("RETURN"))
+	private void extraenchantry$sheathedEdgeRecordCombat(ServerLevel level, DamageSource source, float amount,
+			CallbackInfoReturnable<Boolean> cir) {
+		if (!cir.getReturnValueZ()) {
+			return;
+		}
+		LivingEntity self = (LivingEntity) (Object) this;
+		SheathedEdgeManager.recordCombat(self);
+		if (source.getEntity() instanceof LivingEntity attacker && attacker != self) {
+			SheathedEdgeManager.recordCombat(attacker);
+		}
+	}
+
+	/**
+	 * 触及（Reach）剑气反馈（P1）：命中超出原版近战距离（3 格）的目标时，
+	 * 沿攻击线排 3 点暴击粒子（"剑气够到了"的延长线视觉）。
+	 * 触及是常态效果，不配音效（不该每刀都响）。
+	 */
+	@Inject(method = "hurtServer", at = @At("RETURN"))
+	private void extraenchantry$reachTrail(ServerLevel level, DamageSource source, float amount,
+			CallbackInfoReturnable<Boolean> cir) {
+		if (!cir.getReturnValueZ() || !source.isDirect()
+				|| !(source.getEntity() instanceof LivingEntity attacker)) {
+			return;
+		}
+		LivingEntity self = (LivingEntity) (Object) this;
+		if (attacker == self || ExtraEnchantry.getReachLevel(source.getWeaponItem()) <= 0
+				|| attacker.distanceTo(self) <= 3.0F) {
+			return;
+		}
+		FxHelper.trail(level,
+				attacker.getEyePosition(), self.getEyePosition(),
+				net.minecraft.core.particles.ParticleTypes.CRIT, 3);
 	}
 
 	/**
@@ -296,6 +475,13 @@ public abstract class LivingEntityMixin {
 		}
 		if (totalLevels <= 0) {
 			return effect;
+		}
+
+		// 凋零保护反馈（P2）：孢子粒子 + 轻笛音（"毒素被净化"，节流 20 tick）
+		if (self.level() instanceof ServerLevel serverLevel && FxHelper.throttle(self, "wither_prot", 20)) {
+			FxHelper.burst(serverLevel, self,
+					net.minecraft.core.particles.ParticleTypes.SPORE_BLOSSOM_AIR, 4, 0.3D);
+			FxHelper.play(serverLevel, self, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE, 0.3F, 1.2F);
 		}
 
 		float reduction = Math.min(0.9F, totalLevels * 0.15F);

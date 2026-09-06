@@ -66,5 +66,14 @@ public abstract class ServerPlayerMixin {
 		} else {
 			((Player) (Object) this).getInventory().replaceWith(oldPlayer.getInventory());
 		}
+		// 誓约重生仪式（P2）：图腾粒子 + 清越编钟（四件套全量，部分誓约减半）
+		ServerPlayer self = (ServerPlayer) (Object) this;
+		if (self.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+			boolean fullSet = OathboundManager.hasFullOathboundArmor(oldPlayer);
+			realmikoto.extraenchantry.FxHelper.burst(serverLevel, self,
+					net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING, fullSet ? 10 : 5, 0.4D);
+			realmikoto.extraenchantry.FxHelper.play(serverLevel, self,
+					net.minecraft.sounds.SoundEvents.NOTE_BLOCK_CHIME, 0.5F, 1.0F);
+		}
 	}
 }

@@ -56,11 +56,32 @@ public abstract class LocalPlayerMixin {
 				&& !self.getAbilities().flying) {
 			extraenchantry$skywardJumpsLeft--;
 			self.jumpFromGround();
+			extraenchantry$airJumpEffects(self, maxJumps - extraenchantry$skywardJumpsLeft);
 		}
 		// 装备等级变化（脱靴 / 换靴）时收敛剩余次数
 		if (extraenchantry$skywardJumpsLeft > maxJumps) {
 			extraenchantry$skywardJumpsLeft = maxJumps;
 		}
 		extraenchantry$prevJumpPressed = jumpPressed;
+	}
+
+	/**
+	 * 空跃起跳反馈（DESIGN_aesthetics P0）：脚下云雾下喷 + 短促振翅音。
+	 * 多段跳音高阶梯递减（第 1/2/3 跳 → 1.6/1.5/1.4），制造"阶梯感"。
+	 */
+	@Unique
+	private void extraenchantry$airJumpEffects(LocalPlayer self, int jumpIndex) {
+		for (int i = 0; i < 6; i++) {
+			self.level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
+					self.getX() + (self.getRandom().nextDouble() - 0.5D) * 0.4D, self.getY(),
+					self.getZ() + (self.getRandom().nextDouble() - 0.5D) * 0.4D,
+					0.0D, -0.08D, 0.0D);
+		}
+		for (int i = 0; i < 3; i++) {
+			self.level().addParticle(net.minecraft.core.particles.ParticleTypes.POOF,
+					self.getX(), self.getY() + 0.1D, self.getZ(), 0.0D, -0.05D, 0.0D);
+		}
+		self.playSound(net.minecraft.sounds.SoundEvents.ENDER_DRAGON_FLAP,
+				0.4F, 1.7F - jumpIndex * 0.1F);
 	}
 }

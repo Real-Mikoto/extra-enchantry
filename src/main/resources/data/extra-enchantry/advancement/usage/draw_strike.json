@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.usage.draw_strike.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:iron_sword"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.usage.draw_strike.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

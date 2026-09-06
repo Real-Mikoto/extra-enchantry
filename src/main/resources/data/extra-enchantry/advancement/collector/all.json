@@ -1,0 +1,181 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "soul": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_soul"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "storm": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_storm"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "blade": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_blade"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "nature": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_nature"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "water": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_water"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "wind": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_wind"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "guard": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_guard"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "fire": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_fire"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.collector.all.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "minecraft:nether_star"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.collector.all.title"
+    }
+  },
+  "requirements": [
+    [
+      "soul"
+    ],
+    [
+      "storm"
+    ],
+    [
+      "blade"
+    ],
+    [
+      "nature"
+    ],
+    [
+      "water"
+    ],
+    [
+      "wind"
+    ],
+    [
+      "guard"
+    ],
+    [
+      "fire"
+    ]
+  ]
+}

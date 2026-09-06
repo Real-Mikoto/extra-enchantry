@@ -2,10 +2,10 @@ package realmikoto.extraenchantry.mixin;
 
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.FontDescription;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,29 +13,91 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import realmikoto.extraenchantry.ExtraEnchantry;
 
+import java.util.Map;
+
 /**
- * 破限 / 拓阶 附魔名称特殊渲染：
- * 亮金色 (#FFD700) 基础色 + extra-enchantry:fancy / fancy_lb 字体（凯尔特/篆书风格）。
- * 拓阶用 fancy；破限用 fancy_lb——客户端 FontPreparedTextBuilderMixin 据此区分二者：
- * 破限在本地玩家完成「无敌」进度前按锁定态渲染（灰色无闪光），完成后再变金色波浪闪光。
+ * 附魔名称的特殊渲染体系（DESIGN_aesthetics 字体章）：
+ *
+ * T0 传说级 —— fancy / fancy_lb 字体 + 金色 (#FFD700)：
+ *   破限 / 拓阶；客户端渲染为金色波浪闪光，破限另有锁定态（灰）。
+ * T1 史诗级 —— 主题族字体 + 族色波浪（客户端 FontPreparedTextBuilderMixin 逐帧演算）：
+ *   灵魂族：断罪 / 蚀命 / 余烬 / 劫后余辉 / 无踪
+ *   雷光族：坠星 / 假象
+ *   锋刃族：藏锋 / 触及
+ *   自然族：汲取 / 庇护
+ *   深渊族：渊息
+ *   风族：御风 / 疾风
+ *   守护族：壁垒 / 坚壁 / 不屈 / 誓约
+ *   火焰族：炽焰行者
+ * T2 普通级（uncommon/common：凋零保护 / 活力 / 破阵 / 冲阵 / 霆霓 / 丰壤 / 空跃）保持原版样式，
+ *   维持"稀有度视觉阶梯"——附魔列表里一眼分出高下。
  */
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin {
 
+	/** T1 族字体与基础色（客户端波浪以此字体 ID 为标记匹配色相） */
+	private record FamilyStyle(String fontPath, int baseColor) {
+	}
+
+	private static final Map<ResourceKey<Enchantment>, FamilyStyle> FAMILY_STYLES = Map.ofEntries(
+			// 灵魂族（青蓝 #4FD8E8）
+			Map.entry(ExtraEnchantry.JUDGEMENT, new FamilyStyle("fancy_soul", 0x4FD8E8)),
+			Map.entry(ExtraEnchantry.LIFE_EROSION, new FamilyStyle("fancy_soul", 0x4FD8E8)),
+			Map.entry(ExtraEnchantry.EMBERFALL, new FamilyStyle("fancy_soul", 0x4FD8E8)),
+			Map.entry(ExtraEnchantry.AFTERGLOW, new FamilyStyle("fancy_soul", 0x4FD8E8)),
+			Map.entry(ExtraEnchantry.UNSEEN, new FamilyStyle("fancy_soul", 0x4FD8E8)),
+			// 雷光族（青白 #B8F4FF）
+			Map.entry(ExtraEnchantry.STARFALL, new FamilyStyle("fancy_storm", 0xB8F4FF)),
+			Map.entry(ExtraEnchantry.DECOY, new FamilyStyle("fancy_storm", 0xB8F4FF)),
+			// 锋刃族（银白 #E8E8F0）
+			Map.entry(ExtraEnchantry.SHEATHED_EDGE, new FamilyStyle("fancy_blade", 0xE8E8F0)),
+			Map.entry(ExtraEnchantry.REACH, new FamilyStyle("fancy_blade", 0xE8E8F0)),
+			// 自然族（翠绿 #6FE86F）
+			Map.entry(ExtraEnchantry.SIPHON, new FamilyStyle("fancy_nature", 0x6FE86F)),
+			Map.entry(ExtraEnchantry.SANCTUARY, new FamilyStyle("fancy_nature", 0x6FE86F)),
+			// 深渊族（深蓝 #3F76E4）
+			Map.entry(ExtraEnchantry.TIDEHEART, new FamilyStyle("fancy_water", 0x3F76E4)),
+			// 风族（风白 #D8F0F0）
+			Map.entry(ExtraEnchantry.WINDRIDER, new FamilyStyle("fancy_wind", 0xD8F0F0)),
+			Map.entry(ExtraEnchantry.GALE, new FamilyStyle("fancy_wind", 0xD8F0F0)),
+			Map.entry(ExtraEnchantry.HOMING_PLUME, new FamilyStyle("fancy_wind", 0xD8F0F0)),
+			// 守护族（钢青 #7FA8C9）
+			Map.entry(ExtraEnchantry.BULWARK, new FamilyStyle("fancy_guard", 0x7FA8C9)),
+			Map.entry(ExtraEnchantry.AEGIS, new FamilyStyle("fancy_guard", 0x7FA8C9)),
+			Map.entry(ExtraEnchantry.DEFIANCE, new FamilyStyle("fancy_guard", 0x7FA8C9)),
+			Map.entry(ExtraEnchantry.OATHBOUND, new FamilyStyle("fancy_guard", 0x7FA8C9)),
+			// 火焰族（焰橙 #FF7A2A）
+			Map.entry(ExtraEnchantry.BLAZING_WALKER, new FamilyStyle("fancy_fire", 0xFF7A2A))
+	);
+
 	@Inject(method = "getFullname", at = @At("RETURN"), cancellable = true)
 	private static void extraenchantry$fancyEnchantmentName(Holder<Enchantment> enchanted, int level,
 			CallbackInfoReturnable<Component> cir) {
-		Identifier fontId = enchanted.is(ExtraEnchantry.LIMIT_BREAK)
-				? ExtraEnchantry.id("fancy_lb")
-				: ExtraEnchantry.id("fancy");
+		// T0：破限 / 拓阶（金色 + 专属字体，破限带锁定态）
 		if (enchanted.is(ExtraEnchantry.LIMIT_BREAK) || enchanted.is(ExtraEnchantry.TIER_BREAK)) {
-			Style fancy = Style.EMPTY
-					.withColor(0xFFD700)
-					.withFont(new FontDescription.Resource(fontId))
-					.withItalic(false);
-			// 用带样式的空父组件包裹原名，子组件继承样式
-			MutableComponent styled = Component.empty().withStyle(fancy).append(cir.getReturnValue());
-			cir.setReturnValue(styled);
+			Identifier fontId = enchanted.is(ExtraEnchantry.LIMIT_BREAK)
+					? ExtraEnchantry.id("fancy_lb")
+					: ExtraEnchantry.id("fancy");
+			cir.setReturnValue(wrap(cir.getReturnValue(), fontId, 0xFFD700));
+			return;
 		}
+		// T1：主题族字体 + 族色（客户端按字体 ID 演算波浪）
+		for (Map.Entry<ResourceKey<Enchantment>, FamilyStyle> entry : FAMILY_STYLES.entrySet()) {
+			if (enchanted.is(entry.getKey())) {
+				FamilyStyle family = entry.getValue();
+				cir.setReturnValue(wrap(cir.getReturnValue(),
+						ExtraEnchantry.id(family.fontPath()), family.baseColor()));
+				return;
+			}
+		}
+	}
+
+	/** 用带样式的空父组件包裹原名，子组件继承样式（字体 + 基础色） */
+	private static Component wrap(Component original, Identifier fontId, int baseColor) {
+		Style fancy = Style.EMPTY
+				.withColor(baseColor)
+				.withFont(new FontDescription.Resource(fontId))
+				.withItalic(false);
+		return Component.empty().withStyle(fancy).append(original);
 	}
 }

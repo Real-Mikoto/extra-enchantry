@@ -71,6 +71,24 @@ public final class ShieldChargeManager {
 		// 击退方向：攻击者 → 受击者（被击者被推离攻击者）
 		victim.knockback(KNOCKBACK_POWER[level - 1],
 				attacker.getX() - victim.getX(), attacker.getZ() - victim.getZ(), source, amount);
+		spawnEffects(victim, level);
+		// 实战成就「冲锋陷阵」：冲阵首次撞击命中
+		if (attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			Advancements.award(serverPlayer, Advancements.CHARGE);
+		}
 		return amount + BONUS_DAMAGE[level - 1];
+	}
+
+	/** 撞击打击感（DESIGN_aesthetics P0）：附魔打击粒子 + 沉钝盾击音（等级变调 0.8/0.85/0.9）+ 击退哨音 */
+	private static void spawnEffects(LivingEntity victim, int level) {
+		if (!(victim.level() instanceof net.minecraft.server.level.ServerLevel serverLevel)) {
+			return;
+		}
+		FxHelper.burst(serverLevel, victim, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT, 8, 0.3D);
+		FxHelper.burst(serverLevel, victim, net.minecraft.core.particles.ParticleTypes.POOF, 4, 0.4D);
+		FxHelper.play(serverLevel, victim, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK,
+				1.0F, 0.8F + (level - 1) * 0.05F);
+		FxHelper.play(serverLevel, victim, net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_KNOCKBACK,
+				0.7F, 1.0F);
 	}
 }

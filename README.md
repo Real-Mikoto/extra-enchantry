@@ -39,6 +39,12 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 不屈 Defiance            | II  | 盾牌                                 | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
 | 庇护 Sanctuary           | III | 盾牌                                 | 试炼密室基础 / 稀有奖励箱（附魔书 / 带附魔的盾牌）                      |
 | 坚壁 Aegis               | III | 盾牌                                 | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
+| 归羽 Homing Plume        | II  | 弓 / 弩                               | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与无限互斥）                 |
+| 坠星 Starfall            | I   | 弩                                  | 仅末地城宝箱（附魔书 / 带附魔的弩，与多重射击互斥）                     |
+| 霆霓 Stormsurge          | II  | 三叉戟                                | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与引雷互斥）                 |
+| 藏锋 Sheathed Edge       | III | 剑 / 斧                              | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
+| 渊息 Tideheart           | III | 头盔                                 | 宝藏（无附魔台）：海洋系宝箱（沉船 / 宝藏 / 海底废墟）+ 钓鱼；与水下呼吸 / 水下速掘互斥 |
+| 丰壤 Loam                | III | 锄                                  | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                       |
 
 ## 目录
 
@@ -85,6 +91,18 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * [僵尸马骑兵队](#20-僵尸马骑兵队-zombie-horse-cavalry)
 
 * [盾牌四附魔](#21-盾牌四附魔-shield-enchantments)
+
+* [归羽](#22-归羽-homing-plume)
+
+* [坠星](#23-坠星-starfall)
+
+* [霆霓](#24-霆霓-stormsurge)
+
+* [藏锋](#25-藏锋-sheathed-edge)
+
+* [渊息](#26-渊息-tideheart)
+
+* [丰壤](#27-丰壤-loam)
 
 * [通用技术模式](#通用技术模式)
 
@@ -618,7 +636,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 ## 14. 破阵 (Cleave)
 
-**功能**：3 级，近战武器 / 工具。命中主目标后，对 2 格内最多 1/2/3 个额外目标造成主目标伤害的 50%/60%/70%（走完整护甲结算），按与主目标的距离由近到远选取。触发时附带范围视觉：每个溅射目标身上生成横扫攻击粒子（原版横扫之刃同款），主目标脚下画一圈 2 格半径的暴击粒子范围指示。溅射**不触发**汲取与蚀命（防滚雪球），也**不触发**破阵自身（防递归）。与横扫之刃互斥。
+**功能**：3 级，近战武器 / 工具。命中主目标后，对 2 格内最多 1/2/3 个额外目标造成主目标伤害的 45%/55%/65%（走完整护甲结算；v1.1.0 由 50%/60%/70% 下调，缩小与横扫之刃的差距），按与主目标的距离由近到远选取。触发时附带范围视觉：每个溅射目标身上生成横扫攻击粒子（原版横扫之刃同款），主目标脚下画一圈 2 格半径的暴击粒子范围指示。溅射**不触发**汲取与蚀命（防滚雪球），也**不触发**破阵自身（防递归）。与横扫之刃互斥。
 
 ### 实现方法
 
@@ -670,7 +688,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 1. **滑翔耐久** `LivingEntityMixin` —— 26.2 反编译确认鞘翅耐久在 `LivingEntity#updateFallFlying` 内：每 10 tick 计一次、每 2 次（即 20 tick）对**可滑翔装备槽中随机一个** `hurtAndBreak(1, this, slot)`。`@Redirect` 该调用，按 `WINDRIDER_DURABILITY_SKIP = {0.5, 0.5, 0.75}` 概率跳过 → 等效耐久消耗 -50%/-75%
 
-2. **烟花推进** `FireworkRocketEntityMixin`（新建）—— `FireworkRocketEntity#tick` 对**正在滑翔的附着实体**做一次朝视线方向的插值加速后调 `LivingEntity#setDeltaMovement`（该方法内仅此一处以 LivingEntity 为 owner 的调用，其余是火箭自身移动）。`@Redirect` 后取出 “本次推进增量”（新速度 - 旧速度）按 `WINDRIDER_BOOST_FACTOR = {1.0, 1.5, 1.75}` 放大写回，不改动原版插值公式
+2. **烟花推进** `FireworkRocketEntityMixin`（新建）—— `FireworkRocketEntity#tick` 对**正在滑翔的附着实体**做一次朝视线方向的插值加速后调 `LivingEntity#setDeltaMovement`（该方法内仅此一处以 LivingEntity 为 owner 的调用，其余是火箭自身移动）。`@Redirect` 后取出 “本次推进增量”（新速度 - 旧速度）按 `WINDRIDER_BOOST_FACTOR = {1.0, 1.5, 1.6}` 放大写回，不改动原版插值公式
 
 **获取途径（专属掉落表）**：覆盖 `data/minecraft/loot_table/chests/end_city_treasure.json`—— 保留原版两个池，追加第三池（rolls 1）：70% 空 / 18% 御风附魔书（等级 `uniform 1-3`）/ 12% 带御风的鞘翅（`set_damage 0.9-1.0`）。
 
@@ -904,6 +922,131 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 ***
 
+## 22. 归羽 (Homing Plume)
+
+**功能**：射出的箭 / 弩箭未命中任何实体（插地方或落空）时，按 50% / 100% 概率在 1 秒后自动飞回背包（药箭同样返还）；命中实体不返还。**与无限互斥**（无限 = 不耗箭但禁药箭，归羽 = 省箭 + 保留药箭的经济取舍）。
+
+### 实现方法
+
+**数据定义** `data/extra-enchantry/enchantment/homing_plume.json`：
+
+* `max_level: 2`，`weight: 5`（uncommon），`anvil_cost: 4`
+* `supported_items/primary_items: "#extra-enchantry:homing_plume_supported"`（自定义标签：`#minecraft:enchantable/bow` + `#minecraft:enchantable/crossbow`），`slots: ["mainhand"]`
+* `exclusive_set: ["minecraft:infinity"]`（列表写法）
+* `effects: {}` 纯 Mixin
+
+**核心逻辑** `mixin/ProjectileWeaponItemMixin.java` + `mixin/AbstractArrowMixin.java` + `HomingPlumeManager.java`：
+
+* 发射快照：26.2 反编译确认弓与弩的箭矢都经 `ProjectileWeaponItem#createProjectile(Level, LivingEntity, ItemStack weapon, ItemStack projectile, boolean)` 生成（弩的重写仅处理烟花，箭矢走 super），RETURN 处把武器归羽等级写入箭实体（`HomingPlumeAccess` 接口）
+* 返还判定：`AbstractArrow#onHitEntity` HEAD 置命中标记；`onHitBlock` RETURN 处——无命中标记、拾取态非 DISALLOWED、发射者为 ServerPlayer 时按概率登记延迟任务
+* 延迟返还：`HomingPlumeManager` 走 `ServerTickEvents.END_SERVER_TICK`，20 tick 后箭仍存在（未被手动捡走）→ `getPickupItem()`（protected，@Invoker 透传）进背包（满了掉脚下）+ 拾取音 + `discard()`
+
+**获取途径**：追加进 `minecraft:non_treasure`。
+
+## 23. 坠星 (Starfall)
+
+**功能**：装填烟花火箭发射时，爆炸伤害 +4、爆炸半径 +1 格，爆炸粒子升级为星形散射（末地烛 + 烟花混合）。**与多重射击互斥**（烟花流 vs 散弹流二选一）。
+
+### 实现方法
+
+**数据定义** `data/extra-enchantry/enchantment/starfall.json`：
+
+* `max_level: 1`，`weight: 2`（rare），`anvil_cost: 4`
+* `supported_items/primary_items: "#minecraft:enchantable/crossbow"`，`slots: ["mainhand"]`
+* `exclusive_set: ["minecraft:multishot"]`
+* 不加入任何获取标签 → 全途径隔离，仅末地城专属掉落池（与御风同方案）
+
+**核心逻辑** `mixin/CrossbowItemMixin.java` + `mixin/FireworkRocketEntityMixin.java`（扩展既有类）：
+
+* 发射快照：26.2 反编译确认弩发射烟花走 `CrossbowItem#createProjectile` 烟花分支（`new FireworkRocketEntity(level, 烟花栈, 射手, ...)`），RETURN 处给火箭打坠星标记（`StarfallAccess` 接口）——爆炸时射手可能已换武器，必须快照
+* 爆炸增强：`dealExplosionDamage(ServerLevel)`（private）内三组常量 `@ModifyConstant` 同步放大——基础伤害 5.0f→9.0f（+4）、半径 5.0d→6.0d、距离平方阈值 25.0d→36.0d（衰减公式随半径同构缩放）
+* 星形粒子：`explode` TAIL 按三正交轴 + 体对角线 14 束 `END_ROD` + 中心 `FIREWORK` 散射
+
+**获取途径（专属掉落表）**：`chests/end_city_treasure.json` 第四池（rolls 1）：75% 空 / 15% 坠星附魔书 / 10% 带坠星的弩（`set_damage 0.8-1.0`）。
+
+## 24. 霆霓 (Stormsurge)
+
+**功能**：雨天 / 雷雨天 / 目标在水中时，掷出的三叉戟命中额外 +2 / +4 伤害，并连锁至 2 格内最近 1 个其他实体（连锁伤害减半）；命中点播放引雷同款雷声与电弧粒子（无真实闪电、不引燃）。仅投掷触发，近战戳刺不生效。**与引雷互斥**。
+
+### 实现方法
+
+**数据定义** `data/extra-enchantry/enchantment/stormsurge.json`：
+
+* `max_level: 2`，`weight: 5`（uncommon），`anvil_cost: 4`
+* `supported_items/primary_items: "#minecraft:enchantable/trident"`，`slots: ["mainhand"]`
+* `exclusive_set: ["minecraft:channeling"]`
+* `effects: {}` 纯 Mixin
+
+**核心逻辑** `StormsurgeManager.java`（挂 `LivingEntityMixin` hurtServer HEAD `@ModifyVariable`，定义在冲阵之后、断罪之前——加伤参与断罪斩杀结算）：
+
+* 武器取 `source.getWeaponItem()`（掷出三叉戟返回三叉戟本身，同蚀命），`!source.isDirect()` 限定投掷
+* 环境门：`level.isRaining()` 或目标 `isInWater()`（26.2 已无 `isInWaterRainOrBubble`，拆分判定）
+* 连锁：主目标碰撞箱外扩 2 格取最近 1 个（排除攻击者 / 主目标 / 友方 / 死者），共用主目标 DamageSource + ThreadLocal 短路防递归（破阵同款模式）
+
+**获取途径**：追加进 `minecraft:non_treasure`。
+
+## 25. 藏锋 (Sheathed Edge)
+
+**功能**：脱离战斗（未造成且未承受任何伤害）满 5 秒后，首次近战命中额外 +2 / 4 / 6 伤害，伴随拔刀音效与刀光粒子；触发后重新计时。与断罪不互斥——藏锋加伤参与断罪斩杀阈值结算（与冲阵同一设计逻辑），受壁垒上限克制。
+
+### 实现方法
+
+**数据定义** `data/extra-enchantry/enchantment/sheathed_edge.json`：
+
+* `max_level: 3`，`weight: 2`（rare），`anvil_cost: 4`
+* `supported_items/primary_items: "#minecraft:enchantable/sharp_weapon"`（原版标签 = 近战武器 + 斧，与锋利同适用范围），`slots: ["mainhand"]`
+* `effects: {}` 纯 Mixin
+
+**核心逻辑** `SheathedEdgeManager.java`（挂 `LivingEntityMixin` hurtServer）：
+
+* 计时：每生物 UUID 记录最近参与战斗时间戳（wall-clock，与断罪冷却同风格）；hurtServer RETURN 伤害生效后受害者与攻击者双记账；无记录视为就绪（开局第一刀即拔刀斩）
+* 加伤：HEAD `@ModifyVariable`（argsOnly），就绪则 +2/4/6 并立刻重新计时
+
+**获取途径**：追加进 `minecraft:non_treasure`。
+
+## 26. 渊息 (Tideheart)
+
+**功能**：水下呼吸时间每级 +15 秒（I/II/III 级 → 总氧气 30/45/60 秒），III 级时水下挖掘不再减速（等效水下速掘）。**与水下呼吸、水下速掘互斥**。
+
+### 实现方法
+
+**数据定义** `data/extra-enchantry/enchantment/tideheart.json`：
+
+* `max_level: 3`，`weight: 2`（rare），`anvil_cost: 4`
+* `supported_items/primary_items: "#minecraft:enchantable/head_armor"`，`slots: ["head"]`
+* `exclusive_set: ["minecraft:respiration", "minecraft:aqua_affinity"]`（列表写法）
+
+**核心逻辑** `mixin/EntityMixin.java`（扩展）+ `mixin/LivingEntityMixin.java`（扩展）：
+
+* 氧气上限：26.2 反编译确认 `Entity#getMaxAirSupply()` 硬编码返回 300（15 秒），且 `increaseAirSupply` 以它为钳制上限——HEAD 注入按头盔渊息等级返回 `300 + 300×level`，消耗 / 换气回满 / 客户端气泡 HUD 全部自动跟随
+* III 级水下免减速：26.2 的水下挖掘惩罚是 `Player#getDestroySpeed` 里的 `Attributes.SUBMERGED_MINING_SPEED` 属性乘算（基础值 0.2），tick 内写入 +0.8 瞬态修改器即恢复 1.0（与活力 / 疾风同一模式，双端执行）
+
+**获取途径**：追加进 `minecraft:treasure`（挡附魔台），另以 `LootTableEvents.MODIFY` 向沉船三类 / 埋藏的宝藏 / 海底废墟大小 / 钓鱼宝藏追加专属池（rolls 1：85% 空 / 15% I~III 级附魔书），庇护同款事件追加法，不进 `on_random_loot` 通用随机池。
+
+## 27. 丰壤 (Loam)
+
+**功能**：收获完全成熟的作物时 20% / 35% / 50% 概率双倍掉落（复制一份含时运等加成后的完整掉落，含种子）；III 级额外 3×3 范围收获——仅破坏同种且已成熟的作物，未成熟不动，每格消耗 1 点耐久，各格独立走双倍判定。
+
+### 实现方法
+
+**数据定义** `data/extra-enchantry/enchantment/loam.json`：
+
+* `max_level: 3`，`weight: 5`（uncommon），`anvil_cost: 2`
+* `supported_items/primary_items: "#minecraft:hoes"`，`slots: ["mainhand"]`
+* `effects: {}` 纯 Mixin
+
+**核心逻辑** `mixin/BlockMixin.java` + `LoamManager.java`：
+
+* 注入点：26.2 反编译确认玩家破坏结算集中在 `Block#playerDestroy(Level, Player, BlockPos, BlockState, BlockEntity, ItemStack)`，RETURN 处判定 `CropBlock.isMaxAge(state)`（public final）+ 锄头丰壤等级
+* 双倍掉落：`Block.getDrops(...)`（第六参已是 ItemInstance 新类型，ItemStack 直接实现之）重算一份掉落弹出
+* 3×3 范围：邻格走 `ServerLevel#destroyBlock` 原版流程（各自触发双倍判定），ThreadLocal 深度标记防连锁扩散
+
+**获取途径**：追加进 `minecraft:non_treasure`。
+
+
+
+***
+
 ## 通用技术模式
 
 ### 项目结构
@@ -917,9 +1060,15 @@ src/main/resources/
 
 ├── data/extra-enchantry/tags/item/\*.json        自定义物品标签（可附魔物品）
 
+├── data/extra-enchantry/tags/enchantment/family\_\*.json  八家族附魔标签（字体/成就共用）
+
+├── data/extra-enchantry/advancement/...          成就树（collector 图鉴 / usage 实战 / hidden\_challenges 隐秘挑战）
+
 ├── data/minecraft/tags/enchantment/\*.json       追加原版标签（互斥组/宝藏性/交易）
 
 ├── data/minecraft/loot\_table/...                掉落表覆盖（warden/wither/矿石/基岩/远古城市/末地城/试炼密室）
+
+├── assets/extra-enchantry/font/fancy\_\*.json     八家族附魔名称字体
 
 └── assets/extra-enchantry/lang/\*.json           翻译
 
@@ -927,7 +1076,17 @@ src/main/java/realmikoto/extraenchantry/
 
 ├── ExtraEnchantry.java                          附魔 ResourceKey 注册 + 判定辅助
 
+├── FxHelper.java                                粒子/音效统一封装（见「视听反馈」）
+
+├── Advancements.java                            代码授予成就统一入口（见「成就体系」）
+
+├── \*Manager.java                                各附魔的状态与结算
+
 └── mixin/\*.java                                 效果逻辑
+
+src/client/java/realmikoto/extraenchantry/client/
+
+└── mixin/\*.java                                 客户端渲染/输入（字体动效、HUD、空跃）
 ```
 
 ### 代码注册约定
@@ -958,18 +1117,46 @@ public static final ResourceKey\<Enchantment> REACH =
 
 * **新增附魔时**：在该类的 `ENCHANTMENTS` 列表追加 `(KEY, 最大等级)` 即自动列出全部等级的附魔书
 
+### 视听反馈（FxHelper）
+
+所有粒子/音效必须经过 `FxHelper.java`，不在业务代码里裸写 `sendParticles`/`playSound`：
+
+* 封装：`burst`（实体中心爆发）/ `burstAt`（定点）/ `ring`（环）/ `trail`（两点间排点）/ `play`（音效）/ `pitchForLevel`（等级变调）/ `throttle`（按 UUID+key 节流）
+* `play` 有 `SoundEvent` 与 `Holder<SoundEvent>` 两个重载——26.2 的 `SoundEvents` 常量两种类型并存（如 NOTE\_BLOCK\_\*、SHIELD\_BLOCK、SOUL\_ESCAPE 是 Holder），调用前 `javap` 确认字段类型
+* **分级约定（详见 DESIGN\_aesthetics.md）**：L1 触发确认（每次生效都给，短促）/ L2 持续氛围（必须 `throttle`，10–20 tick）/ L3 高光时刻（免死、处决等稀有事件才允许大场面）。常态生效的效果（如触及）只给粒子不配音效，防吵
+* 客户端独占反馈（如空跃振翅音）放 client source set 的 Mixin，服务端不可见的实体状态别往服务端发
+
+### 附魔名称字体体系
+
+附魔名称按稀有度三级着色，`EnchantmentMixin` 注入 `Enchantment#getFullname` RETURN、用带样式的空父组件包裹原名（子组件继承字体+颜色，不动原名本体）：
+
+* **T0 传说**（破限/拓阶）：金色 + `fancy_lb` 字体
+* **T1 八家族**：`FAMILY_STYLES` 映射（ResourceKey → 字体 ID + 基础色）——灵魂 #4FD8E8 / 雷光 #B8F4FF / 锋刃 #E8E8F0 / 自然 #6FE86F / 深渊 #3F76E4 / 风 #D8F0F0 / 守护 #7FA8C9 / 火焰 #FF7A2A；字体定义在 `assets/extra-enchantry/font/fancy_{族}.json`（均基于 fancy.json 的 uncial\_antiqua + zcool\_xiaowei 双语覆盖，每族一份便于独立调整）
+* **T2 普通**：不动，保持原版灰色
+* **逐字动效**：客户端 `FontPreparedTextBuilderMixin` Redirect `Style#getColor`，按字符索引做 HSV 波形偏移（按字体 ID 分派各族相位/速度参数），形成颜色沿文字流动的效果；破限名另随「无敌」进度切换锁定暗灰/解锁金色
+* **新增附魔时**：在 `FAMILY_STYLES` 选族登记（或明确留在 T2），并同步把附魔加入对应 `tags/enchantment/family_{族}.json`——字体族与成就图鉴族共用同一份划分，两处必须一致
+
+### 成就体系
+
+三棵树，按"能否用数据驱动表达"选触发方式：
+
+* **collector/**（图鉴树，纯数据驱动）：根（tick 触发）→ 家族节点（`inventory_changed` + `stored_enchantments` 谓词引用 `#extra-enchantry:family_{族}` 标签）→ 集齐节点（各族 AND）。**新增附魔时**：归族即自动进入图鉴判定，无需改成就 JSON
+* **usage/**（实战树，代码授予）：JSON 用 `minecraft:impossible` 触发器（任何游戏事件都无法自然完成），由效果代码在生效处调 `Advancements.award(ServerPlayer, ResourceKey)` 授予。criterion 名统一 `triggered`；ResourceKey 常量在 `Advancements.java` 集中声明。**新增附魔时**：有"首次成功使用"纪念价值的，加一个 usage 成就 + 一句 award 调用
+* **hidden\_challenges/**（隐秘挑战，代码授予）：v1.0 既有模式，criterion 自带命名空间（如 `extra-enchantry:obtained`），授予逻辑在各 Manager 内（LimitBreakManager/CavalryManager）
+* 代码授予的查找方式（26.2）：成就**不是**注册表，`server.getAdvancements().get(key.identifier())` 拿 `AdvancementHolder` 再 `player.getAdvancements().award(holder, criterion)`；award 幂等，重复触发安全
+
 ### Mixin 清单
 
 
 
 | Mixin                        | 目标                        | 作用                                                                                                                                                                                 |
 | ---------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| LivingEntityMixin            | `LivingEntity`            | 凋零时长缩短；破限保护上限 100%；汲取攻击回血；蚀命额外最大生命值伤害；断罪斩杀；壁垒单次伤害上限；活力最大生命值修改器（含马铠）；疾风移速修改器；无踪索敌降低；御风滑翔耐久；余烬免死 + 锁血；破阵溅射；誓约四件套经验球跳过；假象 PvP 触发；诸界浩劫挑战生物经验翻倍；冲阵疾跑撞击加伤 + 击退；坚壁格挡减免不可格挡类伤害；庇护团队光环 tick |
-| AnvilMenuMixin               | `AnvilMenu`               | 破限互斥无视 + 铁砧费用 5 级；疾风 III 级需破限（无破限时产出降回 II 级）；破限门禁：未击败骑兵队时拦截破限书应用                                                                                                                   |
+| LivingEntityMixin            | `LivingEntity`            | 凋零时长缩短；破限保护上限 100%；汲取攻击回血；蚀命额外最大生命值伤害；断罪斩杀；壁垒单次伤害上限；活力最大生命值修改器（含马铠）；疾风移速修改器；无踪索敌降低；御风滑翔耐久；余烬免死 + 锁血；破阵溅射；誓约四件套经验球跳过；假象 PvP 触发；诸界浩劫挑战生物经验翻倍；冲阵疾跑撞击加伤 + 击退；坚壁格挡减免不可格挡类伤害；庇护团队光环 tick；霆霓投掷加伤 + 连锁；藏锋拔刀加伤 + 战斗记账；渊息 III 级水下挖掘修改器 |
+| AnvilMenuMixin               | `AnvilMenu`               | 破限互斥无视 + 铁砧费用 5 级（触及 XI 级产物特判 15 级，v1.1.0 起）；疾风 III 级需破限（无破限时产出降回 II 级）；破限门禁：未击败骑兵队时拦截破限书应用                                                                                                                   |
 | EnchantmentHelperMixin       | `EnchantmentHelper`       | 破限附魔台互斥无视（ThreadLocal 传物品）                                                                                                                                                         |
 | ItemStackMixin               | `ItemStack`               | 拓阶挖掘等级 / 速度                                                                                                                                                                        |
 | BlockBehaviourMixin          | `BlockBehaviour`          | 拓阶基岩可破坏                                                                                                                                                                            |
-| EnchantmentMixin             | `Enchantment`             | 破限 / 拓阶名称金色 + 特色字体                                                                                                                                                                 |
+| EnchantmentMixin             | `Enchantment`             | 附魔名称三级样式：T0 破限/拓阶金色 fancy\_lb；T1 八家族字体+基础色（FAMILY\_STYLES）；T2 不动（见「附魔名称字体体系」）                                                                        |
 | EnchantRandomlyFunctionMixin | `EnchantRandomlyFunction` | 触及 / 壁垒随机来源钳到 1 级；疾风钳到最高 2 级                                                                                                                                                       |
 | MobMixin                     | `Mob`                     | setTarget 统一裁决：假象仇恨重定向 + 触发；诸界浩劫挑战生物仇恨锁定玩家 / 无仇恨（误伤不改仇恨）                                                                                                                           |
 | GrindstoneMenuMixin          | `GrindstoneMenu`          | 破限砂轮防移除（removeNonCursesFrom HEAD/RETURN）                                                                                                                                           |
@@ -982,7 +1169,11 @@ public static final ResourceKey\<Enchantment> REACH =
 | ItemCombinerMenuAccessor     | `ItemCombinerMenu`        | 访问器：暴露 protected 的 `player` 字段（声明于父类，AnvilMenuMixin 无法 @Shadow）供破限门禁取玩家                                                                                                            |
 | BlocksAttacksMixin           | `BlocksAttacks`           | 不屈：II 免疫破盾（disable HEAD 取消）、I 破盾时长减半 + 抗性提升、II 格挡耐久消耗 ×2（hurtBlockingItem damage ×2）                                                                                               |
 | CreeperAccessor              | `Creeper`                 | 访问器：私有充能位 DATA\_IS\_POWERED（静态）+ 引信 maxSwell—— 诸界浩劫的闪电苦力怕（引信 30→8）                                                                                                                 |
-| FireworkRocketEntityMixin    | `FireworkRocketEntity`    | 御风 II/III：烟花对滑翔者的推进增量按倍率放大（tick 内 setDeltaMovement Redirect)                                                                                                                       |
+| FireworkRocketEntityMixin    | `FireworkRocketEntity`    | 御风 II/III：烟花对滑翔者的推进增量按倍率放大（tick 内 setDeltaMovement Redirect)；坠星：爆炸伤害 +4 / 半径 +1（dealExplosionDamage 三组常量 ModifyConstant）+ 星形粒子                                                                                                                       |
+| AbstractArrowMixin           | `AbstractArrow`           | 归羽：发射快照等级存箭实体（HomingPlumeAccess）；命中实体置标记；插地方按概率登记延迟返还（注意 26.2 包名为 `projectile.arrow`）                                                                                                                                  |
+| ProjectileWeaponItemMixin    | `ProjectileWeaponItem`    | 归羽：createProjectile RETURN 把武器归羽等级写入箭矢（弓弩共用此生成点）                                                                                                                                                                                          |
+| CrossbowItemMixin            | `CrossbowItem`            | 坠星：createProjectile RETURN 给烟花火箭打坠星标记（StarfallAccess）                                                                                                                                                                                            |
+| BlockMixin                   | `Block`                   | 丰壤：playerDestroy RETURN 判定成熟作物 + 丰壤锄头 → 双倍掉落 / 3×3 范围收获（LoamManager）                                                                                                                                                                    |
 
 客户端 Mixin（`src/client/java/.../client/mixin/`，注册于 `extra-enchantry.client.mixins.json`）：
 
@@ -991,9 +1182,9 @@ public static final ResourceKey\<Enchantment> REACH =
 | Mixin                        | 目标                         | 作用                                        |
 | ---------------------------- | -------------------------- | ----------------------------------------- |
 | HudMixin                     | `Hud`                      | 活力：血条隐藏加成保持单行 + 上方 “❤×n/N” 紧凑显示           |
-| FontPreparedTextBuilderMixin | `Font$PreparedTextBuilder` | 拓阶名称金色波浪闪光；破限名分锁定态：未完成「无敌」进度暗灰平色，完成恢复金色闪光 |
+| FontPreparedTextBuilderMixin | `Font$PreparedTextBuilder` | 家族字体逐字 HSV 波形动效（按字体 ID 分派 8 族参数）；拓阶金色波浪闪光；破限名分锁定态：未完成「无敌」进度暗灰平色，完成恢复金色闪光 |
 | ClientAdvancementsAccessor   | `ClientAdvancements`       | 访问器：暴露私有进度表，供破限锁定态的本地判定                   |
-| LocalPlayerMixin             | `LocalPlayer`              | 空跃：客户端空中跳跃（aiStep 按键沿检测 + jumpFromGround） |
+| LocalPlayerMixin             | `LocalPlayer`              | 空跃：客户端空中跳跃（aiStep 按键沿检测 + jumpFromGround）+ 踏空云粒子与振翅音 |
 
 ### 踩坑记录（26.2）
 
@@ -1069,6 +1260,22 @@ public static final ResourceKey\<Enchantment> REACH =
 
 * **限级 cost 曲线不能只盯附魔台的 30**：加入 `non_treasure` 的附魔会经 `#non_treasure` 流入 `on_random_loot` 与 `tradeable`（反编译两个原版标签确认都引用 `#non_treasure`），而原版宝箱装备的 `enchant_with_levels` 给到 **cost 50**（远古城市 / 末地城 30-50）—— 所以 “最高只能随机到 N 级” 的阈值必须按 50 算（疾风 III 级 min\_cost 定在 55），否则高级附魔会从宝箱装备里泄出
 
+* **26.2 箭矢分包**：`AbstractArrow` 已从 `projectile` 移至 `projectile.arrow` 分包（`ThrownTrident`/`Arrow`/`SpectralArrow` 同移）；其 `onHitEntity`/`onHitBlock`/`tickDespawn`/`getPickupItem`（protected）结构不变，`pickup` 为 public 字段（`AbstractArrow$Pickup`：DISALLOWED/ALLOWED/CREATIVE_ONLY）
+
+* **Mixin 里调目标类的 protected 方法**：经 `((Target)(Object)this).protectedMethod()` 强转调用编译不过（protected 只认子类类型），标准做法是 `@Invoker("方法名")` 声明抽象方法透传——注意注解在 `org.spongepowered.asm.mixin.gen.Invoker`（不是 injection 包）
+
+* **26.2 烟花爆炸结构（坠星的实现依据）**：`FireworkRocketEntity#dealExplosionDamage(ServerLevel)`（private）基础伤害 = `5.0f + 2×爆炸星数`，半径 5.0d（AABB 外扩 + 距离平方阈值 25.0d + `(5-距离)/5` 衰减）；弩发射烟花走 `CrossbowItem#createProjectile` 烟花分支并把射手作为 owner 传入。增强爆炸用三组 `@ModifyConstant`（5.0f / 5.0d / 25.0d）**同步**缩放，衰减公式才能保持一致
+
+* **26.2 氧气体系（渊息的实现依据）**：氧气上限 = `Entity#getMaxAirSupply()` 硬编码 `sipush 300`（15 秒），`increaseAirSupply` 以它为钳制上限——HEAD 注入放大即全链路生效；原版水下呼吸改走 `Attributes.OXYGEN_BONUS`（`decreaseAirSupply` 内判定），与上限放大是两条独立路径
+
+* **26.2 水下挖掘惩罚是属性不是分支**：`Player#getDestroySpeed` 尾部 `isEyeInFluid(WATER)` 时乘 `Attributes.SUBMERGED_MINING_SPEED`（基础 0.2）——免减速写 +0.8 瞬态修改器即可，无需改流程（原版水下速掘同机制）
+
+* **26.2 `Block.getDrops` 第六参已改为 `ItemInstance`**（新接口，`ItemStack` 直接实现之）——看到签名别慌，ItemStack 原样传入即可；`Block#playerDestroy` 签名仍是 ItemStack
+
+* **`isInWaterRainOrBubble()` 在 26.2 已移除**：水中 / 雨中需拆成 `isInWater()` + `level.isRaining()`（或 `isRainingAt(BlockPos)`）自行组合
+
+* **成就 ID 含子目录路径**：`ServerAdvancementManager extends SimpleJsonResourceReloadListener`，成就 ID = JSON 相对 `data/<ns>/advancement/` 的完整路径——`advancement/usage/foo.json` 的 ID 是 `ns:usage/foo`。代码查找（`server.getAdvancements().get(...)` / `ClientAdvancements.get(...)`）与 JSON 内 `parent` 引用都必须带前缀，否则静默返回 null（授予不生效、客户端进度查询恒 false）。v1.0 曾因此 4 个隐藏成就从未授予且破限书锁定判定恒锁，v1.1.0 已修（LimitBreakManager/CavalryManager/LimitBreakLockState 三处）
+
 ## 后续附魔记录规范
 
 > **约定：每新增一个附魔，必须在本 README 追加对应章节。**
@@ -1096,3 +1303,12 @@ public static final ResourceKey\<Enchantment> REACH =
 ```
 
 涉及通用机制变化的（新 Mixin、新标签体系、原版行为覆写）需同步更新 "通用技术模式" 和 "踩坑记录" 章节。
+
+新增附魔的配套登记清单（除章节外逐项过）：
+
+1. `ExtraEnchantry.java` 注册 ResourceKey + 等级读取辅助
+2. `ExtraEnchantryCreativeTab.java` 的 `ENCHANTMENTS` 列表追加（自动列出全部等级附魔书）
+3. **归族**：`EnchantmentMixin.FAMILY_STYLES` 选族登记（或明确留 T2），同步加入 `tags/enchantment/family_{族}.json`——字体与图鉴成就共用该划分
+4. **视听反馈**：按「视听反馈」分级约定经 `FxHelper` 补齐 L1（L2/L3 视稀有度），常态效果记得 `throttle`
+5. **成就**（可选）：有"首次成功使用"纪念价值的加 `advancement/usage/` JSON + `Advancements.java` 常量 + 一句 award 调用
+6. `zh_cn.json` / `en_us.json` 同步翻译（附魔名 + 成就 title/description）

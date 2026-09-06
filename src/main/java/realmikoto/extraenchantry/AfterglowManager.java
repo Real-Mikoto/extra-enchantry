@@ -48,6 +48,11 @@ public final class AfterglowManager {
 		// 伤害吸收效果（决定黄心的效果来源与时长），再直接写入 10 HP 精确覆盖
 		player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, ABSORPTION_DURATION_TICKS, 0));
 		player.setAbsorptionAmount(ABSORPTION_HP);
+
+		// 实战成就「劫后余辉」：余辉首次复活触发
+		if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			Advancements.award(serverPlayer, Advancements.AFTERGLOW_TRIGGER);
+		}
 	}
 
 	/** 判断玩家是否处于锁血状态（余辉效果实例仍在即锁定） */

@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.usage.charge.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:shield"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.usage.charge.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

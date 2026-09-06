@@ -52,11 +52,11 @@ public final class LimitBreakManager {
 
 	/** 普通掉落对应的隐藏进度 */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> ADVANCE_NORMAL =
-			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("obtain_limit_break_book"));
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/obtain_limit_break_book"));
 
 	/** 闪电苦力怕代杀对应的隐藏进度 */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> ADVANCE_CHARGED =
-			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("obtain_limit_break_book_charged"));
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/obtain_limit_break_book_charged"));
 
 	private LimitBreakManager() {
 	}

@@ -140,6 +140,30 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final ResourceKey<Enchantment> AEGIS =
 			ResourceKey.create(Registries.ENCHANTMENT, id("aegis"));
 
+	// 归羽附魔（数据驱动定义于 data/extra-enchantry/enchantment/homing_plume.json）
+	public static final ResourceKey<Enchantment> HOMING_PLUME =
+			ResourceKey.create(Registries.ENCHANTMENT, id("homing_plume"));
+
+	// 坠星附魔（数据驱动定义于 data/extra-enchantry/enchantment/starfall.json）
+	public static final ResourceKey<Enchantment> STARFALL =
+			ResourceKey.create(Registries.ENCHANTMENT, id("starfall"));
+
+	// 霆霓附魔（数据驱动定义于 data/extra-enchantry/enchantment/stormsurge.json）
+	public static final ResourceKey<Enchantment> STORMSURGE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("stormsurge"));
+
+	// 藏锋附魔（数据驱动定义于 data/extra-enchantry/enchantment/sheathed_edge.json）
+	public static final ResourceKey<Enchantment> SHEATHED_EDGE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("sheathed_edge"));
+
+	// 渊息附魔（数据驱动定义于 data/extra-enchantry/enchantment/tideheart.json）
+	public static final ResourceKey<Enchantment> TIDEHEART =
+			ResourceKey.create(Registries.ENCHANTMENT, id("tideheart"));
+
+	// 丰壤附魔（数据驱动定义于 data/extra-enchantry/enchantment/loam.json）
+	public static final ResourceKey<Enchantment> LOAM =
+			ResourceKey.create(Registries.ENCHANTMENT, id("loam"));
+
 	/**
 	 * 破限可提升一级上限的附魔：所有在逻辑上可以增加一级的附魔（原版 + 本 mod）。
 	 * 带破限的输入在铁砧融合时，这些附魔的等级上限从原版最大值提升 1
@@ -243,6 +267,33 @@ public class ExtraEnchantry implements ModInitializer {
 									.withEnchantment(sanctuary, UniformGenerator.between(1.0F, 3.0F)))));
 		});
 
+		// 渊息（Tideheart）：追加进海洋系宝箱（沉船三类/埋藏的宝藏/海底废墟大小）
+		// 与钓鱼宝藏池——主题绑定海洋，不进 on_random_loot 通用随机池
+		// （treasure 标签已将其挡在附魔台之外，同庇护的事件追加法）
+		LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
+			if (!source.isBuiltin()
+					|| (!key.equals(BuiltInLootTables.SHIPWRECK_SUPPLY)
+							&& !key.equals(BuiltInLootTables.SHIPWRECK_MAP)
+							&& !key.equals(BuiltInLootTables.SHIPWRECK_TREASURE)
+							&& !key.equals(BuiltInLootTables.BURIED_TREASURE)
+							&& !key.equals(BuiltInLootTables.UNDERWATER_RUIN_BIG)
+							&& !key.equals(BuiltInLootTables.UNDERWATER_RUIN_SMALL)
+							&& !key.equals(BuiltInLootTables.FISHING_TREASURE))) {
+				return;
+			}
+			Holder<Enchantment> tideheart =
+					registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(TIDEHEART);
+			tableBuilder.withPool(LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(EmptyLootItem.emptyItem().setWeight(85))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(15)
+							.apply(new SetEnchantmentsFunction.Builder()
+									.withEnchantment(tideheart, UniformGenerator.between(1.0F, 3.0F)))));
+		});
+
+		// 归羽（Homing Plume）：落空箭矢的延迟返还节拍（1 秒飞回动画窗口）
+		ServerTickEvents.END_SERVER_TICK.register(HomingPlumeManager::tick);
+
 		LOGGER.info("Hello Fabric world!");
 	}
 
@@ -273,7 +324,23 @@ public class ExtraEnchantry implements ModInitializer {
 		if (level <= 0 || level > BULWARK_CAP.length) {
 			return reduced;
 		}
-		return Math.min(reduced, BULWARK_CAP[level - 1]);
+		float capped = Math.min(reduced, BULWARK_CAP[level - 1]);
+		// 壁垒格挡确认（DESIGN_aesthetics P0）：实际钳制 ≥4 点时给反馈——
+		// 低沉盾音 + 附魔打击粒子 + 动作栏提示（壁垒的价值建立在"玩家意识到被救了"上）
+		float blocked = reduced - capped;
+		if (blocked >= 4.0F && entity instanceof net.minecraft.server.level.ServerPlayer player
+				&& entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+			FxHelper.burst(serverLevel, entity, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT,
+					6, 0.3D);
+			FxHelper.play(serverLevel, entity, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, 1.0F, 0.6F);
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+					"message.extra-enchantry.bulwark_blocked",
+					String.format(java.util.Locale.ROOT, "%.1f", blocked)).withStyle(
+					net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+			// 实战成就「铜墙铁壁」：壁垒挡下 ≥4 点伤害
+			Advancements.award(player, Advancements.BULWARK_SAVE);
+		}
+		return capped;
 	}
 
 	/** 获取物品上的劫后余辉附魔等级（无则返回 0，stack 可为 null） */
@@ -505,6 +572,46 @@ public class ExtraEnchantry implements ModInitializer {
 		return getEnchantmentLevel(stack, AEGIS);
 	}
 
+	/** 获取弓/弩上的归羽附魔等级（无则返回 0） */
+	public static int getHomingPlumeLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, HOMING_PLUME);
+	}
+
+	/** 获取弩上的坠星附魔等级（无则返回 0） */
+	public static int getStarfallLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, STARFALL);
+	}
+
+	/** 获取三叉戟上的霆霓附魔等级（无则返回 0） */
+	public static int getStormsurgeLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, STORMSURGE);
+	}
+
+	/** 获取近战武器上的藏锋附魔等级（无则返回 0） */
+	public static int getSheathedEdgeLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, SHEATHED_EDGE);
+	}
+
+	/** 获取头盔上的渊息附魔等级（无则返回 0） */
+	public static int getTideheartLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, TIDEHEART);
+	}
+
+	/** 获取锄头上的丰壤附魔等级（无则返回 0） */
+	public static int getLoamLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, LOAM);
+	}
+
+	/** 获取武器上的触及附魔等级（无则返回 0） */
+	public static int getReachLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, REACH);
+	}
+
+	/** 获取靴子上的炽焰行者附魔等级（无则返回 0） */
+	public static int getBlazingWalkerLevel(ItemStack stack) {
+		return getEnchantmentLevel(stack, BLAZING_WALKER);
+	}
+
 	/** 靴子上的无踪等级（Entity/LivingEntity 注入点快速判定用） */
 	public static int getUnseenLevelOnFeet(LivingEntity entity) {
 		return getUnseenLevel(entity.getItemBySlot(EquipmentSlot.FEET));
@@ -519,7 +626,7 @@ public class ExtraEnchantry implements ModInitializer {
 		return Math.random() < WINDRIDER_DURABILITY_SKIP[level - 1];
 	}
 
-	/** 御风：烟花推进增量倍率（1.0 / 1.5 / 1.75，无附魔返回 1.0） */
+	/** 御风：烟花推进增量倍率（1.0 / 1.5 / 1.6，无附魔返回 1.0） */
 	public static double getWindriderBoostFactor(LivingEntity glider) {
 		int level = getWindriderLevel(glider.getItemBySlot(EquipmentSlot.CHEST));
 		if (level <= 0 || level > WINDRIDER_BOOST_FACTOR.length) {

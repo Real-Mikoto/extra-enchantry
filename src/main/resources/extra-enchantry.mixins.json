@@ -22,7 +22,11 @@
 		"SkeletonTrapGoalMixin",
 		"ItemCombinerMenuAccessor",
 		"CreeperAccessor",
-		"FireworkRocketEntityMixin"
+		"FireworkRocketEntityMixin",
+		"AbstractArrowMixin",
+		"ProjectileWeaponItemMixin",
+		"CrossbowItemMixin",
+		"BlockMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

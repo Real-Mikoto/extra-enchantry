@@ -3,6 +3,7 @@ package realmikoto.extraenchantry.mixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -62,5 +63,22 @@ public abstract class EntityMixin {
 	@Unique
 	private boolean extraenchantry$wearsUnseen() {
 		return (Object) this instanceof LivingEntity living && ExtraEnchantry.getUnseenLevelOnFeet(living) > 0;
+	}
+
+	/**
+	 * 渊息（Tideheart）I~III 级——氧气上限提升：
+	 * 26.2 反编译确认，氧气上限就是 {@code Entity#getMaxAirSupply()} 硬编码返回 300（15 秒），
+	 * 且 increaseAirSupply 以它为钳制上限——单点 HEAD 注入放大后，
+	 * 消耗、水面换气回满、客户端气泡 HUD 全部自动跟随。
+	 * 每级 +300 tick（+15 秒）：I/II/III 级 → 30/45/60 秒。
+	 */
+	@Inject(method = "getMaxAirSupply", at = @At("HEAD"), cancellable = true)
+	private void extraenchantry$tideheartMaxAir(CallbackInfoReturnable<Integer> cir) {
+		if ((Object) this instanceof LivingEntity living) {
+			int level = ExtraEnchantry.getTideheartLevel(living.getItemBySlot(EquipmentSlot.HEAD));
+			if (level > 0) {
+				cir.setReturnValue(300 + 300 * level);
+			}
+		}
 	}
 }

@@ -1,0 +1,40 @@
+{
+  "parent": "extra-enchantry:collector/root",
+  "criteria": {
+    "book": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "#extra-enchantry:family_soul"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.collector.soul.description"
+    },
+    "icon": {
+      "id": "minecraft:enchanted_book"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.collector.soul.title"
+    }
+  },
+  "requirements": [
+    [
+      "book"
+    ]
+  ]
+}
