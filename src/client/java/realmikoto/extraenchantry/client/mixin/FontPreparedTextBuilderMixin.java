@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import realmikoto.extraenchantry.ExtraEnchantry;
+import realmikoto.extraenchantry.client.CollectorState;
 import realmikoto.extraenchantry.client.LimitBreakLockState;
 
 /**
@@ -42,6 +43,13 @@ public abstract class FontPreparedTextBuilderMixin {
 			return original;
 		}
 
+		// 臻藏奖励（1.2.0）：收藏家玩家的本模附魔名以专属金渐变渲染（覆盖族色）
+		if (resource.id().getNamespace().equals("extra-enchantry")
+				&& resource.id().getPath().startsWith("fancy")
+				&& CollectorState.isCollector()) {
+			return extraenchantry$collectorShine(index);
+		}
+
 		if (resource.id().equals(ExtraEnchantry.id("fancy_lb"))) {
 			// 破限：锁定态 = 暗灰平色；解锁后 = 金色波浪闪光
 			if (LimitBreakLockState.isLocked()) {
@@ -60,6 +68,19 @@ public abstract class FontPreparedTextBuilderMixin {
 	/** 金色邻域色相波动（33°~57°）+ 亮度脉动，沿文字方向传播的波浪 */
 	private static TextColor extraenchantry$goldShine(int index) {
 		return extraenchantry$shine(index, 45.0F, 12.0F, 1.0F, 0.81F, 0.19F);
+	}
+
+	/**
+	 * 臻藏专属金渐变（1.2.0 收藏家奖励）：更宽的金域 + 饱和度呼吸（偶发近白高光），
+	 * 与普通金色波浪一眼可分。
+	 */
+	private static TextColor extraenchantry$collectorShine(int index) {
+		float time = (System.currentTimeMillis() % 6000L) / 1000.0F;
+		float phase = time * (float) (Math.PI * 2.0) + index * 0.5F;
+		float hue = (50.0F + 15.0F * Mth.sin(phase)) / 360.0F;
+		float saturation = 0.55F + 0.25F * Mth.sin(phase * 1.3F);
+		float brightness = 0.92F + 0.08F * Mth.sin(phase * 3.0F);
+		return TextColor.fromRgb(Mth.hsvToRgb(hue, saturation, brightness));
 	}
 
 	/**

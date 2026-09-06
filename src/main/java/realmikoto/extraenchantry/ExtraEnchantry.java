@@ -199,6 +199,27 @@ public class ExtraEnchantry implements ModInitializer {
 		return LEVEL_UP_ENCHANTMENTS.stream().anyMatch(holder::is);
 	}
 
+	/** 在物品的附魔里找指定附魔的 Holder（无则 Optional.empty） */
+	public static java.util.Optional<Holder<Enchantment>> findHolder(ItemStack stack, ResourceKey<Enchantment> key) {
+		for (Holder<Enchantment> holder : stack.getEnchantments().keySet()) {
+			if (holder.is(key)) {
+				return java.util.Optional.of(holder);
+			}
+		}
+		return java.util.Optional.empty();
+	}
+
+	/** 家族共鸣小加成：物品上指定附魔的共鸣有效等级（玩家无共鸣时原样返回） */
+	public static int effectiveLevel(LivingEntity entity, ItemStack stack, ResourceKey<Enchantment> key, int baseLevel) {
+		if (entity instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			java.util.Optional<Holder<Enchantment>> holder = findHolder(stack, key);
+			if (holder.isPresent()) {
+				return FamilyResonanceManager.effectiveLevel(serverPlayer, holder.get(), baseLevel);
+			}
+		}
+		return baseLevel;
+	}
+
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
@@ -230,6 +251,21 @@ public class ExtraEnchantry implements ModInitializer {
 		// 陷阱混编队成员死亡判定：击败计数凑满整队 → 「全歼」进度
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
 				CavalryManager.onTrapRiderDeath(entity, source));
+
+		// 家族共鸣（1.2.0）：秒级扫描档位 + FULL 属性/被动 + 死亡结算（猎魂/深渊回响）
+		ServerTickEvents.END_SERVER_TICK.register(FamilyResonanceManager::tick);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
+				FamilyResonanceManager.onLivingDeath(entity, source));
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
+				ShieldChargeManager.onLivingDeath(entity, source));
+
+		// 死而不僵（隐秘挑战）：劫后余辉锁血期间击杀攻击者
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer killer
+					&& AfterglowManager.isLocked(killer)) {
+				FamilyResonanceManager.onAfterglowKill(killer);
+			}
+		});
 
 		// 诸界浩劫挑战节拍：超时/死亡判定、苦力怕生成、清波检测、下一波启动
 		ServerTickEvents.END_SERVER_TICK.register(CavalryManager::tickCataclysms);
@@ -470,7 +506,13 @@ public class ExtraEnchantry implements ModInitializer {
 		int totalLevels = 0;
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.isArmor()) {
-				totalLevels += getVitalityLevel(entity.getItemBySlot(slot));
+				ItemStack stack = entity.getItemBySlot(slot);
+				int level = getVitalityLevel(stack);
+				// 家族共鸣小加成：自然族 ≥PARTIAL 时活力按 +1 级结算
+				if (level > 0 && entity instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+					level = effectiveLevel(serverPlayer, stack, VITALITY, level);
+				}
+				totalLevels += level;
 			}
 		}
 		if (totalLevels <= 0) {

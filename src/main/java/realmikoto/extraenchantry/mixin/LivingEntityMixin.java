@@ -34,6 +34,7 @@ import realmikoto.extraenchantry.CleaveManager;
 import realmikoto.extraenchantry.DecoyManager;
 import realmikoto.extraenchantry.EmberfallManager;
 import realmikoto.extraenchantry.ExtraEnchantry;
+import realmikoto.extraenchantry.FamilyResonanceManager;
 import realmikoto.extraenchantry.FxHelper;
 import realmikoto.extraenchantry.JudgementManager;
 import realmikoto.extraenchantry.OathboundManager;
@@ -251,6 +252,48 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
+	 * 锋刃连击（家族共鸣 FULL 锋刃，1.2.0）：3 秒内连续命中伤害递增，最高 +15%。
+	 * 声明在最前：连击倍率先于其余加伤/减伤结算。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$bladeCombo(float amount, ServerLevel level, DamageSource source) {
+		if (amount <= 0.0F || !source.isDirect()
+				|| !(source.getEntity() instanceof net.minecraft.server.level.ServerPlayer attacker)) {
+			return amount;
+		}
+		return amount * FamilyResonanceManager.bladeComboMultiplier(attacker);
+	}
+
+	/**
+	 * 风 轻盈（家族共鸣 FULL 风，1.2.0）：摔落伤害 -50%。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$windFallReduction(float amount, ServerLevel level, DamageSource source) {
+		if (amount <= 0.0F
+				|| !(source.getEntity() instanceof net.minecraft.server.level.ServerPlayer victim)
+				|| FamilyResonanceManager.tierOf(victim, FamilyResonanceManager.Family.WIND)
+						!= FamilyResonanceManager.Tier.FULL) {
+			return amount;
+		}
+		return amount * 0.5F;
+	}
+
+	/**
+	 * 火焰 炽热之躯（家族共鸣 FULL 火焰，1.2.0）：免疫火焰 / 熔岩伤害。
+	 * 在蚀命/断罪等结算之前整体取消。
+	 */
+	@Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
+	private void extraenchantry$fireImmunity(ServerLevel level, DamageSource source, float amount,
+			CallbackInfoReturnable<Boolean> cir) {
+		if (amount > 0.0F && source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)
+				&& (Object) this instanceof net.minecraft.server.level.ServerPlayer victim
+				&& FamilyResonanceManager.tierOf(victim, FamilyResonanceManager.Family.FIRE)
+						== FamilyResonanceManager.Tier.FULL) {
+			cir.setReturnValue(false);
+		}
+	}
+
+	/**
 	 * 蚀命（Life Erosion）：被带蚀命附魔的武器/工具/远程武器命中时，额外受到
 	 * 百分比最大生命值伤害（I/II/III 级 → 14%/15%/17%）。
 	 * 远程（箭矢/掷出的三叉戟等非直接伤害）效果减少 1/4（即 ×0.75）。
@@ -265,6 +308,14 @@ public abstract class LivingEntityMixin {
 		int erosionLevel = ExtraEnchantry.getLifeErosionLevel(source.getWeaponItem());
 		if (erosionLevel <= 0 || erosionLevel > EXTRAENCHANTRY$LIFE_EROSION_RATIO.length) {
 			return amount;
+		}
+		// 家族共鸣小加成：自然族 ≥PARTIAL 时蚀命按 +1 级结算（表内已含等级 4）
+		if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
+			erosionLevel = ExtraEnchantry.effectiveLevel(sp, source.getWeaponItem(),
+					ExtraEnchantry.LIFE_EROSION, erosionLevel);
+			if (erosionLevel > EXTRAENCHANTRY$LIFE_EROSION_RATIO.length) {
+				erosionLevel = EXTRAENCHANTRY$LIFE_EROSION_RATIO.length;
+			}
 		}
 		float ratio = EXTRAENCHANTRY$LIFE_EROSION_RATIO[erosionLevel - 1];
 		if (!source.isDirect()) {
@@ -381,6 +432,11 @@ public abstract class LivingEntityMixin {
 		int siphonLevel = ExtraEnchantry.getSiphonLevel(source.getWeaponItem());
 		if (siphonLevel <= 0) {
 			return;
+		}
+		// 家族共鸣小加成：自然族 ≥PARTIAL 时汲取按 +1 级结算
+		if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
+			siphonLevel = ExtraEnchantry.effectiveLevel(sp, source.getWeaponItem(),
+					ExtraEnchantry.SIPHON, siphonLevel);
 		}
 		float hearts = siphonLevel;
 		if (!source.isDirect()) {

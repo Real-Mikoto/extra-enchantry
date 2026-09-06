@@ -32,6 +32,7 @@ public abstract class ProjectileWeaponItemMixin {
 		int homingLevel = ExtraEnchantry.getHomingPlumeLevel(weapon);
 		if (homingLevel > 0) {
 			((HomingPlumeAccess) arrow).extraenchantry$setHomingLevel(homingLevel);
+			((HomingPlumeAccess) arrow).extraenchantry$setLaunchPos(shooter.getX(), shooter.getY(), shooter.getZ());
 		}
 	}
 }

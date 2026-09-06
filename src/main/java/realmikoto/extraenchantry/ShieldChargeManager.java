@@ -1,6 +1,7 @@
 package realmikoto.extraenchantry;
 
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -36,7 +37,27 @@ public final class ShieldChargeManager {
 	/** 攻击者 UUID → 上次撞击时刻 */
 	private static final Map<UUID, Long> COOLDOWNS = new ConcurrentHashMap<>();
 
+	/** 被冲阵命中的劫掠兽 UUID → 撞击者 UUID（以彼之道挑战判定，短 TTL 语义） */
+	private static final Map<UUID, UUID> CHARGED_RAVAGERS = new ConcurrentHashMap<>();
+
 	private ShieldChargeManager() {
+	}
+
+	/**
+	 * 以彼之道（隐秘挑战）：被冲阵命中的劫掠兽，由同一玩家击杀时达成。
+	 * 挂 Fabric {@code ServerLivingEntityEvents.AFTER_DEATH}（ExtraEnchantry 注册）。
+	 */
+	public static void onLivingDeath(LivingEntity victim, net.minecraft.world.damagesource.DamageSource source) {
+		UUID victimId = victim.getUUID();
+		if (!(victim instanceof net.minecraft.world.entity.monster.Ravager)) {
+			return;
+		}
+		UUID charger = CHARGED_RAVAGERS.remove(victimId);
+		if (charger == null || !(source.getEntity() instanceof net.minecraft.server.level.ServerPlayer killer)
+				|| !killer.getUUID().equals(charger)) {
+			return;
+		}
+		realmikoto.extraenchantry.FamilyResonanceManager.onRavagerChargeKill(killer);
 	}
 
 	/** 读取实体双手盾牌上的冲阵最高等级（无则 0） */

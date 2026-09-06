@@ -28,6 +28,15 @@ public final class ExtraEnchantryEffects {
 			MobEffectCategory.HARMFUL, 0x8B2500, ParticleTypes.SOUL_FIRE_FLAME) {
 	});
 
+	/**
+	 * 共鸣（RESONANCE，1.2.0）：家族共鸣的状态栏展示载体（BENEFICIAL）。
+	 * amplifier = 激活的家族数 - 1，由 FamilyResonanceManager 每 20 tick 滚动续期
+	 * （40 tick 时长），不承担任何结算——实际加成与被动在各 Manager / Mixin。
+	 */
+	public static final Holder<MobEffect> RESONANCE = Holder.direct(new MobEffect(
+			MobEffectCategory.BENEFICIAL, 0x7FD4E8, ParticleTypes.END_ROD) {
+	});
+
 	private ExtraEnchantryEffects() {
 	}
 
@@ -36,5 +45,7 @@ public final class ExtraEnchantryEffects {
 				ExtraEnchantry.id("afterglow"), AFTERGLOW.value());
 		net.minecraft.core.Registry.register(BuiltInRegistries.MOB_EFFECT,
 				ExtraEnchantry.id("emberfall"), EMBERFALL.value());
+		net.minecraft.core.Registry.register(BuiltInRegistries.MOB_EFFECT,
+				ExtraEnchantry.id("resonance"), RESONANCE.value());
 	}
 }

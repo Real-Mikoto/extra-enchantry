@@ -7,7 +7,8 @@
 		"FontPreparedTextBuilderMixin",
 		"HudMixin",
 		"LocalPlayerMixin",
-		"ClientAdvancementsAccessor"
+		"ClientAdvancementsAccessor",
+		"ItemStackFoilMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

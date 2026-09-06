@@ -17,4 +17,10 @@ public interface HomingPlumeAccess {
 
 	/** 该箭矢被拾取/返还时对应的物品栈（透传 protected 的 getPickupItem） */
 	ItemStack extraenchantry$getPickupItem();
+
+	/** 写入发射点坐标（百步穿杨挑战测距用） */
+	void extraenchantry$setLaunchPos(double x, double y, double z);
+
+	/** 读取发射点坐标（未写入时返回 null） */
+	double[] extraenchantry$getLaunchPos();
 }

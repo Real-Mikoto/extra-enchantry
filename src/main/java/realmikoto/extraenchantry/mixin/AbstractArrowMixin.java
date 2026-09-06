@@ -38,6 +38,10 @@ public abstract class AbstractArrowMixin implements HomingPlumeAccess {
 	@Unique
 	private boolean extraenchantry$hitEntity;
 
+	/** 发射点坐标（百步穿杨挑战测距用；null = 未记录） */
+	@Unique
+	private double[] extraenchantry$launchPos;
+
 	@Override
 	public void extraenchantry$setHomingLevel(int level) {
 		this.extraenchantry$homingLevel = level;
@@ -48,6 +52,16 @@ public abstract class AbstractArrowMixin implements HomingPlumeAccess {
 		return this.extraenchantry$homingLevel;
 	}
 
+	@Override
+	public void extraenchantry$setLaunchPos(double x, double y, double z) {
+		this.extraenchantry$launchPos = new double[]{x, y, z};
+	}
+
+	@Override
+	public double[] extraenchantry$getLaunchPos() {
+		return this.extraenchantry$launchPos;
+	}
+
 	/** 透传 protected 的 getPickupItem（@Invoker 标准做法） */
 	@Invoker("getPickupItem")
 	@Override
@@ -56,6 +70,17 @@ public abstract class AbstractArrowMixin implements HomingPlumeAccess {
 	@Inject(method = "onHitEntity", at = @At("HEAD"))
 	private void extraenchantry$markEntityHit(EntityHitResult hitResult, CallbackInfo ci) {
 		this.extraenchantry$hitEntity = true;
+		// 隐秘挑战「百步穿杨」：归羽箭命中距发射点 ≥40 格的生物
+		if (this.extraenchantry$homingLevel > 0 && this.extraenchantry$launchPos != null) {
+			AbstractArrow self = (AbstractArrow) (Object) this;
+			double dx = self.getX() - this.extraenchantry$launchPos[0];
+			double dy = self.getY() - this.extraenchantry$launchPos[1];
+			double dz = self.getZ() - this.extraenchantry$launchPos[2];
+			if (dx * dx + dy * dy + dz * dz >= 40.0D * 40.0D
+					&& self.getOwner() instanceof net.minecraft.server.level.ServerPlayer owner) {
+				realmikoto.extraenchantry.FamilyResonanceManager.onHomingLongShot(owner);
+			}
+		}
 	}
 
 	@Inject(method = "onHitBlock", at = @At("RETURN"))

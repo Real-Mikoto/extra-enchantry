@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.Map;
 
 /**
  * 丰壤（Loam）：锄头专属的农业附魔。
@@ -34,6 +36,14 @@ public final class LoamManager {
 	/** 范围收获深度标记：true = 当前正在处理邻格，不再向外扩展 */
 	private static final ThreadLocal<Boolean> AREA_HARVESTING = new ThreadLocal<>();
 
+	/** 隐秘挑战「丰收之神的赞许」：玩家 UUID → 连锁收获累计株数与最近收获时刻 */
+	private static final Map<UUID, Integer> CHAIN_COUNTS = new java.util.concurrent.ConcurrentHashMap<>();
+	private static final Map<UUID, Long> CHAIN_LAST_MS = new java.util.concurrent.ConcurrentHashMap<>();
+	/** 连锁窗口（毫秒）：超过则重新计数 */
+	private static final long CHAIN_WINDOW_MS = 3000L;
+	/** 挑战阈值：单次连锁 64 株 */
+	private static final int CHAIN_CHALLENGE_COUNT = 64;
+
 	private LoamManager() {
 	}
 
@@ -47,6 +57,18 @@ public final class LoamManager {
 		int loamLevel = ExtraEnchantry.getLoamLevel(tool);
 		if (loamLevel <= 0 || loamLevel > DOUBLE_DROP_CHANCE.length) {
 			return;
+		}
+		// 隐秘挑战计数：连锁窗口内累计收获株数（中心 + 邻格都算）
+		if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+			long now = System.currentTimeMillis();
+			long last = CHAIN_LAST_MS.getOrDefault(serverPlayer.getUUID(), 0L);
+			int count = (now - last <= CHAIN_WINDOW_MS)
+					? CHAIN_COUNTS.merge(serverPlayer.getUUID(), 1, Integer::sum) : 1;
+			CHAIN_LAST_MS.put(serverPlayer.getUUID(), now);
+			FamilyResonanceManager.onLoamChainCrop(serverPlayer, count);
+			if (count >= CHAIN_CHALLENGE_COUNT) {
+				CHAIN_COUNTS.remove(serverPlayer.getUUID());
+			}
 		}
 		// 双倍掉落：重算一份完整掉落（含时运上下文）弹出
 		if (player.getRandom().nextFloat() < DOUBLE_DROP_CHANCE[loamLevel - 1]) {
