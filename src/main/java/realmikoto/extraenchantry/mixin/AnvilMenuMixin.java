@@ -2,9 +2,13 @@ package realmikoto.extraenchantry.mixin;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import java.util.Optional;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,11 +64,15 @@ public abstract class AnvilMenuMixin {
 		ci.cancel();
 	}
 
-	/** 判断铁砧两侧输入中是否有带破限的物品 */
+	/**
+	 * 判断铁砧两侧输入中是否有带破限的物品。
+	 * 1.0.1 起：附加槽的破限**附魔书**（破限存于 STORED_ENCHANTMENTS）同样生效——
+	 * 破限书+装备与破限装备+破限书两条路径都需要等级突破。
+	 */
 	private boolean extraenchantry$hasLimitBreakInput(AnvilMenu menu) {
 		ItemStack input = menu.getSlot(0).getItem();
 		ItemStack additional = menu.getSlot(1).getItem();
-		return ExtraEnchantry.hasLimitBreak(input) || ExtraEnchantry.hasLimitBreak(additional);
+		return CavalryManager.carriesLimitBreak(input) || CavalryManager.carriesLimitBreak(additional);
 	}
 
 	@Redirect(
@@ -80,6 +88,34 @@ public abstract class AnvilMenuMixin {
 			return true;
 		}
 		return Enchantment.areCompatible(first, second);
+	}
+
+	/**
+	 * 破限等级突破（1.0.1）：带破限的输入在铁砧融合时，可成长附魔的等级上限 +1
+	 * （例：两个保护 IV 融合 → 保护 V）。上限钳制点在 createResult 内的
+	 * `level > enchantment.getMaxLevel()` 两处调用——重定向后带破限时返回原版上限 +1。
+	 * 仅对 LEVEL_UP_ENCHANTMENTS 中的"逻辑上可增加一级"的附魔生效。
+	 */
+	@Redirect(
+			method = "createResult",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/world/item/enchantment/Enchantment;getMaxLevel()I"
+			)
+	)
+	private int extraenchantry$levelUpCap(Enchantment enchantment) {
+		AnvilMenu menu = (AnvilMenu) (Object) this;
+		if (extraenchantry$hasLimitBreakInput(menu)) {
+			Player player = ((ItemCombinerMenuAccessor) menu).extraenchantry$player();
+			if (player != null) {
+				Optional<ResourceKey<Enchantment>> key = player.level().registryAccess()
+						.lookupOrThrow(Registries.ENCHANTMENT).getResourceKey(enchantment);
+				if (key.isPresent() && ExtraEnchantry.LEVEL_UP_ENCHANTMENTS.contains(key.get())) {
+					return enchantment.getMaxLevel() + 1;
+				}
+			}
+		}
+		return enchantment.getMaxLevel();
 	}
 
 	@Inject(method = "createResult", at = @At("TAIL"))

@@ -30,6 +30,10 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
+import java.util.Set;
+
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -136,6 +140,41 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final ResourceKey<Enchantment> AEGIS =
 			ResourceKey.create(Registries.ENCHANTMENT, id("aegis"));
 
+	/**
+	 * 破限可提升一级上限的附魔：所有在逻辑上可以增加一级的附魔（原版 + 本 mod）。
+	 * 带破限的输入在铁砧融合时，这些附魔的等级上限从原版最大值提升 1
+	 * （例：两个保护 IV → 保护 V）。见 AnvilMenuMixin#extraenchantry$levelUpCap。
+	 */
+	public static final Set<ResourceKey<Enchantment>> LEVEL_UP_ENCHANTMENTS = Set.of(
+			vanillaEnchantment("unbreaking"), vanillaEnchantment("protection"),
+			vanillaEnchantment("fire_protection"), vanillaEnchantment("blast_protection"),
+			vanillaEnchantment("projectile_protection"), vanillaEnchantment("feather_falling"),
+			vanillaEnchantment("thorns"), vanillaEnchantment("respiration"),
+			vanillaEnchantment("depth_strider"), vanillaEnchantment("soul_speed"),
+			vanillaEnchantment("sharpness"), vanillaEnchantment("smite"),
+			vanillaEnchantment("bane_of_arthropods"), vanillaEnchantment("looting"),
+			vanillaEnchantment("knockback"), vanillaEnchantment("sweeping_edge"),
+			vanillaEnchantment("efficiency"), vanillaEnchantment("breach"),
+			vanillaEnchantment("density"), vanillaEnchantment("wind_burst"),
+			vanillaEnchantment("impaling"), vanillaEnchantment("lunge"),
+			vanillaEnchantment("power"), vanillaEnchantment("punch"),
+			vanillaEnchantment("quick_charge"), vanillaEnchantment("multishot"),
+			vanillaEnchantment("loyalty"), vanillaEnchantment("riptide"),
+			vanillaEnchantment("piercing"), vanillaEnchantment("fortune"),
+			vanillaEnchantment("luck_of_the_sea"), vanillaEnchantment("lure"),
+			WITHER_PROTECTION, REACH, SIPHON, LIFE_EROSION, VITALITY, BULWARK, SKYWARD
+	);
+
+	/** 原版附魔的 ResourceKey 快捷构造 */
+	private static ResourceKey<Enchantment> vanillaEnchantment(String path) {
+		return ResourceKey.create(Registries.ENCHANTMENT, Identifier.withDefaultNamespace(path));
+	}
+
+	/** 判断附魔是否支持破限提升一级上限 */
+	public static boolean supportsLevelUp(Holder<Enchantment> holder) {
+		return LEVEL_UP_ENCHANTMENTS.stream().anyMatch(holder::is);
+	}
+
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
@@ -213,7 +252,7 @@ public class ExtraEnchantry implements ModInitializer {
 
 	/** 壁垒各等级的单次伤害上限（HP，下标 = 等级 - 1）：5.5/5/4.5/4/3.5/3/2.5/2/1.5/1 颗心（每级递减 0.5 心） */
 	private static final float[] BULWARK_CAP =
-			{11.0F, 10.0F, 9.0F, 8.0F, 7.0F, 6.0F, 5.0F, 4.0F, 3.0F, 2.0F};
+			{11.0F, 10.0F, 9.0F, 8.0F, 7.0F, 6.0F, 5.0F, 4.0F, 3.0F, 2.0F, 1.5F};
 
 	/**
 	 * 壁垒（Bulwark）：把**防御减免之后**的实际承伤钳制到胸甲壁垒等级对应的上限。

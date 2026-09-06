@@ -161,6 +161,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 4. 跨部位附魔解锁：带破限的腿甲可在铁砧附魔原版摔落保护（原版仅限靴子）
 
 5. 装备上的破限无法被砂轮去除
+6. **等级突破（1.0.1）**：带破限的输入在铁砧融合时，所有"逻辑上可增加一级"的附魔等级上限 **+1**（例：两个保护 IV → 保护 V；触及 X → XI）。覆盖 32 种原版附魔（耐久/四保护/摔落/荆棘/水下呼吸/深海探索者/灵魂疾行/锋利三系/抢夺/击退/横扫/效率/破甲/致密/风爆/穿刺/冲刺/力量/冲击/快速装填/多重射击/忠诚/激流/穿透/时运/海之眷顾/饵钓）+ 7 种本 mod 附魔（凋零保护/触及/汲取/蚀命/活力/壁垒/空跃）。仅对可成长附魔生效，单级附魔（精准采集等）不变。
 
 **使用门禁**：破限附魔书在完成「诸界浩劫」守护挑战（四波，见第 20 节）前**无法使用**—— 未达成「无敌」进度时，铁砧上应用破限书会被拦截（清空产出 + 动作栏提示）；达成「无敌」进度即解锁，进度持久化 = 解锁状态持久化。
 
@@ -224,6 +225,8 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * `@Redirect` 拦截 `getDamageAfterMagicAbsorb` 中的 `CombatRules.getDamageAfterMagicAbsorb(damage, protection)`
 
 * 护甲带破限时改用 `damage × (1 - clamp(EPF, 0, 25)/25)`（原版 clamp 上限 20 = 80% 减免，改 25 = 100%）
+
+**等级突破（1.0.1）**：`AnvilMenuMixin` 重定向 `createResult` 内的 `Enchantment#getMaxLevel`——带破限输入时对 `LEVEL_UP_ENCHANTMENTS`（32 原版 + 7 本 mod）返回原版上限 +1。`hasLimitBreakInput` 同步改用 `carriesLimitBreak`（同时检查 ENCHANTMENTS 与 STORED_ENCHANTMENTS），破限**书**作为附加槽也能触发融合加成。配套扩展蚀命比率表（等级 4 → 19%）与壁垒上限表（等级 11 → 1.5 心）。
 
 **跨部位附魔解锁**（摔落保护上腿甲）：主类订阅 fabric-item-api 的 `EnchantmentEvents.ALLOW_ENCHANTING` 事件 —— 附魔是原版 `feather_falling` 且目标是带破限的腿甲（`#minecraft:enchantable/leg_armor`）时返回 `TriState.TRUE` 跳过 canEnchant（supported\_items 部位检查）。**不能**用 Mixin Redirect 拦 `Enchantment.canEnchant`：fabric-item-api 自身的 AnvilMenuMixin 已 Redirect 该调用点（Redirect 独占注入，冲突即 Critical injection failure）。
 

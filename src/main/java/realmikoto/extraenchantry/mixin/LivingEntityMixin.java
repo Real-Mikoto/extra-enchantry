@@ -50,7 +50,7 @@ public abstract class LivingEntityMixin {
 	protected abstract void dropExperience(ServerLevel level, Entity attacker);
 
 	/** 蚀命各等级的目标最大生命值伤害比例（下标 = 等级 - 1） */
-	private static final float[] EXTRAENCHANTRY$LIFE_EROSION_RATIO = {0.14F, 0.15F, 0.17F};
+	private static final float[] EXTRAENCHANTRY$LIFE_EROSION_RATIO = {0.14F, 0.15F, 0.17F, 0.19F};
 
 	/** 坚壁各等级的不可格挡类伤害减免比例（下标 = 等级 - 1） */
 	private static final float[] EXTRAENCHANTRY$AEGIS_REDUCTION = {0.30F, 0.45F, 0.60F};
