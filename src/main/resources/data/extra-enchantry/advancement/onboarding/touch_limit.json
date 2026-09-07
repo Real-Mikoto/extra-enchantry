@@ -1,0 +1,40 @@
+{
+  "parent": "extra-enchantry:onboarding/root",
+  "criteria": {
+    "obtained": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "minecraft:enchanted_book",
+            "predicates": {
+              "minecraft:stored_enchantments": [
+                {
+                  "enchantments": "extra-enchantry:limit_break"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.onboarding.touch_limit.description"
+    },
+    "icon": {
+      "id": "minecraft:lightning_rod"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.onboarding.touch_limit.title"
+    }
+  },
+  "requirements": [
+    [
+      "obtained"
+    ]
+  ]
+}

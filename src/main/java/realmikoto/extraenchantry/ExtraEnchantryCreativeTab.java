@@ -66,6 +66,13 @@ public final class ExtraEnchantryCreativeTab {
 				.title(Component.translatable("itemGroup.extra-enchantry.enchantments"))
 				.icon(() -> new ItemStack(Items.ENCHANTED_BOOK))
 				.displayItems((parameters, output) -> {
+					// 1.3.0「铭刻与试炼」：共鸣秘典 + 八枚家族铭印（打头，随后是附魔书）
+					output.accept(new ItemStack(ExtraEnchantry.RESONANCE_CODEX));
+					for (FamilyResonanceManager.Family family : FamilyResonanceManager.Family.values()) {
+						ItemStack sigil = new ItemStack(FamilySigils.FAMILY_SIGIL);
+						sigil.set(FamilySigils.FAMILY_ID, family.name().toLowerCase(java.util.Locale.ROOT));
+						output.accept(sigil);
+					}
 					for (EnchantmentEntry entry : ENCHANTMENTS) {
 						Holder<Enchantment> holder = parameters.holders()
 								.lookupOrThrow(Registries.ENCHANTMENT)

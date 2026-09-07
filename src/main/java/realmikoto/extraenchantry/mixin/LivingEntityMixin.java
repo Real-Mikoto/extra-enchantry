@@ -35,6 +35,7 @@ import realmikoto.extraenchantry.DecoyManager;
 import realmikoto.extraenchantry.EmberfallManager;
 import realmikoto.extraenchantry.ExtraEnchantry;
 import realmikoto.extraenchantry.FamilyResonanceManager;
+import realmikoto.extraenchantry.FamilyTrialsManager;
 import realmikoto.extraenchantry.FxHelper;
 import realmikoto.extraenchantry.JudgementManager;
 import realmikoto.extraenchantry.OathboundManager;
@@ -252,6 +253,25 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
+	 * 八系试炼与自然受伤记账（1.3.0）：在所有伤害修改（锋刃/蚀命等）之前
+	 * 把原始伤害传给试炼计数——守护·不动按减免前原始伤害累计；
+	 * 玩家受害者另记自然扎根的受伤暂停时刻。
+	 * 声明在锋刃 @ModifyVariable 之前以保证捕获原始入参。
+	 */
+	@Inject(method = "hurtServer", at = @At("HEAD"))
+	private void extraenchantry$trialHurtRecord(ServerLevel level, DamageSource source, float amount,
+			CallbackInfoReturnable<Boolean> cir) {
+		if (amount <= 0.0F) {
+			return;
+		}
+		LivingEntity self = (LivingEntity) (Object) this;
+		FamilyTrialsManager.onHurtServer(self, source, amount);
+		if (self instanceof ServerPlayer victim) {
+			FamilyResonanceManager.onPlayerHurt(victim);
+		}
+	}
+
+	/**
 	 * 锋刃连击（家族共鸣 FULL 锋刃，1.2.0）：3 秒内连续命中伤害递增，最高 +15%。
 	 * 声明在最前：连击倍率先于其余加伤/减伤结算。
 	 */
@@ -265,7 +285,8 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
-	 * 风 轻盈（家族共鸣 FULL 风，1.2.0）：摔落伤害 -50%。
+	 * 风 轻盈（家族共鸣 FULL 风，1.2.0）：摔落伤害减免（基线 50%），
+	 * 1.3.0 数值数据化，主调提升至 65%。
 	 */
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float extraenchantry$windFallReduction(float amount, ServerLevel level, DamageSource source) {
@@ -275,7 +296,20 @@ public abstract class LivingEntityMixin {
 						!= FamilyResonanceManager.Tier.FULL) {
 			return amount;
 		}
-		return amount * 0.5F;
+		return amount * FamilyResonanceManager.windFallMultiplier(victim);
+	}
+
+	/**
+	 * 风暴主调（1.3.0）：FULL 风暴 + 主调时雷击伤害降低 25%。
+	 * 声明在风轻盈之后、其余加伤/减伤之前。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$stormLightningReduction(float amount, ServerLevel level, DamageSource source) {
+		if (amount <= 0.0F || !source.is(DamageTypeTags.IS_LIGHTNING)
+				|| !(source.getEntity() instanceof net.minecraft.server.level.ServerPlayer victim)) {
+			return amount;
+		}
+		return amount * FamilyResonanceManager.lightningDamageMultiplier(victim);
 	}
 
 	/**

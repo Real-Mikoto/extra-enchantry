@@ -1,0 +1,26 @@
+{
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
+    "description": {
+      "translate": "advancement.extra-enchantry.family_trials.root.description"
+    },
+    "icon": {
+      "id": "minecraft:nether_star"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.family_trials.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

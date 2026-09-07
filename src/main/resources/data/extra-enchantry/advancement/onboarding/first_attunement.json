@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:onboarding/open_codex",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.onboarding.first_attunement.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "minecraft:amethyst_cluster"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.onboarding.first_attunement.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

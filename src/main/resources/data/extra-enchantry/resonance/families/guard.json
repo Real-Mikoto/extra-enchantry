@@ -1,0 +1,9 @@
+{
+  "partial_threshold": 3,
+  "full_threshold": 5,
+  "guard_knockback_resist": 0.50,
+  "attuned_guard_knockback_resist": 0.70,
+  "trial_guard_seconds": 30,
+  "trial_guard_damage": 80.0,
+  "trial_guard_max_displacement": 8.0
+}

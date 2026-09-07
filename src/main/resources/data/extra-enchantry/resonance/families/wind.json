@@ -1,0 +1,7 @@
+{
+  "partial_threshold": 3,
+  "full_threshold": 5,
+  "wind_fall_reduction": 0.50,
+  "attuned_wind_fall_reduction": 0.65,
+  "trial_wind_min_fall_distance": 80
+}

@@ -267,6 +267,8 @@ public final class CavalryManager {
 				if (state.wave >= CATACLYSM_WAVES) {
 					succeedCataclysm(state, player);
 				} else {
+					// 该幕清空 → 破限残页派发 + 幕格言（1.3.1「铭文纪元」）
+					OnboardingManager.onCataclysmWave(player, state.wave);
 					state.nextWaveTick = now + WAVE_DELAY_TICKS;
 					state.bossEvent.setProgress(state.wave / (float) CATACLYSM_WAVES);
 				}
@@ -622,6 +624,9 @@ public final class CavalryManager {
 		clearChallengeMobs(state);
 		awardAdvancement(player, ADVANCE_INVINCIBLE);
 		player.sendSystemMessage(Component.translatable("message.extra-enchantry.cataclysm.success"));
+		// 第四幕清空 → 残页·肆派发 + 图样收录提示（1.3.1「铭文纪元」）
+		OnboardingManager.onCataclysmWave(player, state.wave);
+		OnboardingManager.onCataclysmComplete(player);
 		state.bossEvent.removePlayer(player);
 		CATACLYSMS.remove(state.playerId);
 	}

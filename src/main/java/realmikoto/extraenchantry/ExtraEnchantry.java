@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.item.v1.EnchantmentEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.util.TriState;
 
 import net.minecraft.core.Holder;
@@ -14,12 +16,14 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -29,8 +33,6 @@ import net.minecraft.world.level.storage.loot.functions.SetEnchantmentsFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-
-import java.util.Set;
 
 import java.util.Set;
 
@@ -232,6 +234,46 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final DataComponentType<Boolean> LIMIT_BREAK_SOURCE =
 			DataComponentType.<Boolean>builder().persistent(com.mojang.serialization.Codec.BOOL).build();
 
+	// ============ 1.3.0「铭刻与试炼」 ============
+
+	/** 共鸣秘典（八系共鸣状态入口：总览/家族详情/试炼三页，潜行右键切页）
+	 *  26.2：Item 构造时即要求 Properties 已设置物品 ID（setId(ResourceKey)） */
+	public static final Item RESONANCE_CODEX = new ResonanceCodexItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("resonance_codex")))
+					.stacksTo(1).rarity(Rarity.EPIC));
+
+	// ============ 1.3.1「铭文纪元」 ============
+
+	/** 来者手札：动态 lore 容器（页码按玩家 lore 触发进度开放） */
+	public static final Item WELCOME_LETTER = new WelcomeLetterItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("welcome_letter")))
+					.stacksTo(1).rarity(Rarity.UNCOMMON));
+
+	/** 家族铭文：一个物品类型 + family_id 组件表达八面（首 FULL 派发） */
+	public static final Item FAMILY_INSCRIPTION = new FamilyInscriptionItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("family_inscription")))
+					.stacksTo(1).rarity(Rarity.RARE));
+
+	/** 破限残页：一个物品类型 + shard_id 组件表达四幕（浩劫每波完成派发） */
+	public static final Item LIMIT_BREAK_SHARD = new LimitBreakShardItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("limit_break_shard")))
+					.stacksTo(1).rarity(Rarity.RARE));
+
+	/** 编年史卷轴：大共鸣者终局 lore（全文硬编码 lang） */
+	public static final Item CHRONICLE_SCROLL = new ChronicleScrollItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("chronicle_scroll")))
+					.stacksTo(1).rarity(Rarity.EPIC));
+
+	/** 八系家族附魔总标签（数据定义 tags/enchantment/families.json，引用八个 family_* 标签）：
+	 *  onboarding「首次拾取本模附魔书」检测用 */
+	public static final TagKey<Enchantment> ANY_FAMILY_TAG =
+			TagKey.create(Registries.ENCHANTMENT, id("families"));
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -243,6 +285,38 @@ public class ExtraEnchantry implements ModInitializer {
 
 		// 破限附魔书来源标记组件（区分隐藏进度来源）
 		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, id("limit_break_source"), LIMIT_BREAK_SOURCE);
+
+		// 共鸣秘典物品（1.3.0）：八系共鸣状态入口
+		Registry.register(BuiltInRegistries.ITEM, id("resonance_codex"), RESONANCE_CODEX);
+
+		// 家族铭印物品 + family_id 数据组件（1.3.0：一个物品 + 组件表达八枚铭印）
+		FamilySigils.register();
+
+		// 共鸣规则数据化（1.3.0）：SERVER_DATA 阶段读取 resonance/families/*.json，
+		// /reload 与服务器启动都会执行；失败回退内置默认
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
+				id("resonance_rules"), provider -> new ResonanceConfig.RulesLoader());
+
+		// ============ 1.3.1「铭文纪元」注册 ============
+
+		// lore 物品（不进创造栏——仅通过进度获得）+ shard_id 组件
+		Registry.register(BuiltInRegistries.ITEM, id("welcome_letter"), WELCOME_LETTER);
+		Registry.register(BuiltInRegistries.ITEM, id("family_inscription"), FAMILY_INSCRIPTION);
+		Registry.register(BuiltInRegistries.ITEM, id("limit_break_shard"), LIMIT_BREAK_SHARD);
+		Registry.register(BuiltInRegistries.ITEM, id("chronicle_scroll"), CHRONICLE_SCROLL);
+		LimitBreakShardItem.register();
+
+		// lore 文本数据化（1.3.1）：SERVER_DATA 阶段读取 lore/ 目录（五类 schema，逐条容错）
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
+				id("lore"), provider -> new LoreLoader.Loader());
+
+		// 被动引导（1.3.1）：登录追发 + 秒级首次拾书检测
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+				OnboardingManager.onJoin(handler.player));
+		ServerTickEvents.END_SERVER_TICK.register(OnboardingManager::tick);
+
+		// 主调铭刻/查询/诊断命令组（1.3.0）
+		ExtraEnchantryCommands.register();
 
 		// 破限附魔书的掉落（监守者 0.05% / 闪电苦力怕代杀 0.5%）
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
@@ -258,6 +332,11 @@ public class ExtraEnchantry implements ModInitializer {
 				FamilyResonanceManager.onLivingDeath(entity, source));
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
 				ShieldChargeManager.onLivingDeath(entity, source));
+
+		// 八系共鸣试炼（1.3.0）：窗口型计数（秒级/逐 tick）+ 击杀类判定
+		ServerTickEvents.END_SERVER_TICK.register(FamilyTrialsManager::tick);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
+				FamilyTrialsManager.onLivingDeath(entity, source));
 
 		// 死而不僵（隐秘挑战）：劫后余辉锁血期间击杀攻击者
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {

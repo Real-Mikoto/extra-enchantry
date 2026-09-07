@@ -1,0 +1,7 @@
+{
+  "partial_threshold": 3,
+  "full_threshold": 5,
+  "soul_invisibility_ticks": 60,
+  "attuned_soul_invisibility_ticks": 100,
+  "trial_soul_kills": 5
+}

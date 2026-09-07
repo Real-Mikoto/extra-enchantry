@@ -1,0 +1,26 @@
+{
+  "parent": "extra-enchantry:onboarding/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.onboarding.open_codex.description"
+    },
+    "icon": {
+      "id": "minecraft:amethyst_shard"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.onboarding.open_codex.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

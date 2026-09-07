@@ -1,0 +1,27 @@
+{
+  "parent": "extra-enchantry:family_trials/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.family_trials.soul.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "minecraft:soul_torch"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.family_trials.soul.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

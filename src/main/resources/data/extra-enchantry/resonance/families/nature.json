@@ -1,0 +1,9 @@
+{
+  "partial_threshold": 3,
+  "full_threshold": 5,
+  "nature_still_ticks": 60,
+  "nature_regen_hp": 1.0,
+  "attuned_nature_regen_hp": 1.5,
+  "nature_hurt_pause_ticks": 40,
+  "trial_nature_heal_total": 30.0
+}

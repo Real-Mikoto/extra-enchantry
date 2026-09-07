@@ -1,0 +1,9 @@
+{
+  "partial_threshold": 3,
+  "full_threshold": 5,
+  "storm_speed_bonus": 0.20,
+  "attuned_storm_speed_bonus": 0.25,
+  "attuned_lightning_reduction": 0.25,
+  "trial_storm_seconds": 120,
+  "trial_storm_distance": 600.0
+}
