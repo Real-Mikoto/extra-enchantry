@@ -71,11 +71,23 @@ public abstract class EntityMixin {
 	 * 且 increaseAirSupply 以它为钳制上限——单点 HEAD 注入放大后，
 	 * 消耗、水面换气回满、客户端气泡 HUD 全部自动跟随。
 	 * 每级 +300 tick（+15 秒）：I/II/III 级 → 30/45/60 秒。
+	 *
+	 * 构造时序陷阱（26.2 实测堆栈）：{@code Entity#<init>} 的 defineSyncker
+	 * 在第 322 行就回调 getMaxAirSupply()（定义 DATA_AIR_SUPPLY_ID 的初值），
+	 * 而 {@code LivingEntity#equipment} 字段要到子类构造体才初始化——
+	 * 此时 instanceof LivingEntity 已为真但 getItemBySlot 必然 NPE，
+	 * 实体构造直接失败（新世界/登录时 "Couldn't place player in world"）。
+	 * 防御：装备未就绪视为无渊息，走原版上限；实体构造完成后调用路径全部正常。
 	 */
 	@Inject(method = "getMaxAirSupply", at = @At("HEAD"), cancellable = true)
 	private void extraenchantry$tideheartMaxAir(CallbackInfoReturnable<Integer> cir) {
 		if ((Object) this instanceof LivingEntity living) {
-			int level = ExtraEnchantry.getTideheartLevel(living.getItemBySlot(EquipmentSlot.HEAD));
+			int level;
+			try {
+				level = ExtraEnchantry.getTideheartLevel(living.getItemBySlot(EquipmentSlot.HEAD));
+			} catch (NullPointerException e) {
+				return;
+			}
 			if (level > 0) {
 				cir.setReturnValue(300 + 300 * level);
 			}

@@ -1085,6 +1085,9 @@ public static final ResourceKey\<Enchantment> REACH =
 * **26.2 `Block.getDrops` 第六参已改为 `ItemInstance`**（新接口，`ItemStack` 直接实现之）——看到签名别慌，ItemStack 原样传入即可；`Block#playerDestroy` 签名仍是 ItemStack
 * **`isInWaterRainOrBubble()` 在 26.2 已移除**：水中 / 雨中需拆成 `isInWater()` + `level.isRaining()`（或 `isRainingAt(BlockPos)`）自行组合
 * **成就 ID 含子目录路径**：`ServerAdvancementManager extends SimpleJsonResourceReloadListener`，成就 ID = JSON 相对 `data/<ns>/advancement/` 的完整路径——`advancement/usage/foo.json` 的 ID 是 `ns:usage/foo`。代码查找（`server.getAdvancements().get(...)` / `ClientAdvancements.get(...)`）与 JSON 内 `parent` 引用都必须带前缀，否则静默返回 null（授予不生效、客户端进度查询恒 false）。v1.0 曾因此 4 个隐藏成就从未授予且破限书锁定判定恒锁，v1.1.0 已修（LimitBreakManager/CavalryManager/LimitBreakLockState 三处）
+* **26.2 状态效果图标走 GUI 图集而非独立贴图**（v1.3.2 踩坑）：`Hud#getMobEffectSprite` 把效果 ID 前缀 `mob_effect/` 后交给 `graphics.blitSprite`——**sprite 必须注册进 `textures/atlas/gui.png` 图集**，mod 需自带 `assets/<ns>/atlases/gui.json`（`{"type": "minecraft:directory", "source": "mob_effect", "prefix": "mob_effect/"}`，与原版 gui.json 同款 directory source）。v1.2.0 起共鸣图标一直走 missing sprite fallback（日志 "Using missing texture"），v1.3.2 补注册后生效
+* **NativeImage(STB) 对 PNG 校验严格**（v1.3.2 踩坑）：脚本生成 PNG 时每行必须恰好是 `1 filter 字节 + 宽×4 字节(RGBA)`，多一个字节 System.Drawing 能读但 STB 报 `Corrupt PNG`（atlas stitch 阶段 IOException，sprite 永久 missing）。用 Python 校验：`zlib.decompress(IDAT)` 后长度应等于 `高 × (1 + 宽×4)`
+* **实体构造早期钩子的装备陷阱**（v1.3.2 踩坑）：`Entity#<init>` 的 defineSyncker 在定义 `DATA_AIR_SUPPLY_ID` 初值时就回调 `getMaxAirSupply()`——此时 `LivingEntity#equipment` 字段尚未初始化（子类构造体才赋值），Mixin 里 `instanceof LivingEntity` 已为真但 `getItemBySlot` 必 NPE，**实体构造直接失败**（新世界/登录 "Couldn't place player in world"，服务器停止）。渊息的 `tideheartMaxAir` 自 1.1.0 起带此雷，v1.3.2 加 try-catch NPE 防护（构造早期视为无渊息走原版上限）
 
 ## 记录规范
 
