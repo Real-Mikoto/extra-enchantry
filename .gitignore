@@ -49,3 +49,5 @@ __pycache__/
 test_screenshots/
 mc_helper.py
 README.md.bak
+# runtime logs (not part of the mod)
+logs/

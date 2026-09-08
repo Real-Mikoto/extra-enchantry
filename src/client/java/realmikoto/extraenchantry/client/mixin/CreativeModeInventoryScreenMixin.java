@@ -59,16 +59,22 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 		AccessoryColumnRenderer.tickAnimation(partialTick);
 		// 按钮/副手共用滑出 X：折叠 35 → 展开 -3
 		int slideX = Math.round(35 - 38.0F * AccessoryHudState.eased());
-		// 1) 衬底：按钮 + 副手列区域（面板色；在面板上不可见；同时覆盖烤入贴图的旧副手框残影）
-		AccessoryColumnRenderer.drawBacking(extractor, this.leftPos, this.topPos, slideX - 2, 3, 20, 50);
-		// 2) 副手槽框（当前位：折叠 (35,33) / 展开随列滑出）
+		// 1) 固定条衬底（x33~52，面板色）：常驻覆盖烤入 tab_inventory.png 的旧副手框
+		//    （35,20）——展开后项链 (35,6) 与手镯 (35,33) 的槽框盖不到其中段
+		//    （y23~31），残影恰落在两格之间；此条独立于滑列，始终遮盖
+		AccessoryColumnRenderer.drawBacking(extractor, this.leftPos, this.topPos, 33, 3, 20, 50);
+		// 2) 滑出列衬底（按钮 + 副手列随列滑动；折叠时与固定条重合，跳过）
+		if (slideX - 2 < 33) {
+			AccessoryColumnRenderer.drawBacking(extractor, this.leftPos, this.topPos, slideX - 2, 3, 20, 50);
+		}
+		// 3) 副手槽框（当前位：折叠 (35,33) / 展开随列滑出）
 		AccessoryColumnRenderer.drawSlotBg(extractor, this.leftPos, this.topPos, slideX, 33);
-		// 3) 配饰 2×2（装备栏左侧，与装备 2×2 同风格同尺寸；面板内无需衬底）
+		// 4) 配饰 2×2（装备栏左侧，与装备 2×2 同风格同尺寸；绘制晚于衬底，槽框压在其上）
 		AccessoryColumnRenderer.drawColumn(extractor, this.leftPos, this.topPos, this.getMenu(),
 				new int[]{16, 35, 16, 35},
 				new int[]{6, 6, 33, 33},
 				0, 0, 0, 0);
-		// 4) 配饰按钮（头盔左侧头盔行）
+		// 5) 配饰按钮（头盔左侧头盔行）
 		AccessoryColumnRenderer.drawButton(extractor, this.leftPos, this.topPos, slideX, 6);
 	}
 

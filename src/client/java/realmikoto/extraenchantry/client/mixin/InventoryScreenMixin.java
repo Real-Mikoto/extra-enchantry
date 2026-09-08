@@ -38,8 +38,10 @@ public abstract class InventoryScreenMixin extends AbstractContainerScreen<Inven
 				new int[]{-10, -10, -10, -10},
 				new int[]{8, 26, 44, 62},
 				-13, 5, 20, 76);
-		// 配饰按钮（盾牌列头盔行；衬底盖住按钮区域——面板上不可见）
-		AccessoryColumnRenderer.drawBacking(extractor, this.leftPos, this.topPos, 74, 6, 22, 22);
+		// 配饰按钮（盾牌列头盔行；贴图 18×18 全不透明自带槽框底，直接绘制即可。
+		// 不得加 panel_fill 衬底：原版纸娃娃渲染区右缘在 x=75（extractEntityInInventory
+		// 参数 26~75），纯色衬底左缘若 <76 会压进纸娃娃 1~2px——且纯色与面板纹理
+		// 存在色阶差，四面边缘都会显出色缝）
 		AccessoryColumnRenderer.drawButton(extractor, this.leftPos, this.topPos, 77, 8);
 	}
 }

@@ -83,15 +83,16 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
   * [27. 藏锋 (Sheathed Edge)](#27-藏锋-sheathed-edge)
   * [28. 渊息 (Tideheart)](#28-渊息-tideheart)
   * [29. 丰壤 (Loam)](#29-丰壤-loam)
-  * [配饰八附魔 (Accessory Enchantments)（30~37）](#配饰八附魔-accessory-enchantments)
-  * [狼铠三附魔 (Wolf Armor Enchantments)（38~40）](#狼铠三附魔-wolf-armor-enchantments)
+  * [配饰八附魔 (Accessory Enchantments)（30~37）](#配饰八附魔-accessory-enchantments3037)
+  * [狼铠三附魔 (Wolf Armor Enchantments)（38~40）](#狼铠三附魔-wolf-armor-enchantments3840)
 * [版本主题](#版本主题)
   * [1.0.0「诸界浩劫」 (Cataclysm of Realms)](#100诸界浩劫-cataclysm-of-realms)
   * [1.2.0「共鸣与臻藏」 (Resonance & Collector)](#120共鸣与臻藏-resonance--collector)
   * [1.3.0「铭刻与试炼」 (Inscription & Trials)](#130铭刻与试炼-inscription--trials)
     * [1.3.1「铭文纪元」 (Era of Inscription)](#131铭文纪元-era-of-inscription)
-    * [1.3.2 修复补丁 (Hotfix)](#132修复补丁-hotfix)
-    * [1.4.0「环佩与獠牙」 (Trinkets & Fangs)](#140环佩与獠牙-trinkets--fangs)
+    * [1.3.2 修复补丁 (Hotfix)](#132-修复补丁-hotfix)
+  * [1.4.0「环佩与獠牙」 (Trinkets & Fangs)](#140环佩与獠牙-trinkets--fangs)
+  * [1.4.1 修复与观感打磨 (Polish)](#141-修复与观感打磨-polish)
 * [通用技术模式](#通用技术模式)
 * [记录规范](#记录规范)
 
@@ -902,6 +903,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 #### 家族铭印与大共鸣者 (Family Sigils & Grand Resonator)
 
 - 首次完成试炼授予对应铭印：一个物品类型 + `family_id` 数据组件（非法值降级为「失效铭印」不崩溃）；背包满掉落脚下；重复完成不重复发放。
+- **铭印贴图（九型令牌）**：v1.4.0 补完——八族各一枚圆形令牌贴图（家族色基面 + 左上高光弧 / 右下暗部弧 + 中央族徽：魂焰 / 闪电 / 短剑 / 柳叶 / 盾徽 / 三道流线 / 火苗 / 水滴），经 `items/family_sigil.json` 的 **component select**（`minecraft:select` + `property: minecraft:component`，键 `family_id`）按组件值分发模型，`fallback` 为灰底裂纹「风化」贴图（与失效铭印语义对齐）——单物品多形态**纯数据零代码**。
 - 集齐八印（八试炼进度全 done）授予「大共鸣者」进度：本模附魔书与共鸣秘典恒显光效（客户端 `GrandResonatorState` 查进度，视觉可降级），进入世界 5 秒后一次称号提示；无数值增益。
 
 #### 数据化规则与诊断 (Data-driven Rules & Debug)
@@ -922,7 +924,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 进度 | `family_trials/` root + 8 试炼 + grand_resonator |
 | 配方 | `recipe/resonance_codex.json` |
 | 规则 | `resonance/families/` 8 个家族 JSON |
-| 模型 | `items/resonance_codex.json`、`items/family_sigil.json`（原版贴图降级） |
+| 模型 | `items/resonance_codex.json`、`items/family_sigil.json`（v1.4.0 补完：component select 分发九型专属令牌贴图，替换原版 echo_shard 降级） |
 
 #### 1.3.1「铭文纪元」 (Era of Inscription)
 
@@ -1014,9 +1016,11 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * **16 配饰**（4 槽 × 铜/铁/金/钻四材质）：材质 ×N + 槽位绑定宝石合成，**宝石被动按材质传导**（铜 100% / 铁 125% / 金 150% / 钻 200%）；宝石合成时决定、不可事后更换（配方 result components 写 `socketed_gem`）；耳坠贴图成对
 * **宝石被动**（8 条微缩被动，全身至多 4 条）：魂珀击杀 +5 经验 / 雷光石雷雨 +3% 移速 / 刃晶 +2% 攻速 / 萌芽晶 +5% 自然恢复 / 盾纹玉 -2% 受伤 / 风羽晶 -3% 弹射物伤 / 烬心石 -4% 火伤 / 潮汐珠 +5% 游泳效率
 
-#### 配饰附魔 ×8（编号 30~37，计入八系共鸣）
+#### 配饰附魔（编号 30~37，8 个，计入八系共鸣）
 
-魂铃 / 盾坠 / 雷鸣扣 / 翠滴 / 刃戒 / 羽环 / 烬镯 / 潮镯——每家族 1 个、按槽位 2/2/2/2 分布（与宝石同族绑定）；`AccessoryManager` 统一结算（属性类 tick 值变化才写瞬态修改器、受伤/造成伤害走 hurtServer ModifyVariable、击杀走 AFTER_DEATH、自然恢复用自有计时器——零注入原版回血分支）。**共鸣阈值 3/5 → 4/7**（计件扩展到配饰 4 槽，装备签名缓存同步含配饰）。
+* **8 个附魔**：魂铃 / 盾坠 / 雷鸣扣 / 翠滴 / 刃戒 / 羽环 / 烬镯 / 潮镯（每家族 1 个，槽位 2/2/2/2 分布，与宝石同族绑定）
+* **统一结算**：`AccessoryManager` 静态入口集中处理——属性类 tick 值变化才写瞬态修改器、受伤 / 造成伤害走 `hurtServer` ModifyVariable、击杀走 `AFTER_DEATH`、自然恢复用自有计时器，**零注入原版回血分支**
+* **共鸣阈值 3/5 → 4/7**：计件扩展到配饰 4 槽，装备签名缓存同步含配饰
 
 #### 狼铠附魔（编号 38~40）
 
@@ -1026,7 +1030,27 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 #### 火焰家族防火（新设定「烬火不侵」）
 
-带火焰家族附魔（`#extra-enchantry:family_fire`：炽焰行者 / 余烬 / 烬镯 / 劫后余辉，含附魔书）或镶嵌烬心石的物品：**掉落物免疫火 / 岩浆烧毁**（`ItemEntityMixin` hurtServer HEAD 取消，下界合金同款行为）；动态判定即时生效，砂轮磨掉附魔即失效。既有旧装备零迁移受益。
+* **触发条件**（任一即生效）：携带火焰家族附魔（`#extra-enchantry:family_fire`：炽焰行者 / 余烬 / 烬镯 / 劫后余辉，**含附魔书**）或镶嵌烬心石
+* **效果**：掉落物**免疫火 / 岩浆烧毁**（`ItemEntityMixin` `hurtServer` HEAD 取消，与下界合金同款行为）
+* **动态判定**：即时生效，砂轮磨掉附魔即失效；既有旧装备**零迁移受益**（首次进入 1.4.0 玩家不会自动获得该效果）
+
+### 1.4.1 修复与观感打磨 (Polish)
+
+渲染修复 + 铭印专属贴图补完 + 文案精简，无玩法数值变化。
+
+#### 视觉修复
+
+* **幽灵图标 sprite id 修正**（配饰空槽紫黑块）：26.2 GUI 图集 directory source（`source: gui/sprites` + `prefix: ""`）按「前缀 + 文件相对路径」生成 sprite id——裸文件名 `ghost_<slot>`（原版同例 `hud/heart/full`），原代码误引 `gui/ghost_<slot>` 导致 blitSprite 落空；`AccessorySlot#getNoItemIcon` 与 `AccessoryColumnRenderer#GHOSTS` 同步修正，回归测试新增 prefix 空串断言
+* **生存背包配饰按钮**：移除 panel_fill 衬底——原版纸娃娃渲染区右缘 x=75（`extractEntityInInventory` 参数 26~75），衬底左缘 <76 会压进玩家模型 1~2px，且纯色与面板纹理存在色阶差、四面显色缝；按钮贴图 18×18 自带不透明槽框底，直接绘制即可
+* **创造模式物品栏**：固定条衬底（x33~52）常驻遮盖烤入 `tab_inventory.png` 的旧副手框残影——盾牌栏下移后项链/手镯槽框盖不到 y23~31 中段，残影恰落在两格之间；滑出列衬底独立绘制、折叠时与固定条重合跳过
+
+#### 铭印专属贴图（九型令牌）
+
+* 八族各一枚圆形令牌贴图（家族色基面 + 中央族徽）+ 灰底裂纹「风化」失效兜底（共 9 型），`items/family_sigil.json` 经 **component select**（`minecraft:select` + `property: minecraft:component`，键 `extra-enchantry:family_id`）按组件值分发模型，`fallback` 对齐失效铭印语义——单物品多形态**纯数据零代码**，替换 v1.4.0 的原版 echo_shard 降级
+
+#### 文案
+
+* 八种家族宝石物品介绍精简：删除「残响」后的合成途径括注（获取途径仍见配方图鉴与合成书），其余文字不变
 
 ## 通用技术模式
 
@@ -1239,6 +1263,8 @@ public static final ResourceKey\<Enchantment> REACH =
 * **Mixin 访问目标类 protected 成员的标准手法**（v1.4.0）：`InventoryMenuMixin extends AbstractContainerMenu`——mixin 继承目标类的父类即可访问 protected 的 `addSlot` / `moveItemStackTo`（构造器仅 `super(type, containerId)` 服务访问、不参与合并）；比 `@Invoker` 逐个透传省事
 * **`Slot#isActive` 是纯客户端概念**（v1.4.0，反编译确认）：26.2 的 `AbstractContainerMenu` / `Slot` 服务端路径**零调用** isActive——折叠/展开门控只影响渲染与点击判定，服务端逻辑完全无感知（shift 移动不做门禁的依据：折叠时放入的物品展开后可见，属可接受便利）
 * **Fabric Data Attachment 是快照语义**（v1.4.0）：`getAttached` 返回的是落盘快照，**原地修改其中的 ItemStack 不会自动保存**——所有写路径必须收敛到 `setAttached` 回写（配饰统一走 `AccessoryContainer.setItem → setChanged → setAttached`；Menu `removed` 钩子做关闭界面时的最终写回兜底）
+* **26.2 物品模型可按任意数据组件值分发**（v1.4.0，反编译确认）：`items/*.json` 支持 `{"type": "minecraft:select", "property": "minecraft:component", "component": "<ns:组件>", "cases": [{"when": "<codec 值>", "model": {...}}], "fallback": {...}}`——`ComponentContents` 经组件自身的 codec 解析 `when` 值（组件须非 transient 且带 persistent codec），`fallback` 兜底无组件/无匹配。对"单物品类型 + 标识组件"（铭印 / 铭文 / 残页类）是**纯数据零代码**的多形态方案，无需 custom_model_data 旁路或客户端渲染 Mixin（家族铭印九型令牌即此实现）
+* **生存背包纸娃娃渲染区 = GUI 坐标 (26~75, 8~78)**（v1.4.1 踩坑，反编译 `InventoryScreen#extractBackground`：`extractEntityInInventoryFollowsMouse(xo+26, yo+8, xo+75, yo+78, ...)`）——自绘 UI 元素左缘必须 ≥76，否则压进玩家模型 1~2px（配饰按钮的 panel_fill 衬底左缘 74 压住右缘 75 两列，观感即"按钮左侧向玩家界面突出"）。另：**纯色 panel_fill 与面板纹理贴图存在色阶差，面板内自绘元素能不用衬底就不用**（自带不透明底的贴图直接绘制即可）；衬底只用于面板外（悬浮在游戏世界上方）的区域成形
 
 ## 记录规范
 

@@ -1,6 +1,18 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "minecraft:item/echo_shard"
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "extra-enchantry:family_id",
+    "cases": [
+      {"when": "soul", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_soul"}},
+      {"when": "storm", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_storm"}},
+      {"when": "blade", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_blade"}},
+      {"when": "nature", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_nature"}},
+      {"when": "guard", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_guard"}},
+      {"when": "wind", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_wind"}},
+      {"when": "fire", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_fire"}},
+      {"when": "water", "model": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_water"}}
+    ],
+    "fallback": {"type": "minecraft:model", "model": "extra-enchantry:item/family_sigil_invalid"}
   }
 }

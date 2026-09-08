@@ -36,9 +36,10 @@ public final class AccessoryColumnRenderer {
 
 	static {
 		for (Accessories.SlotType slotType : Accessories.SlotType.values()) {
-			// blitSprite 走 GUI 图集：sprite id = gui/ghost_<slot>（gui/sprites 目录
-			// source 注册于 atlases/gui.json，与 AccessorySlot#getNoItemIcon 同源同 id）
-			GHOSTS[slotType.ordinal()] = ExtraEnchantry.id("gui/ghost_" + slotType.path);
+			// blitSprite 走 GUI 图集：sprite id = ghost_<slot>（directory source 按
+			// 「prefix + 文件相对路径」生成 id——文件 gui/sprites/ghost_<slot>.png
+			// 配 prefix "" 即裸文件名，原版同例 hud/heart/full；与 getNoItemIcon 同源同 id）
+			GHOSTS[slotType.ordinal()] = ExtraEnchantry.id("ghost_" + slotType.path);
 		}
 	}
 

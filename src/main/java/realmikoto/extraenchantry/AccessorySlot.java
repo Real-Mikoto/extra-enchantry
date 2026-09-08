@@ -46,12 +46,15 @@ public class AccessorySlot extends Slot {
 
 	/**
 	 * 空槽幽灵图标（26.2 走 GUI 图集 blitSprite）：
-	 * 精灵 id 对应 assets/…/textures/gui/sprites/ghost_{slot}.png。
+	 * 精灵 id = ghost_{slot}——atlases/gui.json 的 directory source
+	 * （prefix "" + source gui/sprites）按「前缀 + 文件相对路径」生成 id
+	 * （原版同例：hud/heart/full ↔ textures/gui/sprites/hud/heart/full.png），
+	 * 对应文件 assets/…/textures/gui/sprites/ghost_{slot}.png。
 	 * 动画期间由 Screen 自绘（extractBackground 层）；动画完成后本图标接管。
 	 */
 	@Override
 	public net.minecraft.resources.Identifier getNoItemIcon() {
-		return ExtraEnchantry.id("gui/ghost_" + slotType.path);
+		return ExtraEnchantry.id("ghost_" + slotType.path);
 	}
 
 	/** 纯客户端判定：已展开且动画完成（服务端零调用，26.2 反编译确认） */

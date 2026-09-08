@@ -77,19 +77,27 @@ class MobEffectIconAtlasTest {
 
 	@Test
 	void guiAtlasRegistersGuiSpritesDirectoryForGhostIcons() throws IOException {
-		// v1.4.0 踩坑回归：幽灵图标 blitSprite 走 GUI 图集，sprite id = gui/ghost_<slot>
-		// （原 Renderer 误用完整贴图路径 textures/gui/ghost_*.png——blitSprite 找不到 sprite）
+		// v1.4.0 踩坑回归：幽灵图标 blitSprite 走 GUI 图集，sprite id 必须与
+		// directory source 生成的 id 一致——「prefix + 文件相对路径」。
+		// 原版同例：hud/heart/full ↔ textures/gui/sprites/hud/heart/full.png（prefix ""）。
+		// 故本约定：gui.json 注册 source=gui/sprites + prefix=""，文件
+		// gui/sprites/ghost_<slot>.png → sprite id = ghost_<slot>（裸文件名，无 gui/ 前缀；
+		// 代码侧 AccessorySlot#getNoItemIcon 与 AccessoryColumnRenderer#GHOSTS 按此引用）。
 		Path atlasFile = ASSETS.resolve(Path.of("atlases", "gui.json"));
 		assertTrue(Files.isRegularFile(atlasFile), "atlases/gui.json 缺失");
 		String json = Files.readString(atlasFile, StandardCharsets.UTF_8);
 		assertMatches(json, "\"source\"\\s*:\\s*\"gui/sprites\"",
 				"gui.json 需声明 source=gui/sprites（textures/gui/sprites 目录的 "
 						+ "directory source，与原版 gui.json 同款；幽灵图标 blitSprite 依赖）");
+		assertMatches(json, "\"prefix\"\\s*:\\s*\"\"",
+				"gui/sprites source 的 prefix 必须为空串——非空 prefix 会给 sprite id 加前缀，"
+						+ "与代码引用的裸文件名 id（ghost_<slot>）错位 → missing sprite 紫黑块"
+						+ "（v1.4.1 修复：原代码误引 gui/ghost_* 而目录 source 生成 ghost_*）");
 		// 四槽位幽灵贴图必须存在（slot id → 贴图文件一一对应）
 		for (String slot : new String[]{"earring", "necklace", "ring", "bracelet"}) {
 			Path ghost = ASSETS.resolve(Path.of("textures", "gui", "sprites", "ghost_" + slot + ".png"));
 			assertTrue(Files.isRegularFile(ghost),
-					"幽灵贴图缺失: " + ghost + "（sprite id gui/ghost_" + slot + "）");
+					"幽灵贴图缺失: " + ghost + "（sprite id ghost_" + slot + "）");
 			TestPng.read(ghost); // 结构校验（Corrupt PNG 回归）
 		}
 	}
