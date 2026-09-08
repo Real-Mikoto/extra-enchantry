@@ -1,0 +1,26 @@
+{
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:gui/advancements/backgrounds/adventure",
+    "description": {
+      "translate": "advancement.extra-enchantry.lords.root.description"
+    },
+    "icon": {
+      "id": "extra-enchantry:void_shard"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "advancement.extra-enchantry.lords.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

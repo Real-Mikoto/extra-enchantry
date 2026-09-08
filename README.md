@@ -85,6 +85,12 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
   * [29. 丰壤 (Loam)](#29-丰壤-loam)
   * [配饰八附魔 (Accessory Enchantments)（30~37）](#配饰八附魔-accessory-enchantments3037)
   * [狼铠三附魔 (Wolf Armor Enchantments)（38~40）](#狼铠三附魔-wolf-armor-enchantments3840)
+* [五境领主（1.5.0）](#五境领主elite-encounters)
+  * [1. 深暗境・守望者](#1-深暗境守望者-overwarden)
+  * [2. 下界境・烬骨王](#2-下界境烬骨王-emberbone-king)
+  * [3. 海洋境・渊潮之主](#3-海洋境渊潮之主-tidal-sovereign)
+  * [4. 沼泽境・巫后](#4-沼泽境巫后-hag-sovereign)
+  * [5. 末地境・末影领主](#5-末地境末影领主-ender-lord)
 * [版本主题](#版本主题)
   * [1.0.0「诸界浩劫」 (Cataclysm of Realms)](#100诸界浩劫-cataclysm-of-realms)
   * [1.2.0「共鸣与臻藏」 (Resonance & Collector)](#120共鸣与臻藏-resonance--collector)
@@ -796,6 +802,8 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **触发与去重**：Player#addItem 与 Inventory#add 双钩子都会对同一本书触发（/give 直调 Inventory#add 不经 addItem，反编译 GiveCommand 确认）—— 按**同一游戏刻去重**，无时间墙：重新拾取掉落的破限书会**立即重开新挑战**。
 
+**视听反馈（L3 仪式感，DESIGN_aesthetics.md 预算）**：触发 = 远古守卫者诅咒号角（ELDER_GUARDIAN_CURSE，音量 3.0）+ 监守者咆哮 + 头顶视觉闪电（setVisualOnly，不点燃）+ 双重收缩魂火环（12 格远环 32 点 + 4 格近环 16 点）+ 大范围浓烟；成功 = UI_TOAST_CHALLENGE_COMPLETE + 图腾金光爆发（48 粒子）+ 末地烛双环绽放（5/9 格）；失败 = 凋灵哀鸣（低音 0.6）+ 灰烟沉降 + 火焰熄灭嘶声（破限书化灰烬）。均经 FxHelper 模板（burst/ring/play），无新增自定义粒子与音效资源。
+
 **仇恨锁定**：所有挑战生物经 `MobMixin` 拦截 `Mob#setTarget`—— 锁定成员强制以挑战发起者为唯一目标（**怪物间误伤不改变仇恨**，HurtByTargetGoal 的反咬也走 setTarget 故一并覆盖）；无仇恨成员强制空目标。**掉落经验翻倍**：`LivingEntity#getExperienceReward`（26.2 public final 统一经验入口）RETURN ×2。
 
 #### 破限书的锁定视觉
@@ -1052,6 +1060,68 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 * 八种家族宝石物品介绍精简：删除「残响」后的合成途径括注（获取途径仍见配方图鉴与合成书），其余文字不变
 
+***
+
+## 五境领主（Elite Encounters）
+
+> 1.5.0「五境领主 / Lords of Five Realms」：在 1.3.3「守望者陷阱」基础上把
+> 「环境触发 → 三段式生成 → 强化怪物 → 高回报」体系化（设计稿 `DESIGN/1.5.0-design.md`）。
+> 五境触发机制互不相同：愤怒持续 / 状态累积 / 浸泡或激光 / 夜晚双路径 / 物品使用计数。
+
+### 统一框架
+
+* `EliteEncounterManager`：遭遇注册表 + 通用阶段机（蓄势 PRELUDE → 蔓延 UNFOLD → 裂缝 CRACK → 觉醒 AWAKEN）+ 冷却（10 分钟 / 打断 5 分钟）+ 每维度并发锁（≤1）+ 取消路径（触发者死亡 / 离开群系 / 离开领主 64 格）
+* `EncounterDef`：单境定义（群系过滤 / 触发类型 / 领主工厂 / 掉落 / 三条进度），阶段时长与数值走 `EliteEncounterConfig`
+* `EliteEncounterConfig`：数据化（`data/<namespace>/elite_encounter/<境>.json` + `elite_encounter_global/global.json`），字段缺省回退内置默认值，单文件解析失败不影响其余境
+* 通用规则：和平 / 旁观不触发，创造模式可观赏；领主与召唤物复用原版实体类型（DecoyEntity 模式，零实体注册、`shouldBeSaved=false`）；掉落全部走 `dropCustomDeathLoot` 覆写，**不覆盖任何原版掉落表**
+
+### 1. 深暗境・守望者 (Overwarden)
+
+* **触发**：深暗之域，32 格内普通监守者被激怒至敌对并持续 30 s（`WardenMixin` 挂 `increaseAngerAt`；达阈值后普通监守者愤怒清零退场）
+* **阶段**：蓄势 30（超载尖啸 ×3）→ 蔓延 90（5×5×5 深板岩 / 石头 → 幽匿脉络）→ 裂缝 60（粒子柱）→ 觉醒（钻出、体型 1.4×、裂缝留 3×3 催发体、5 s 黑暗）
+* **属性**：生命 1400、近战 45、音波 24（无视护甲）、索敌 24、体型 1.4×、经验 100
+* **技能**：双音波（4–6 s）、幽匿地刺（12 s）、愤怒咆哮（20 s，含自定义减益「耳鸣」）、幽匿召唤（30 s，3 只幽匿幼体，召唤期站立 3 s）
+* **掉落**：幽匿核心 ×1（100%）、蚀命 III 书（35%）、无踪 II 书（25%）；幽匿宝匣 = 3 核心 + 1 幽匿脉络
+* **进度**：惊雷之兆 / 守望者陨落 / 隐藏「无声狩猎」（全程未被监守者愤怒命中）
+
+### 2. 下界境・烬骨王 (Emberbone King)
+
+* **触发**：下界任意群系，120 s 窗口内累计承受凋零 ≥ 60 s（`LivingEntity#addEffect` 与凋零保护**共用同一注入点分支**）
+* **阶段**：蓄势 30（7×7 地面 → 灵魂沙 / 土 + 灵魂火）→ 凝聚 120（烬骨堆粒子柱）→ 觉醒（3×3 火焰爆裂、5 s 凋零 I）
+* **属性**：生命 400、近战 24（附 8 s 凋零 I）、移速 0.45、索敌 24、体型 1.6×、经验 80
+* **技能**：熔岩吐息（8 s，锥形 12 伤害 + 燃烧 + 岩浆残留 4 s 后冷却为黑曜石）、凋零光环（常驻）、烬魂召唤（25 s，2 只烈焰人，蓄力 2 s）、灵魂火墙（18 s，7 格灵魂火 8 s 自灭）
+* **掉落**：烬核 ×1、炽焰行者 II 书（30%）、拓阶 I 书（15%）；烬火宝匣 = 3 烬核 + 1 灵魂沙
+
+### 3. 海洋境・渊潮之主 (Tidal Sovereign)
+
+* **触发**：海洋 / 深海（排除冻洋与寒冷海洋），300 s 窗口内浸泡游泳累计 180 s **或** 120 s 窗口内被守卫者激光命中 ≥5 次
+* **阶段**：蓄势 30（漩涡粒子 + 鲸鸣）→ 潮涌 120（渊潮裂缝 + 气泡柱）→ 觉醒（上浮现身、5 s 挖掘疲劳 III）
+* **属性**：生命 600、激光 20（穿透护甲）、荆棘 6、水中移速 0.6、索敌 32、体型 1.7×、经验 100
+* **技能**：激光连射（6 s，3 道 ×20，1 s 蓄力光点前兆）、水龙卷（15 s，10 格内拉拽 3 s）、守卫者潮（25 s，3 只守卫者）、深海黑暗（20 s，30 格内黑暗 II + 挖掘疲劳 II）
+* **掉落**：渊潮之泪 ×2、空跃 I 书（25%）；渊潮宝匣 = 3 泪 + 1 海晶石
+
+### 4. 沼泽境・巫后 (Hag Sovereign)
+
+* **触发**：沼泽 / 红树林沼泽 + 夜晚（13000–23000），60 s 窗口内被女巫药水命中 ≥3 次 **或** 击杀女巫 ≥5 只
+* **阶段**：蓄势 30（药水粒子风暴）→ 沸煮 120（大釜幻影 + 5×5 草方块 → 菌丝）→ 觉醒（5 s 中毒 II + 缓慢）
+* **属性**：生命 320、药水伤害 15、移速 0.35、索敌 24、体型 1.35×、**保留 85% 药水抗性**（强制物理输出）、经验 80
+* **技能**：魔药暴雨（10 s，9 瓶随机药水）、迷雾遮蔽（16 s，8 格致盲 + 减速）、咒术反噬（12 s，对攻击者虚弱 II + 缓慢 II）、魔仆召唤（28 s，2 只毒蛛）
+* **掉落**：魔药精华 ×2、断罪 I 书（20%）、假象 II 书（10%）；魔药宝匣 = 3 精华 + 1 蘑菇
+
+### 5. 末地境・末影领主 (Ender Lord)
+
+* **触发**：末地外岛（距原点 >1000 格），120 s 窗口内使用末影珍珠 ≥10 次（`ThrownEnderpearlMixin` 挂构造函数 TAIL）
+* **阶段**：蓄势 30（紫颂漩涡）→ 凝视 120（裂缝粒子）→ 觉醒（连续瞬移入场、5 s 缓慢）
+* **属性**：生命 500、近战 20、移速 0.4、索敌 32、体型 1.5×、**保留怕水弱点**（水桶核心反制）、经验 100
+* **技能**：虚空折射（8 s，0.5 s 前兆后瞬移背后偷袭 20）、影分身（20 s，3 个生命 1 分身）、虚空之握（15 s，拉至面前 3 格）、末影螨潮（30 s，5 只末影螨）
+* **掉落**：虚空碎片 ×2、御风 I 书（25%）、誓约 I 书（15%）；虚空宝匣 = 3 碎片 + 1 紫颂果
+
+### 共同规则与联动
+
+* 五境领主全部进入 `isBossLike`（断罪不斩杀改 ×2）；不受诸界浩劫仇恨锁定 / 经验翻倍影响，且**遭遇进行中浩劫冻结**
+* 材料互不通用，但铁砧修复行为统一：任一材料放第二槽 → 修复 50% 耐久、固定 5 级经验（`AnvilMenuMixin` TAIL 链：材料修复 > 破限书 > 疾风降级）
+* 五境全部击杀授予隐藏进度「五境巡礼」（`lords/grand_tour`）
+
 ## 通用技术模式
 
 ### 项目结构
@@ -1079,6 +1149,8 @@ src/main/resources/
 
 ├── assets/extra-enchantry/items/ + models/item/  物品客户端模型（1.3.1 起 JSON 同步维护）
 
+├── data/extra-enchantry/elite_encounter/\*.json  1.5.0 五境遭遇规则（每境一份；elite_encounter_global/global.json 为全局）
+├── data/extra-enchantry/advancement/lords/...     1.5.0 五境进度树（root + 5 触发 + 5 击杀 + 5 隐藏 + 五境巡礼）
 ├── assets/extra-enchantry/font/fancy_\*.json     八家族附魔名称字体
 
 └── assets/extra-enchantry/lang/\*.json           翻译
@@ -1092,6 +1164,7 @@ src/main/java/realmikoto/extraenchantry/
 ├── Advancements.java                            代码授予成就统一入口（见「成就体系」）
 
 ├── \*Manager.java                                各附魔的状态与结算（1.4.0 增 AccessoryManager / WolfArmorManager；1.3.x 增 FamilyResonance / FamilyTrials / Attunement / Onboarding / LoreTrigger / Cavalry）
+├── EliteEncounterManager / EncounterDef / LordRuntime / EliteLord / EliteEncounterConfig / RealmTreasures   1.5.0 五境领主（遭遇调度 / 境定义 / 领主共享运行时 / 领主标记 / 数据化配置 / 材料与宝匣）
 
 ├── Accessories.java / AccessoryItem / GemItem / AccessoryContainer / AccessorySlot / AccessoryAttachments   1.4.0 环佩体系（注册中心 + 物品 + Attachment 容器）
 
@@ -1197,6 +1270,8 @@ public static final ResourceKey\<Enchantment> REACH =
 | InventoryMenuMixin           | `InventoryMenu`           | 配饰槽进背包菜单：构造 TAIL 追加 4 个 AccessorySlot（46~49）+ quickMoveStack shift 智能移动（mixin 继承 AbstractContainerMenu 以访问 protected 成员）                                                               |
 | ItemEntityMixin              | `ItemEntity`              | 火焰家族烧毁免疫：带火焰系附魔 / 烬心石配饰的掉落物免疫火与岩浆伤害（hurtServer HEAD 取消，下界合金同款）                                                                    |
 | BlockMixin                   | `Block`                   | 丰壤：playerDestroy RETURN 判定成熟作物 + 丰壤锄头 → 双倍掉落 / 3×3 范围收获（LoamManager）                                                                                                                                                                    |
+| WardenMixin                  | `Warden`                  | 1.5.0 深暗境：increaseAngerAt HEAD 通报"被监守者愤怒锁定"（隐藏进度「无声狩猎」反向判定；不改动愤怒数值）                                                                                                                |
+| ThrownEnderpearlMixin        | `ThrownEnderpearl`        | 1.5.0 末地境：珍珠投出构造函数 TAIL 计数（120 s 窗口 ≥10 次触发末影领主）                                                                                                                                              |
 
 客户端 Mixin（`src/client/java/.../client/mixin/`，注册于 `extra-enchantry.client.mixins.json`）：
 
@@ -1264,7 +1339,19 @@ public static final ResourceKey\<Enchantment> REACH =
 * **`Slot#isActive` 是纯客户端概念**（v1.4.0，反编译确认）：26.2 的 `AbstractContainerMenu` / `Slot` 服务端路径**零调用** isActive——折叠/展开门控只影响渲染与点击判定，服务端逻辑完全无感知（shift 移动不做门禁的依据：折叠时放入的物品展开后可见，属可接受便利）
 * **Fabric Data Attachment 是快照语义**（v1.4.0）：`getAttached` 返回的是落盘快照，**原地修改其中的 ItemStack 不会自动保存**——所有写路径必须收敛到 `setAttached` 回写（配饰统一走 `AccessoryContainer.setItem → setChanged → setAttached`；Menu `removed` 钩子做关闭界面时的最终写回兜底）
 * **26.2 物品模型可按任意数据组件值分发**（v1.4.0，反编译确认）：`items/*.json` 支持 `{"type": "minecraft:select", "property": "minecraft:component", "component": "<ns:组件>", "cases": [{"when": "<codec 值>", "model": {...}}], "fallback": {...}}`——`ComponentContents` 经组件自身的 codec 解析 `when` 值（组件须非 transient 且带 persistent codec），`fallback` 兜底无组件/无匹配。对"单物品类型 + 标识组件"（铭印 / 铭文 / 残页类）是**纯数据零代码**的多形态方案，无需 custom_model_data 旁路或客户端渲染 Mixin（家族铭印九型令牌即此实现）
+* **1.5.0 反编译确认点（26.2，javap 校验 minecraft-common-deobf）**：① 凋零施加入口 = `LivingEntity#addEffect(MobEffectInstance, Entity)`（烬骨王计数必须与凋零保护**合并分支**，禁止第二个 @ModifyVariable）；② 守卫者激光 / 女巫药水无专属伤害类型，按 `DamageSource#getEntity()` 的实体类型（Guardian / Witch）判定；③ 末影珍珠入口 = `ThrownEnderpearl(Level, LivingEntity, ItemStack)` 构造函数（26.2 分包 `projectile.throwableitemprojectile`）；④ 实体体型读写 = `Attributes.SCALE` 属性（瞬态 ADD_VALUE 修改器，1.0 为基准）
+
+* **26.2 无 deep_dark / swamp 群系标签**（1.5.0）：`BiomeTags` 只有 `is_ocean` / `is_deep_ocean` / `is_nether` / `is_end`，深暗与沼泽必须按群系 ID 判定（`level.getBiome(pos).unwrapKey()`），外岛按距原点距离（>1000 格）判定——不要凭印象写 `#minecraft:is_deep_dark`
+
+* **领主与召唤物不持久化**（1.5.0）：`shouldBeSaved()=false`，配合运行时状态（冷却 / 并发锁不落盘）避免重启后残留孤儿领主；领主经验不能覆写 `getExperienceReward`（26.2 为 `public final`），须走既有 `getExperienceReward` RETURN 注入点按领主类型覆盖
+
+* **效果图标与语言键必须成对**（1.5.0，回归测试强制）：新增自定义状态效果时，语言文件的 `effect.extra-enchantry.<id>` 与 `assets/extra-enchantry/textures/mob_effect/<id>.png` 必须同时存在——`MobEffectIconAtlasTest` 会比对二者集合，缺图标即构建失败（耳鸣效果首次触发此门禁）
+
 * **生存背包纸娃娃渲染区 = GUI 坐标 (26~75, 8~78)**（v1.4.1 踩坑，反编译 `InventoryScreen#extractBackground`：`extractEntityInInventoryFollowsMouse(xo+26, yo+8, xo+75, yo+78, ...)`）——自绘 UI 元素左缘必须 ≥76，否则压进玩家模型 1~2px（配饰按钮的 panel_fill 衬底左缘 74 压住右缘 75 两列，观感即"按钮左侧向玩家界面突出"）。另：**纯色 panel_fill 与面板纹理贴图存在色阶差，面板内自绘元素能不用衬底就不用**（自带不透明底的贴图直接绘制即可）；衬底只用于面板外（悬浮在游戏世界上方）的区域成形
+
+* **Attachment 注册在静态块 = 类加载时序陷阱**（v1.5.0 踩坑，实锤于 dev 日志）：`onInitialize` 里 `ServerTickEvents.register(Manager::tick)` 的**方法引用不会触发目标类 `<clinit>`**（JLS 方法引用惰性解析）——Attachment 类型直到首个玩家事件才注册，而玩家登录时 Fabric 反序列化 NBT 中的全部 attachment，**未注册类型的数据被静默丢弃**（日志 `Skipping invalid attachments: Found unknown attachment type extra-enchantry:lore_triggers`），表现为手札 / 拾书提示等一次性引导每次重进世界重复触发。修法：attachment 持有类加空 `register()`（仅保证 `<clinit>` 执行），在 `onInitialize` **最顶部**显式调用（`LoreTriggerManager` / `AttunementManager` / `AccessoryAttachments` 三处一并加固——配饰若踩同坑是背包清空级事故）。审查要点：凡 `AttachmentRegistry.create` 写在静态块 / 静态字段的类，必须显式早注册，禁止依赖调用方类加载时序
+
+* **dev 环境日志噪音识别**：`Failed to retrieve profile key pair` + 401（`/player/certificates`，`Download-N` 线程）是 **Loom dev 离线会话的正常现象**——客户端进世界时向 Mojang 请求聊天签名密钥对，离线 dev 账号（PlayerNNN）无 token 必然 401；单人世界不需要聊天签名，无任何功能影响，正式账号玩家不会出现。不要在 mod 里"修复"它
 
 ## 记录规范
 

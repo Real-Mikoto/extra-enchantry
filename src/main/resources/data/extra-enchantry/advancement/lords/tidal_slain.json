@@ -1,0 +1,28 @@
+{
+  "parent": "extra-enchantry:lords/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancement.extra-enchantry.lords.tidal_slain.description"
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "id": "minecraft:elder_guardian_spawn_egg"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.lords.tidal_slain.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

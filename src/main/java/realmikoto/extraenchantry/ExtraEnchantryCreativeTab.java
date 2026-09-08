@@ -94,6 +94,10 @@ public final class ExtraEnchantryCreativeTab {
 						output.accept(new ItemStack(Accessories.ACCESSORY_ITEMS[material.ordinal()][slot.ordinal()]));
 					}
 					}
+					// 1.5.0「五境领主」：5 材料 + 5 宝匣（境主掉落与合成产物）
+					for (net.minecraft.world.item.Item treasure : RealmTreasures.CREATIVE_ITEMS) {
+						output.accept(new ItemStack(treasure));
+					}
 					for (EnchantmentEntry entry : ENCHANTMENTS) {
 						Holder<Enchantment> holder = parameters.holders()
 								.lookupOrThrow(Registries.ENCHANTMENT)

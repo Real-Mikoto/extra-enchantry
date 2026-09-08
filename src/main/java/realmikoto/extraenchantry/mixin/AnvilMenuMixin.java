@@ -145,6 +145,29 @@ public abstract class AnvilMenuMixin {
 	}
 
 	/**
+	 * 五境材料修复（1.5.0 §0.2.5 / §7.2）：第二槽为五境材料之一时，
+	 * 修复第一槽物品 50% 最大耐久，费用固定 5 级经验。
+	 * 判定优先级：材料修复 > 破限书合并 > 疾风降级（写入既有 TAIL 检查链，设计 §7.4）。
+	 */
+	@Inject(method = "createResult", at = @At("TAIL"))
+	private void extraenchantry$realmMaterialRepair(CallbackInfo ci) {
+		AnvilMenu menu = (AnvilMenu) (Object) this;
+		ItemStack material = menu.getSlot(1).getItem();
+		if (!realmikoto.extraenchantry.EliteEncounterManager.isRepairMaterial(material)) {
+			return;
+		}
+		ItemStack target = menu.getSlot(0).getItem();
+		if (target.isEmpty() || !target.isDamageableItem() || !target.isDamaged()) {
+			return;
+		}
+		ItemStack repaired = target.copy();
+		int restore = Math.max(1, (int) (repaired.getMaxDamage() * 0.5D));
+		repaired.setDamageValue(Math.max(0, repaired.getDamageValue() - restore));
+		menu.getSlot(2).set(repaired);
+		this.cost.set(5);
+	}
+
+	/**
 	 * 疾风 III 级门槛：无破限时把产出上的疾风降回 II 级。
 	 * （附魔台/钓鱼由 min_cost 曲线限制、宝箱书/交易由
 	 * EnchantRandomlyFunctionMixin 钳制，铁砧融合是 III 级的唯一途径）

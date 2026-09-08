@@ -253,6 +253,29 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
+	 * 五境领主触发计数（1.5.0）：玩家受伤来源判定。
+	 *   - 来源为守卫者 / 远古守卫者 → 海洋境路径 B（激光命中）；
+	 *   - 来源为女巫（投掷药水） → 沼泽境路径 A（药水命中）；
+	 * 另记录最低血量比例（末地境隐藏进度「无惧虚空」判定）。
+	 * 仅新增分支，不改任何既有伤害数值。
+	 */
+	@Inject(method = "hurtServer", at = @At("HEAD"))
+	private void extraenchantry$eliteTriggerHurt(ServerLevel level, DamageSource source, float amount,
+			CallbackInfoReturnable<Boolean> cir) {
+		LivingEntity victim = (LivingEntity) (Object) this;
+		if (!(victim instanceof net.minecraft.server.level.ServerPlayer player)) {
+			return;
+		}
+		realmikoto.extraenchantry.EliteEncounterManager.notePlayerHurt(player, source);
+		net.minecraft.world.entity.Entity attacker = source.getEntity();
+		if (attacker instanceof net.minecraft.world.entity.monster.Guardian) {
+			realmikoto.extraenchantry.EliteEncounterManager.noteGuardianHit(player);
+		} else if (attacker instanceof net.minecraft.world.entity.monster.Witch) {
+			realmikoto.extraenchantry.EliteEncounterManager.noteWitchPotionHit(player);
+		}
+	}
+
+	/**
 	 * 配饰造成伤害加成（雷鸣扣：雷雨天气全伤害 +4%/级）：attacker 侧 ModifyVariable。
 	 */
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
@@ -584,6 +607,13 @@ public abstract class LivingEntityMixin {
 			return effect;
 		}
 
+		// 下界境·烬骨王触发计数（1.5.0）：凋零累积并入本注入点分支，
+		// 禁止对同一方法新增第二个 @ModifyVariable（独占冲突，见设计 §7.4）
+		if (self instanceof net.minecraft.server.level.ServerPlayer witherPlayer) {
+			realmikoto.extraenchantry.EliteEncounterManager.noteWitherApplication(
+					witherPlayer, effect.getDuration());
+		}
+
 		int totalLevels = 0;
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (!slot.isArmor()) {
@@ -699,6 +729,13 @@ public abstract class LivingEntityMixin {
 	private void extraenchantry$cataclysmDoubleXp(ServerLevel level, Entity killer,
 			CallbackInfoReturnable<Integer> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
+		// 五境领主经验（1.5.0）：按配置覆盖（getExperienceReward 是 public final，
+		// 无法覆写，统一走本注入点；优先于诸界浩劫翻倍判定）
+		int lordXp = realmikoto.extraenchantry.EliteEncounterManager.lordExperience(self);
+		if (lordXp >= 0) {
+			cir.setReturnValue(lordXp);
+			return;
+		}
 		if (self instanceof Mob mob && CavalryManager.isChallengeMob(mob)) {
 			cir.setReturnValue(cir.getReturnValueI() * 2);
 		}

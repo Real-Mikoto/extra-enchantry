@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CEC",
+    "CCC"
+  ],
+  "key": {
+    "C": "extra-enchantry:potion_essence",
+    "E": "minecraft:red_mushroom"
+  },
+  "result": {
+    "id": "extra-enchantry:potion_casket",
+    "count": 1
+  }
+}

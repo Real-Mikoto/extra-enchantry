@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CEC",
+    "CCC"
+  ],
+  "key": {
+    "C": "extra-enchantry:ember_core",
+    "E": "minecraft:soul_sand"
+  },
+  "result": {
+    "id": "extra-enchantry:ember_casket",
+    "count": 1
+  }
+}

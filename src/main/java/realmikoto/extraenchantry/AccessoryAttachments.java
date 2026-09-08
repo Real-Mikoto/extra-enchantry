@@ -42,6 +42,11 @@ public final class AccessoryAttachments {
 	private AccessoryAttachments() {
 	}
 
+	/** 显式触发静态初始化（onInitialize 早期调用）：配饰 Attachment 注册于静态块，
+	 *  需早于任何玩家数据读取，否则存量配饰被当未知 attachment 丢弃（背包清空级事故）。 */
+	public static void register() {
+	}
+
 	/** 读取 4 槽快照（无 attachment → 全空数组） */
 	public static ItemStack[] slots(net.minecraft.world.entity.LivingEntity entity) {
 		ItemStack[] out = new ItemStack[Accessories.SlotType.values().length];

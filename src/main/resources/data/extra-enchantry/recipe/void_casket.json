@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CEC",
+    "CCC"
+  ],
+  "key": {
+    "C": "extra-enchantry:void_shard",
+    "E": "minecraft:chorus_fruit"
+  },
+  "result": {
+    "id": "extra-enchantry:void_casket",
+    "count": 1
+  }
+}

@@ -28,7 +28,9 @@
 		"CrossbowItemMixin",
 		"BlockMixin",
 		"ItemEntityMixin",
-		"InventoryMenuMixin"
+		"InventoryMenuMixin",
+		"WardenMixin",
+		"ThrownEnderpearlMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

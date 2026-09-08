@@ -39,6 +39,11 @@ public abstract class MobMixin {
 			return target;
 		}
 
+		// 五境领主（1.5.0）：觉醒后 10 秒锁定触发者（与诸界浩劫同级，先判领主）
+		if (realmikoto.extraenchantry.EliteEncounterManager.isLord(self)) {
+			return realmikoto.extraenchantry.EliteEncounterManager.resolveLordTarget(self, target);
+		}
+
 		// 诸界浩劫：挑战生物仇恨锁定 / 无仇恨（优先级最高，压过诱饵重定向）
 		if (CavalryManager.isChallengeMob(self)) {
 			return CavalryManager.resolveChallengeTarget(self, target);

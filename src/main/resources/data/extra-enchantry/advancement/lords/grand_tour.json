@@ -1,0 +1,28 @@
+{
+  "parent": "extra-enchantry:lords/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.lords.grand_tour.description"
+    },
+    "frame": "challenge",
+    "hidden": true,
+    "icon": {
+      "id": "extra-enchantry:void_shard"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.lords.grand_tour.title"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

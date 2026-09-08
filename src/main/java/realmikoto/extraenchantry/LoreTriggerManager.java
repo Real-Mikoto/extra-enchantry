@@ -48,6 +48,16 @@ public final class LoreTriggerManager {
 	private LoreTriggerManager() {
 	}
 
+	/**
+	 * 显式触发本类静态初始化（onInitialize 早期调用）：Attachment 注册在静态块中，
+	 * 若依赖首个调用方的类加载时机会导致「玩家数据读取时 lore_triggers 尚未注册」——
+	 * 已存的触发记录被当未知类型丢弃（Fabric 日志 "Skipping invalid attachments"），
+	 * 手札 / 拾书提示等一次性引导每次重进世界重复触发。注册门禁见 v1.3.1 修复。
+	 */
+	public static void register() {
+		// 类加载即完成 AttachmentRegistry.create——本方法体为空，仅保证 <clinit> 执行
+	}
+
 	// ============ 核心 API ============
 
 	/**

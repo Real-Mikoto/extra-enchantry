@@ -231,6 +231,12 @@ public final class CavalryManager {
 		if (CATACLYSMS.isEmpty()) {
 			return;
 		}
+		// 五境领主遭遇进行中 → 诸界浩劫冻结（1.5.0 §6.2：领主不受浩劫影响）
+		for (Cataclysm state : List.copyOf(CATACLYSMS.values())) {
+			if (EliteEncounterManager.isActiveIn(state.level.dimension())) {
+				return;
+			}
+		}
 		for (UUID ownerId : List.copyOf(CATACLYSMS.keySet())) {
 			Cataclysm state = CATACLYSMS.get(ownerId);
 			if (state == null) {
@@ -335,6 +341,7 @@ public final class CavalryManager {
 		CATACLYSMS.put(player.getUUID(), state);
 		bossEvent.addPlayer(player);
 		player.sendSystemMessage(Component.translatable("message.extra-enchantry.cataclysm.started"));
+		playCataclysmStartFx(level, player);
 		spawnWave(state, player);
 	}
 
@@ -612,6 +619,7 @@ public final class CavalryManager {
 		player.sendSystemMessage(Component.translatable(byDeath
 				? "message.extra-enchantry.cataclysm.fail_death"
 				: "message.extra-enchantry.cataclysm.fail_timeout"));
+		playCataclysmFailFx(state.level, player);
 		state.bossEvent.removePlayer(player);
 		CATACLYSMS.remove(state.playerId);
 	}
@@ -624,6 +632,7 @@ public final class CavalryManager {
 		clearChallengeMobs(state);
 		awardAdvancement(player, ADVANCE_INVINCIBLE);
 		player.sendSystemMessage(Component.translatable("message.extra-enchantry.cataclysm.success"));
+		playCataclysmSuccessFx(state.level, player);
 		// 第四幕清空 → 残页·肆派发 + 图样收录提示（1.3.1「铭文纪元」）
 		OnboardingManager.onCataclysmWave(player, state.wave);
 		OnboardingManager.onCataclysmComplete(player);
@@ -1105,6 +1114,45 @@ public final class CavalryManager {
 				pos.x, pos.y + 0.5D, pos.z, 60, 1.0D, 2.0D, 1.0D, 0.04D);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE,
 				pos.x, pos.y + 1.0D, pos.z, 16, 0.6D, 1.2D, 0.6D, 0.01D);
+	}
+
+	// ============ 诸界浩劫仪式感（L3 高光，DESIGN_aesthetics.md 预算 20~40 粒子） ============
+
+	/** 触发：诅咒号角（ELDER_GUARDIAN_CURSE，原版进阶仪式感天花板）+ 监守者咆哮压场 */
+	private static void playCataclysmStartFx(ServerLevel level, ServerPlayer player) {
+		FxHelper.play(level, player, SoundEvents.ELDER_GUARDIAN_CURSE, 3.0F, 1.0F);
+		FxHelper.play(level, player, SoundEvents.WARDEN_ROAR, 2.0F, 0.8F);
+		// 头顶正中一道视觉闪电（不点燃；呼应骑兵队登场与原版陷阱的招牌提示）
+		LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
+		if (bolt != null) {
+			bolt.snapTo(player.getX(), player.getY(), player.getZ());
+			bolt.setVisualOnly(true);
+			level.addFreshEntity(bolt);
+		}
+		// 双重收缩魂火环：远环（12 格）+ 近环（4 格），八家族火色圈拢 = 黑暗降临
+		FxHelper.ring(level, player, 12.0D, ParticleTypes.SOUL_FIRE_FLAME, 32);
+		FxHelper.ring(level, player, 4.0D, ParticleTypes.SOUL_FIRE_FLAME, 16);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE,
+				player.getX(), player.getY(0.5D), player.getZ(), 40, 3.0D, 0.8D, 3.0D, 0.015D);
+	}
+
+	/** 成功：挑战完成号角 + 图腾金光爆发 + 末地烛双环绽放（破限解锁的高光时刻） */
+	private static void playCataclysmSuccessFx(ServerLevel level, ServerPlayer player) {
+		FxHelper.play(level, player, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
+		FxHelper.burstAt(level, player.getX(), player.getY(0.5D), player.getZ(),
+				ParticleTypes.TOTEM_OF_UNDYING, 48, 0.8D);
+		FxHelper.ring(level, player, 5.0D, ParticleTypes.END_ROD, 24);
+		FxHelper.ring(level, player, 9.0D, ParticleTypes.END_ROD, 32);
+	}
+
+	/** 失败：凋灵哀鸣（低音 0.6 挫败感）+ 灰烟沉降 + 火焰熄灭嘶声（破限书化为灰烬） */
+	private static void playCataclysmFailFx(ServerLevel level, ServerPlayer player) {
+		FxHelper.play(level, player, SoundEvents.WITHER_DEATH, 2.0F, 0.6F);
+		level.sendParticles(ParticleTypes.SMOKE,
+				player.getX(), player.getY(1.2D), player.getZ(), 60, 2.5D, 0.5D, 2.5D, 0.0D);
+		FxHelper.burstAt(level, player.getX(), player.getY(0.5D), player.getZ(),
+				ParticleTypes.FLAME, 12, 0.6D);
+		FxHelper.play(level, player, SoundEvents.FIRE_EXTINGUISH, 1.0F, 0.8F);
 	}
 
 	/** 每支队伍一次的登场音：监守者现身声（音量 2.0）+ 对应生物嘶吼，替代闪电雷声 */

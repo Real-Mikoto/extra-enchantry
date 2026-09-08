@@ -51,3 +51,4 @@ mc_helper.py
 README.md.bak
 # runtime logs (not part of the mod)
 logs/
+.workbuddy-ai/

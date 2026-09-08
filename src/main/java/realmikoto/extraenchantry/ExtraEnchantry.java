@@ -351,6 +351,12 @@ public class ExtraEnchantry implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
+		// Attachment 持有类显式注册（静态块注册 attachment，必须早于任何玩家数据读取；
+		// 曾因方法引用不触发 <clinit> 导致 lore_triggers 被当未知类型丢弃 → 一次性引导重复触发）
+		LoreTriggerManager.register();
+		AttunementManager.register();
+		AccessoryAttachments.register();
+
 		ExtraEnchantryCreativeTab.register();
 		ExtraEnchantryEffects.register();
 
@@ -439,6 +445,33 @@ public class ExtraEnchantry implements ModInitializer {
 
 		// 诸界浩劫挑战节拍：超时/死亡判定、苦力怕生成、清波检测、下一波启动
 		ServerTickEvents.END_SERVER_TICK.register(CavalryManager::tickCataclysms);
+
+		// ============ 1.5.0「五境领主」注册 ============
+
+		// 五境材料与宝匣（5 材料 + 5 宝匣）
+		RealmTreasures.register();
+
+		// 精英遭遇规则数据化：elite_encounter/<境>.json + elite_encounter_global/global.json
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
+				id("elite_encounter_rules"), provider -> new EliteEncounterConfig.RealmLoader());
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
+				id("elite_encounter_global"), provider -> new EliteEncounterConfig.GlobalLoader());
+
+		// 遭遇节拍：触发计数（浸泡 / 愤怒采样）+ 阶段机推进 + 取消判定
+		ServerTickEvents.END_SERVER_TICK.register(EliteEncounterManager::tick);
+
+		// 领主死亡 → 击杀 / 隐藏 / 五境巡礼进度；女巫死亡 → 沼泽境路径 B 计数
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			EliteEncounterManager.onLordDeath(entity, source);
+			if (entity instanceof net.minecraft.world.entity.monster.Witch
+					&& source.getEntity() instanceof ServerPlayer killer) {
+				EliteEncounterManager.noteWitchKill(killer);
+			}
+		});
+
+		// 玩家离线清理（避免计数与维度锁残留）
+		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register(
+				(handler, server) -> EliteEncounterManager.onPlayerLeave(handler.player));
 
 		// 破限腿甲跨部位解锁：可附魔原版摔落保护（经 fabric-item-api 的官方事件，
 		// 避免 Mixin Redirect 与其 AnvilMenuMixin 冲突）
@@ -869,6 +902,8 @@ public class ExtraEnchantry implements ModInitializer {
 	public static boolean isBossLike(LivingEntity entity) {
 		return entity instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon
 				|| entity instanceof net.minecraft.world.entity.boss.wither.WitherBoss
-				|| entity instanceof net.minecraft.world.entity.monster.warden.Warden;
+				|| entity instanceof net.minecraft.world.entity.monster.warden.Warden
+				// 1.5.0「五境领主」：领主级进入 boss 判定（断罪不斩杀改 ×2、曳钩不可拉拽）
+				|| entity instanceof EliteLord;
 	}
 }

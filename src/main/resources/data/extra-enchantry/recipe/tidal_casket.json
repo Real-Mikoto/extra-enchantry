@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CEC",
+    "CCC"
+  ],
+  "key": {
+    "C": "extra-enchantry:tidal_tear",
+    "E": "minecraft:prismarine_shard"
+  },
+  "result": {
+    "id": "extra-enchantry:tidal_casket",
+    "count": 1
+  }
+}

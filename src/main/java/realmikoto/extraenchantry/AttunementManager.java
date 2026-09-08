@@ -72,6 +72,11 @@ public final class AttunementManager {
 	private AttunementManager() {
 	}
 
+	/** 显式触发静态初始化（onInitialize 早期调用）：主调 Attachment 注册于静态块，
+	 *  需早于任何玩家数据读取，否则存量主调记录被当未知 attachment 丢弃。 */
+	public static void register() {
+	}
+
 	// ============ 查询 API ============
 
 	/** 玩家当前主调家族（未铭刻/数据非法 → null） */

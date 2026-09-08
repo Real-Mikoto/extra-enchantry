@@ -37,6 +37,14 @@ public final class ExtraEnchantryEffects {
 			MobEffectCategory.BENEFICIAL, 0x7FD4E8, ParticleTypes.END_ROD) {
 	});
 
+	/**
+	 * 耳鸣（Tinnitus，1.5.0「五境领主」）：守望者「愤怒咆哮」的专属减益，
+	 * 移速 −15%（属性修改器在 LivingEntityMixin 结算），纯计时载体 + 屏幕压迫感。
+	 */
+	public static final Holder<MobEffect> TINNITUS = Holder.direct(new MobEffect(
+			MobEffectCategory.HARMFUL, 0x9AA0A6, ParticleTypes.SMOKE) {
+	});
+
 	private ExtraEnchantryEffects() {
 	}
 
@@ -47,5 +55,7 @@ public final class ExtraEnchantryEffects {
 				ExtraEnchantry.id("emberfall"), EMBERFALL.value());
 		net.minecraft.core.Registry.register(BuiltInRegistries.MOB_EFFECT,
 				ExtraEnchantry.id("resonance"), RESONANCE.value());
+		net.minecraft.core.Registry.register(BuiltInRegistries.MOB_EFFECT,
+				ExtraEnchantry.id("tinnitus"), TINNITUS.value());
 	}
 }
