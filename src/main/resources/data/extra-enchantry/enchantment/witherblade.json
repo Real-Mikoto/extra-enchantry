@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.extra-enchantry.witherblade"
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 14,
+    "per_level_above_first": 8
+  },
+  "max_level": 2,
+  "min_cost": {
+    "base": 8,
+    "per_level_above_first": 8
+  },
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#extra-enchantry:witherblade_supported",
+  "weight": 5,
+  "anvil_cost": 4,
+  "primary_items": "#minecraft:enchantable/melee_weapon"
+}

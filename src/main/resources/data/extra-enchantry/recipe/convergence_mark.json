@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "extra-enchantry:realm_sigil",
+    "extra-enchantry:realm_sigil",
+    "extra-enchantry:realm_sigil",
+    "extra-enchantry:realm_sigil",
+    "extra-enchantry:realm_sigil",
+    "extra-enchantry:sculk_core",
+    "extra-enchantry:ember_core",
+    "extra-enchantry:tidal_tear",
+    "extra-enchantry:potion_essence"
+  ],
+  "result": {
+    "id": "extra-enchantry:convergence_mark",
+    "count": 1
+  }
+}

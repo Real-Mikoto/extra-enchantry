@@ -46,9 +46,29 @@ public final class LordRuntime {
 	private ServerBossEvent bossEvent;
 	/** 站立不动的剩余 tick（召唤 / 蓄力技能引导窗口） */
 	private int standTicks;
+	// ============ 1.6.0 变体修饰（宣战图腾 / 归一回响，§1.4 / §3.4） ============
+	/** 觉醒变体（图腾路径）：生命 ×1.4 / 伤害 ×1.2 / 技能冷却 ×0.8 */
+	private boolean awakened;
+	/** 归一回响（链式终局）：生命 ×0.75 / 技能冷却 ×1.2 / 体型 −0.1 */
+	private boolean echo;
 
 	public LordRuntime(EncounterDef def) {
 		this.def = def;
+	}
+
+	/** 图腾路径觉醒修饰（EliteEncounterManager.awaken 调用） */
+	public void markAwakened() {
+		this.awakened = true;
+	}
+
+	/** 归一回响修饰（ConvergenceManager.spawnEcho 调用） */
+	public void markEcho() {
+		this.echo = true;
+	}
+
+	/** 是否为觉醒变体（掉落分支与名称前缀判定） */
+	public boolean isAwakened() {
+		return awakened;
 	}
 
 	public EncounterDef def() {
@@ -81,7 +101,10 @@ public final class LordRuntime {
 			}
 			self.setDeltaMovement(self.getDeltaMovement().multiply(0.0D, 1.0D, 0.0D));
 		}
-		updateBossBar(self, level);
+		// 归一回响：无独立血条（ConvergenceManager 单血条接管）
+		if (!echo) {
+			updateBossBar(self, level);
+		}
 	}
 
 	/** 技能是否就绪 */
@@ -89,9 +112,14 @@ public final class LordRuntime {
 		return slot >= 0 && slot < SKILL_SLOTS && cooldowns[slot] <= 0;
 	}
 
-	/** 设置技能冷却（tick） */
+	/** 设置技能冷却（tick；觉醒 ×0.8 更紧凑 / 回响 ×1.2 更从容，§1.4 / §3.4） */
 	public void cooldown(int slot, int ticks) {
 		if (slot >= 0 && slot < SKILL_SLOTS) {
+			if (awakened) {
+				ticks = Math.max(1, (int) (ticks * 0.8D));
+			} else if (echo) {
+				ticks = (int) (ticks * 1.2D);
+			}
 			cooldowns[slot] = ticks;
 		}
 	}
@@ -108,24 +136,44 @@ public final class LordRuntime {
 
 	private void applyStats(LivingEntity self, ServerLevel level) {
 		EliteEncounterConfig.Realm rules = EliteEncounterConfig.realm(def.id());
+		// 1.6.0 变体修饰：觉醒 ×1.4 生命（回响与其互斥——图腾与归一不会同时产生同一领主）
+		double healthTarget = rules.stats().health();
+		double damageTarget = rules.stats().meleeDamage();
+		double scaleTarget = rules.stats().scale();
+		if (awakened) {
+			healthTarget *= 1.4D;
+			damageTarget *= 1.2D;
+		} else if (echo) {
+			healthTarget *= 0.75D;
+			scaleTarget = Math.max(1.0D, scaleTarget - 0.1D);
+		}
 		setTransient(self, Attributes.MAX_HEALTH, "lord_health",
-				rules.stats().health() - baseValue(self, Attributes.MAX_HEALTH),
+				healthTarget - baseValue(self, Attributes.MAX_HEALTH),
 				AttributeModifier.Operation.ADD_VALUE);
 		setTransient(self, Attributes.ATTACK_DAMAGE, "lord_damage",
-				rules.stats().meleeDamage() - baseValue(self, Attributes.ATTACK_DAMAGE),
+				damageTarget - baseValue(self, Attributes.ATTACK_DAMAGE),
 				AttributeModifier.Operation.ADD_VALUE);
 		setTransient(self, Attributes.FOLLOW_RANGE, "lord_range",
 				rules.stats().followRange() - baseValue(self, Attributes.FOLLOW_RANGE),
 				AttributeModifier.Operation.ADD_VALUE);
 		setTransient(self, Attributes.SCALE, "lord_scale",
-				rules.stats().scale() - 1.0D, AttributeModifier.Operation.ADD_VALUE);
+				scaleTarget - 1.0D, AttributeModifier.Operation.ADD_VALUE);
 	}
 
 	private void updateBossBar(LivingEntity self, ServerLevel level) {
 		if (bossEvent == null) {
+			// 觉醒变体名称前缀「觉醒·」（§1.4；归一回响沿用原名——血条由 ConvergenceManager 接管，
+			// 此处仅在 echo 时隐藏独立血条避免双血条）
+			if (echo) {
+				return;
+			}
+			Component name = Component.translatable(def.nameKey());
+			if (awakened) {
+				name = Component.translatable("event.extra-enchantry.awakened_prefix")
+						.append(" ").append(name);
+			}
 			bossEvent = new ServerBossEvent(UUID.randomUUID(),
-					Component.translatable(def.nameKey()), def.barColor(),
-					BossEvent.BossBarOverlay.PROGRESS);
+					name, def.barColor(), BossEvent.BossBarOverlay.PROGRESS);
 		}
 		List<ServerPlayer> nearby = level.getPlayers(
 				player -> player.distanceTo(self) <= BAR_RANGE

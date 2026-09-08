@@ -1,0 +1,48 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:component",
+    "component": "extra-enchantry:realm_id",
+    "cases": [
+      {
+        "when": "overwarden",
+        "model": {
+          "type": "minecraft:model",
+          "model": "extra-enchantry:item/war_totem_overwarden"
+        }
+      },
+      {
+        "when": "emberbone",
+        "model": {
+          "type": "minecraft:model",
+          "model": "extra-enchantry:item/war_totem_emberbone"
+        }
+      },
+      {
+        "when": "tidal",
+        "model": {
+          "type": "minecraft:model",
+          "model": "extra-enchantry:item/war_totem_tidal"
+        }
+      },
+      {
+        "when": "hag",
+        "model": {
+          "type": "minecraft:model",
+          "model": "extra-enchantry:item/war_totem_hag"
+        }
+      },
+      {
+        "when": "ender",
+        "model": {
+          "type": "minecraft:model",
+          "model": "extra-enchantry:item/war_totem_ender"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "extra-enchantry:item/war_totem_invalid"
+    }
+  }
+}

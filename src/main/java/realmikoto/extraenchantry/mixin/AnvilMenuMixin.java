@@ -153,7 +153,10 @@ public abstract class AnvilMenuMixin {
 	private void extraenchantry$realmMaterialRepair(CallbackInfo ci) {
 		AnvilMenu menu = (AnvilMenu) (Object) this;
 		ItemStack material = menu.getSlot(1).getItem();
-		if (!realmikoto.extraenchantry.EliteEncounterManager.isRepairMaterial(material)) {
+		// 1.6.0 归一心核：万能修复 75%（第六成员，超集优先于五境材料的 50%，§3.6）
+		boolean core = !material.isEmpty()
+				&& material.getItem() == realmikoto.extraenchantry.WarArtifacts.CONVERGENCE_CORE;
+		if (!core && !realmikoto.extraenchantry.EliteEncounterManager.isRepairMaterial(material)) {
 			return;
 		}
 		ItemStack target = menu.getSlot(0).getItem();
@@ -161,7 +164,8 @@ public abstract class AnvilMenuMixin {
 			return;
 		}
 		ItemStack repaired = target.copy();
-		int restore = Math.max(1, (int) (repaired.getMaxDamage() * 0.5D));
+		double ratio = core ? 0.75D : 0.5D;
+		int restore = Math.max(1, (int) (repaired.getMaxDamage() * ratio));
 		repaired.setDamageValue(Math.max(0, repaired.getDamageValue() - restore));
 		menu.getSlot(2).set(repaired);
 		this.cost.set(5);

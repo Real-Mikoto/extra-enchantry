@@ -1,6 +1,7 @@
 package realmikoto.extraenchantry.mixin;
 
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -593,8 +594,12 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
-	 * 凋零保护：受到凋零效果时，按装备上的附魔总等级缩短效果持续时间。
-	 * 每级减少 15%，穿戴多件时叠加，总减少量上限 90%。
+	 * 统一状态效果时长修饰（1.6.0 §5.4 五分支纪律——单注入多分支互斥命中）：
+	 *   凋零 → 凋零保护（既有）+ 烬骨王计数（1.5.0）；
+	 *   黑暗 → 明目（41，头盔，−35%/级）；
+	 *   挖掘疲劳 → 潮涌（43，胸甲，−35%/级）；
+	 *   其余有害 → 辟邪（44，护腿，−20%/级，排除集 = 凋零/黑暗/疲劳三大专属位）。
+	 * 一个效果一次只走一个缩短分支（专属优先、辟邪兜底）；禁止对 addEffect 新增第二注入点。
 	 */
 	@ModifyVariable(
 			method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z",
@@ -603,17 +608,41 @@ public abstract class LivingEntityMixin {
 	)
 	private MobEffectInstance extraenchantry$reduceWitherDuration(MobEffectInstance effect) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (effect == null || !effect.is(MobEffects.WITHER) || effect.isInfiniteDuration()) {
+		if (effect == null || effect.isInfiniteDuration()) {
 			return effect;
 		}
 
-		// 下界境·烬骨王触发计数（1.5.0）：凋零累积并入本注入点分支，
-		// 禁止对同一方法新增第二个 @ModifyVariable（独占冲突，见设计 §7.4）
-		if (self instanceof net.minecraft.server.level.ServerPlayer witherPlayer) {
-			realmikoto.extraenchantry.EliteEncounterManager.noteWitherApplication(
-					witherPlayer, effect.getDuration());
+		// 分支 1+2：凋零（保护缩短 + 烬骨王触发计数，先计数后缩短）
+		if (effect.is(MobEffects.WITHER)) {
+			if (self instanceof net.minecraft.server.level.ServerPlayer witherPlayer) {
+				realmikoto.extraenchantry.EliteEncounterManager.noteWitherApplication(
+						witherPlayer, effect.getDuration());
+			}
+			return scaleWitherProtection(self, effect);
 		}
 
+		// 分支 3：黑暗 → 明目（头盔，每级 −35%）
+		if (effect.is(MobEffects.DARKNESS)) {
+			int clearsight = armorLevels(self, ExtraEnchantry.CLEARSIGHT, EquipmentSlot.HEAD);
+			return scaleDuration(self, effect, clearsight * 0.35F, "clearsight");
+		}
+
+		// 分支 4：挖掘疲劳 → 潮涌（胸甲，每级 −35%）
+		if (effect.is(MobEffects.MINING_FATIGUE)) {
+			int tidesurge = armorLevels(self, ExtraEnchantry.TIDESURGE, EquipmentSlot.CHEST);
+			return scaleDuration(self, effect, tidesurge * 0.35F, "tidesurge_fatigue");
+		}
+
+		// 分支 5：其余有害 → 辟邪（护腿，每级 −20%，上限 60%）
+		if (!effect.getEffect().value().isBeneficial()) {
+			int hexbreak = armorLevels(self, ExtraEnchantry.HEXBREAK, EquipmentSlot.LEGS);
+			return scaleDuration(self, effect, Math.min(0.6F, hexbreak * 0.20F), "hexbreak");
+		}
+		return effect;
+	}
+
+	/** 凋零保护既有逻辑（装备总等级缩短，上限 90%）——从原注入抽出为内部方法 */
+	private MobEffectInstance scaleWitherProtection(LivingEntity self, MobEffectInstance effect) {
 		int totalLevels = 0;
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (!slot.isArmor()) {
@@ -630,15 +659,42 @@ public abstract class LivingEntityMixin {
 		if (totalLevels <= 0) {
 			return effect;
 		}
-
-		// 凋零保护反馈（P2）：孢子粒子 + 轻笛音（"毒素被净化"，节流 20 tick）
 		if (self.level() instanceof ServerLevel serverLevel && FxHelper.throttle(self, "wither_prot", 20)) {
 			FxHelper.burst(serverLevel, self,
 					net.minecraft.core.particles.ParticleTypes.SPORE_BLOSSOM_AIR, 4, 0.3D);
 			FxHelper.play(serverLevel, self, net.minecraft.sounds.SoundEvents.NOTE_BLOCK_FLUTE, 0.3F, 1.2F);
 		}
-
 		float reduction = Math.min(0.9F, totalLevels * 0.15F);
+		return effect.withScaledDuration(1.0F - reduction);
+	}
+
+	/** 单槽位指定附魔的等级（明目头 / 潮涌胸 / 辟邪腿） */
+	private static int armorLevels(LivingEntity self,
+			ResourceKey<Enchantment> key, EquipmentSlot slot) {
+		ItemStack stack = self.getItemBySlot(slot);
+		ItemEnchantments enchantments = stack.getEnchantments();
+		for (Holder<Enchantment> enchantment : enchantments.keySet()) {
+			if (enchantment.is(key)) {
+				return enchantments.getLevel(enchantment);
+			}
+		}
+		return 0;
+	}
+
+	/** 通用时长缩放（reduction ≥ 1.0 = 完全免疫 → 时长归 0；带 L1 节流反馈） */
+	private static MobEffectInstance scaleDuration(LivingEntity self, MobEffectInstance effect,
+			float reduction, String fxKey) {
+		if (reduction <= 0.0F) {
+			return effect;
+		}
+		if (reduction >= 1.0F) {
+			return effect.withScaledDuration(0.0F);
+		}
+		if (self.level() instanceof ServerLevel serverLevel
+				&& FxHelper.throttle(self, fxKey, 40)) {
+			FxHelper.burst(serverLevel, self,
+					net.minecraft.core.particles.ParticleTypes.END_ROD, 3, 0.3D);
+		}
 		return effect.withScaledDuration(1.0F - reduction);
 	}
 

@@ -67,6 +67,25 @@ public abstract class AbstractArrowMixin implements HomingPlumeAccess {
 	@Override
 	public abstract ItemStack extraenchantry$getPickupItem();
 
+	@Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
+	private void extraenchantry$voidblinkDodge(EntityHitResult hitResult, CallbackInfo ci) {
+		AbstractArrow self = (AbstractArrow) (Object) this;
+		if (!(hitResult.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)) {
+			return;
+		}
+		int level = realmikoto.extraenchantry.VoidblinkManager.blinkLevel(player);
+		if (level <= 0) {
+			return;
+		}
+		if (!realmikoto.extraenchantry.VoidblinkManager.tryBlink(player, level)) {
+			return; // 内冷却中或概率未命中
+		}
+		// 闪避成立：取消本次命中（伤害 / 撞击 / 归羽登记全部跳过）+ 侧移瞬移 + 反馈
+		this.extraenchantry$hitEntity = true; // 归羽复用：闪避的箭不登记返还（§5.4 设计意图）
+		ci.cancel();
+		realmikoto.extraenchantry.VoidblinkManager.dodgeFx(player);
+	}
+
 	@Inject(method = "onHitEntity", at = @At("HEAD"))
 	private void extraenchantry$markEntityHit(EntityHitResult hitResult, CallbackInfo ci) {
 		this.extraenchantry$hitEntity = true;

@@ -207,6 +207,32 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final ResourceKey<Enchantment> RENEWAL =
 			ResourceKey.create(Registries.ENCHANTMENT, id("renewal"));
 
+	// ============ 1.6.0「宣战与归一」器魂附魔（编号 41–46） ============
+
+	// 明目（41，深暗境守望者）：黑暗时长按级 −35%（III 级免疫）——数据驱动 clearsight.json
+	public static final ResourceKey<Enchantment> CLEARSIGHT =
+			ResourceKey.create(Registries.ENCHANTMENT, id("clearsight"));
+
+	// 枯刃（42，下界境烬骨王）：命中附带凋零 I（I 3 s / II 6 s）——数据驱动 witherblade.json
+	public static final ResourceKey<Enchantment> WITHERBLADE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("witherblade"));
+
+	// 潮涌（43，海洋境渊潮之主）：水中/雨中伤害 +8%/级 + 挖掘疲劳时长 −35%/级——tidesurge.json
+	public static final ResourceKey<Enchantment> TIDESURGE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("tidesurge"));
+
+	// 辟邪（44，沼泽境巫后）：有害效果时长 −20%/级（排除凋零/黑暗/疲劳三大专属反制位）——hexbreak.json
+	public static final ResourceKey<Enchantment> HEXBREAK =
+			ResourceKey.create(Registries.ENCHANTMENT, id("hexbreak"));
+
+	// 虚闪（45，末地境末影领主）：被弹射物命中前 10%/级 概率侧移闪避——voidblink.json
+	public static final ResourceKey<Enchantment> VOIDBLINK =
+			ResourceKey.create(Registries.ENCHANTMENT, id("voidblink"));
+
+	// 五境同辉（46，传说 T0）：八系共鸣判定阈值 −1（4/7 → 3/6），单件生效——realms_unity.json
+	public static final ResourceKey<Enchantment> REALMS_UNITY =
+			ResourceKey.create(Registries.ENCHANTMENT, id("realms_unity"));
+
 	/**
 	 * 破限可提升一级上限的附魔：所有在逻辑上可以增加一级的附魔（原版 + 本 mod）。
 	 * 带破限的输入在铁砧融合时，这些附魔的等级上限从原版最大值提升 1
@@ -450,6 +476,14 @@ public class ExtraEnchantry implements ModInitializer {
 
 		// 五境材料与宝匣（5 材料 + 5 宝匣）
 		RealmTreasures.register();
+
+		// ============ 1.6.0「宣战与归一」注册 ============
+
+		// 宣战图腾 / 觉醒徽记 / 归一印记 / 归一心核 / 归一宝匣 + realm_id 组件
+		WarArtifacts.register();
+
+		// 归一之战链式调度：回合推进 / 超时 / 单血条五色切换
+		ServerTickEvents.END_SERVER_TICK.register(ConvergenceManager::tick);
 
 		// 精英遭遇规则数据化：elite_encounter/<境>.json + elite_encounter_global/global.json
 		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(

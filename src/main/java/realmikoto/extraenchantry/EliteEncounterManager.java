@@ -189,6 +189,69 @@ public final class EliteEncounterManager {
 		return time >= thresholds.nightStart() && time <= thresholds.nightEnd();
 	}
 
+	// ============ 1.6.0 主动宣战（图腾入口） ============
+
+	/** 图腾开启结果（WarArtifacts.TotemItem 反馈统一发送） */
+	public enum ChallengeResult { OK, NOT_IN_REALM, ACTIVE_OR_COOLDOWN, DISABLED }
+
+	/** 图腾独立冷却（与普通遭遇冷却互不占用，设计 §1.3：每玩家 30 分钟） */
+	private static final Map<UUID, Long> TOTEM_COOLDOWN_UNTIL = new ConcurrentHashMap<>();
+	private static final long TOTEM_COOLDOWN_MINUTES = 30;
+
+	/**
+	 * 主动宣战（1.6.0 §1.3）：跳过触发条件累积直接进入蓄势，生成觉醒变体。
+	 * 前置：本境限定群系内；互斥：当前维度已有激活遭遇（普通 / 归一）或图腾冷却中。
+	 */
+	public static ChallengeResult startChallenged(ServerPlayer player, String realmId) {
+		EncounterDef def = EncounterDef.byId(realmId);
+		if (def == null || !EliteEncounterConfig.realm(realmId).enabled()) {
+			return ChallengeResult.DISABLED;
+		}
+		ServerLevel level = (ServerLevel) player.level();
+		if (!def.matches(level, player.blockPosition())) {
+			return ChallengeResult.NOT_IN_REALM;
+		}
+		Long until = TOTEM_COOLDOWN_UNTIL.get(player.getUUID());
+		if (until != null && until > System.currentTimeMillis()) {
+			return ChallengeResult.ACTIVE_OR_COOLDOWN;
+		}
+		if (ACTIVE.containsKey(player.getUUID())
+				|| DIMENSION_LOCK.containsKey(level.dimension())
+				|| ConvergenceManager.isRunning()) {
+			return ChallengeResult.ACTIVE_OR_COOLDOWN;
+		}
+		long nowTick = level.getGameTime();
+		Encounter encounter = new Encounter(def, level, player.getUUID(), nowTick);
+		encounter.awakened = true; // 觉醒修饰（§1.4 数值在 awaken() 内应用）
+		encounter.anchor = findAnchor(level, player.position());
+		ACTIVE.put(player.getUUID(), encounter);
+		DIMENSION_LOCK.put(level.dimension(), player.getUUID());
+		TOTEM_COOLDOWN_UNTIL.put(player.getUUID(),
+				System.currentTimeMillis() + TOTEM_COOLDOWN_MINUTES * MINUTE_MS);
+		player.sendOverlayMessage(Component.translatable(
+				"message.extra-enchantry.elite.prelude." + def.id()));
+		Advancements.award(player, LORDS_ROOT);
+		Advancements.award(player, def.triggerAdv());
+		Advancements.award(player, Advancements.WAR_TOTEM_USED);
+		ExtraEnchantry.LOGGER.info("[extra-enchantry] 宣战图腾：{} 觉醒遭遇开始（玩家 {}）", def.id(),
+				player.getName().getString());
+		return ChallengeResult.OK;
+	}
+
+	/** 归一之战借用维度锁（ConvergenceManager 调用） */
+	public static void lockDimension(ResourceKey<Level> dimension, UUID playerId) {
+		DIMENSION_LOCK.put(dimension, playerId);
+	}
+
+	public static void unlockDimension(ResourceKey<Level> dimension, UUID playerId) {
+		DIMENSION_LOCK.remove(dimension, playerId);
+	}
+
+	/** 归一回响的仇恨锁定（复用 LOCKS） */
+	public static void lockLord(UUID lordId, UUID playerId) {
+		LOCKS.put(lordId, new TargetLock(playerId, Long.MAX_VALUE >> 1));
+	}
+
 	// ============ 事件入口（Mixin 回调） ============
 
 	/**
@@ -409,7 +472,11 @@ public final class EliteEncounterManager {
 		level.addFreshEntity(lord);
 		// lord 静态类型即 Mob（setTarget 在 Mob 上；instanceof LivingEntity 反而降级看不到 setTarget）
 		lord.setHealth(lord.getMaxHealth());
-		lord.setTarget(player);		encounter.lordId = lord.getUUID();
+		lord.setTarget(player);
+		// 1.6.0 图腾路径：觉醒修饰（×1.4 生命 / ×1.2 伤害 / ×0.8 技能冷却，§1.4）
+		if (encounter.awakened && lord instanceof EliteLord eliteLord) {
+			eliteLord.lordRuntime().markAwakened();
+		}		encounter.lordId = lord.getUUID();
 		LOCKS.put(lord.getUUID(), new TargetLock(player.getUUID(),
 				level.getGameTime() + LOCK_TICKS));
 		applyAwakenEffects(encounter, player);
@@ -480,6 +547,16 @@ public final class EliteEncounterManager {
 		if (!(lord instanceof EliteLord eliteLord)) {
 			return;
 		}
+		// 1.6.0 归一回响优先转发（中途回响零掉落——防 farming 旁路，设计 §3.6）
+		ServerPlayer echoKiller = source.getEntity() instanceof ServerPlayer sp ? sp : null;
+		if (ConvergenceManager.isEcho(lord)) {
+			eliteLord.lordRuntime().dispose();
+			LOCKS.remove(lord.getUUID());
+			if (echoKiller != null) {
+				ConvergenceManager.onEchoDeath(lord, echoKiller);
+			}
+			return;
+		}
 		eliteLord.lordRuntime().dispose();
 		LOCKS.remove(lord.getUUID());
 		EncounterDef def = eliteLord.lordRuntime().def();
@@ -513,6 +590,11 @@ public final class EliteEncounterManager {
 		COOLDOWN_UNTIL.put(killer.getUUID(), System.currentTimeMillis() + minutes * MINUTE_MS);
 		if (allLordsSlain(killer)) {
 			Advancements.award(killer, GRAND_TOUR);
+		}
+		// 1.6.0 觉醒掉落分支（§1.5）：材料 ×2 + 器魂书 II–III 100% + 觉醒徽记 100% + 进度
+		if (encounter != null && encounter.awakened) {
+			Advancements.award(killer, Advancements.AWAKENED_SLAIN);
+			RealmTreasures.dropAwakenedLoot(lord, def, encounter.level, killer);
 		}
 	}
 
@@ -646,6 +728,8 @@ public final class EliteEncounterManager {
 		Vec3 anchor;
 		UUID lordId;
 		boolean unfoldApplied;
+		/** 1.6.0 图腾路径：觉醒变体（×1.4 生命 / ×1.2 伤害 / ×0.8 技能冷却） */
+		boolean awakened;
 		/** 隐藏进度判定：是否被监守者愤怒命中 / 是否受过凋零 / 最低血量比例 */
 		boolean angerHits;
 		boolean witherApplied;

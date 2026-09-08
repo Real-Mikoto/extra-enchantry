@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "MFM",
+    "FMF",
+    "MFM"
+  ],
+  "key": {
+    "M": "extra-enchantry:ember_core",
+    "F": "minecraft:soul_sand"
+  },
+  "result": {
+    "id": "extra-enchantry:war_totem",
+    "count": 1,
+    "components": {
+      "extra-enchantry:realm_id": "emberbone"
+    }
+  }
+}

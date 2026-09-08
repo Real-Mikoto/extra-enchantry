@@ -126,6 +126,57 @@ public final class RealmTreasures {
 				lord.spawnAtLocation(level, enchantedBook(level, drop.enchantment(), drop.level()));
 			}
 		}
+		// 1.6.0 普通领主器魂小概率掉落（20% I–II，§1.5 表）
+		maybeDropSoulBook(lord, def, level);
+	}
+
+	// ============ 1.6.0 觉醒掉落与器魂（§1.5 / §2） ============
+
+	/** 各境器魂附魔（realm id → 附魔 Key，§2 各条） */
+	private static final java.util.Map<String, ResourceKey<Enchantment>> SOUL_ENCHANTMENTS =
+			java.util.Map.of(
+					"overwarden", ExtraEnchantry.CLEARSIGHT,
+					"emberbone", ExtraEnchantry.WITHERBLADE,
+					"tidal", ExtraEnchantry.TIDESURGE,
+					"hag", ExtraEnchantry.HEXBREAK,
+					"ender", ExtraEnchantry.VOIDBLINK);
+
+	/** 器魂附魔书掉落（境 id → 等级数组 [普通概率, 普通最高级, 觉醒最高级]） */
+	public static ResourceKey<Enchantment> soulEnchantmentOf(String realmId) {
+		return SOUL_ENCHANTMENTS.get(realmId);
+	}
+
+	/** 器魂书构造（等级区间随机） */
+	public static ItemStack soulBook(ServerLevel level, String realmId, int minLevel, int maxLevel) {
+		ResourceKey<Enchantment> key = soulEnchantmentOf(realmId);
+		int lvl = maxLevel > minLevel
+				? minLevel + level.getRandom().nextInt(maxLevel - minLevel + 1)
+				: minLevel;
+		return enchantedBook(level, key, lvl);
+	}
+
+	/**
+	 * 觉醒领主掉落（1.6.0 §1.5）：境材料 ×2 + 器魂书 II–III 100% + 觉醒徽记 100%。
+	 * 既有附魔书掉落（原 35% 蚀命 III 等）照旧走 dropLordLoot——由调用方先调原掉落再调本方法。
+	 */
+	public static void dropAwakenedLoot(LivingEntity lord, EncounterDef def, ServerLevel level,
+			net.minecraft.server.level.ServerPlayer killer) {
+		ItemStack material = new ItemStack(def.material(), def.materialCount() * 2);
+		lord.spawnAtLocation(level, material);
+		lord.spawnAtLocation(level, soulBook(level, def.id(), 2, 3));
+		ItemStack sigil = WarArtifacts.sigil(def.id());
+		if (!killer.getInventory().add(sigil)) {
+			lord.spawnAtLocation(level, sigil);
+		}
+		FxHelper.burstAt(level, lord.getX(), lord.getY(0.5D), lord.getZ(),
+				net.minecraft.core.particles.ParticleTypes.END_ROD, 24, 0.6D);
+	}
+
+	/** 普通领主的器魂小概率掉落（20%，I–II 级）——并入 dropLordLoot 调用链 */
+	public static void maybeDropSoulBook(LivingEntity lord, EncounterDef def, ServerLevel level) {
+		if (level.getRandom().nextFloat() < 0.20F) {
+			lord.spawnAtLocation(level, soulBook(level, def.id(), 1, 2));
+		}
 	}
 
 	/** 构造指定等级的附魔书（STORED_ENCHANTMENTS 组件，与创造栏一致） */

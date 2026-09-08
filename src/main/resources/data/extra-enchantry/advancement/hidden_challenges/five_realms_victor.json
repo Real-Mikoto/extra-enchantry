@@ -1,0 +1,28 @@
+{
+  "parent": "extra-enchantry:hidden_challenges/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:dragon_egg"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hidden.five_realms_victor"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hidden.five_realms_victor.desc"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
+}

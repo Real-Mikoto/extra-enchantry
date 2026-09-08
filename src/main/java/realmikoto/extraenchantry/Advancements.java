@@ -76,6 +76,17 @@ public final class Advancements {
 	/** 獠牙礼赞：首次在铁砧产出带本模附魔的狼铠 */
 	public static final ResourceKey<net.minecraft.advancements.Advancement> WOLF_ARMOR = key("wolf_armor");
 
+	// ========== 1.6.0 宣战与归一 ==========
+
+	/** 宣战者：首次使用任意宣战图腾 */
+	public static final ResourceKey<net.minecraft.advancements.Advancement> WAR_TOTEM_USED = key("war_totem_used");
+
+	/** 唤醒之敌：首次击杀任意觉醒境主 */
+	public static final ResourceKey<net.minecraft.advancements.Advancement> AWAKENED_SLAIN = key("awakened_slain");
+
+	/** 归一：完成归一之战 */
+	public static final ResourceKey<net.minecraft.advancements.Advancement> CONVERGENCE_DONE = key("convergence_done");
+
 	private Advancements() {
 	}
 

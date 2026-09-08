@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -195,11 +196,11 @@ public final class FamilyResonanceManager {
 					}
 				}
 			}
-			Map<Family, Tier> tiers = new EnumMap<>(Family.class);
-			for (Family family : Family.values()) {
-				int total = totals.get(family);
-				tiers.put(family, tierOf(total, family));
-			}
+		Map<Family, Tier> tiers = new EnumMap<>(Family.class);
+		for (Family family : Family.values()) {
+			int total = totals.get(family);
+			tiers.put(family, tierOf(total, family, player));
+		}
 			Map<Family, Tier> prev = PREV_TIERS.put(playerId, tiers);
 			TIERS.put(playerId, tiers);
 			TOTALS.put(playerId, totals);
@@ -252,11 +253,34 @@ public final class FamilyResonanceManager {
 		applyAttributePassives(player);
 	}
 
-	/** 累计等级 → 档位（阈值数据化） */
-	private static Tier tierOf(int total, Family family) {
+	/** 累计等级 → 档位（阈值数据化；1.6.0 五境同辉：四护甲任一携带 → 两阈值各 −1） */
+	private static Tier tierOf(int total, Family family, ServerPlayer player) {
 		ResonanceConfig.FamilyRules rules = ResonanceConfig.rules(family);
-		return total >= rules.fullThreshold() ? Tier.FULL
-				: total >= rules.partialThreshold() ? Tier.PARTIAL : Tier.NONE;
+		int partial = rules.partialThreshold();
+		int full = rules.fullThreshold();
+		if (hasRealmsUnity(player)) {
+			partial = Math.max(1, partial - 1);
+			full = Math.max(1, full - 1);
+		}
+		return total >= full ? Tier.FULL
+				: total >= partial ? Tier.PARTIAL : Tier.NONE;
+	}
+
+	/** 五境同辉（46 号传说）：四护甲槽任一携带即生效（单件生效，多件不叠加） */
+	private static boolean hasRealmsUnity(ServerPlayer player) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (!slot.isArmor()) {
+				continue;
+			}
+			ItemStack stack = player.getItemBySlot(slot);
+			ItemEnchantments enchantments = stack.getEnchantments();
+			for (Holder<Enchantment> enchantment : enchantments.keySet()) {
+				if (enchantment.is(ExtraEnchantry.REALMS_UNITY)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

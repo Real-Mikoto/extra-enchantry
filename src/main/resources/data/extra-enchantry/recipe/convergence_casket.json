@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "extra-enchantry:convergence_core",
+    "extra-enchantry:sculk_core",
+    "extra-enchantry:ember_core",
+    "extra-enchantry:tidal_tear",
+    "extra-enchantry:potion_essence",
+    "extra-enchantry:void_shard"
+  ],
+  "result": {
+    "id": "extra-enchantry:convergence_casket",
+    "count": 1
+  }
+}

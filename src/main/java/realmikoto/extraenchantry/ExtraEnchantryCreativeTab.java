@@ -67,7 +67,14 @@ public final class ExtraEnchantryCreativeTab {
 			new EnchantmentEntry(ExtraEnchantry.TIDE_BRACELET, 2),
 			new EnchantmentEntry(ExtraEnchantry.SHARP_FANG, 3),
 			new EnchantmentEntry(ExtraEnchantry.VIGIL, 2),
-			new EnchantmentEntry(ExtraEnchantry.RENEWAL, 2)
+			new EnchantmentEntry(ExtraEnchantry.RENEWAL, 2),
+			// 1.6.0「宣战与归一」器魂六附魔（41–46）
+			new EnchantmentEntry(ExtraEnchantry.CLEARSIGHT, 3),
+			new EnchantmentEntry(ExtraEnchantry.WITHERBLADE, 2),
+			new EnchantmentEntry(ExtraEnchantry.TIDESURGE, 3),
+			new EnchantmentEntry(ExtraEnchantry.HEXBREAK, 3),
+			new EnchantmentEntry(ExtraEnchantry.VOIDBLINK, 2),
+			new EnchantmentEntry(ExtraEnchantry.REALMS_UNITY, 1)
 	);
 
 	public static final ResourceKey<CreativeModeTab> TAB_KEY =
@@ -98,6 +105,14 @@ public final class ExtraEnchantryCreativeTab {
 					for (net.minecraft.world.item.Item treasure : RealmTreasures.CREATIVE_ITEMS) {
 						output.accept(new ItemStack(treasure));
 					}
+					// 1.6.0「宣战与归一」：图腾（五型）+ 徽记（五型）+ 印记 / 心核 / 宝匣
+					for (String realm : new String[]{"overwarden", "emberbone", "tidal", "hag", "ender"}) {
+						output.accept(WarArtifacts.totem(realm));
+						output.accept(WarArtifacts.sigil(realm));
+					}
+					output.accept(new ItemStack(WarArtifacts.CONVERGENCE_MARK));
+					output.accept(new ItemStack(WarArtifacts.CONVERGENCE_CORE));
+					output.accept(new ItemStack(WarArtifacts.CONVERGENCE_CASKET));
 					for (EnchantmentEntry entry : ENCHANTMENTS) {
 						Holder<Enchantment> holder = parameters.holders()
 								.lookupOrThrow(Registries.ENCHANTMENT)
