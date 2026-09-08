@@ -68,6 +68,14 @@ public final class Advancements {
 	/** 基石崩解（隐藏挑战）：拓阶挖掘基岩 */
 	public static final ResourceKey<net.minecraft.advancements.Advancement> BEDROCK_BREAKER = key("bedrock_breaker");
 
+	// ========== 1.4.0 环佩与獠牙 ==========
+
+	/** 环佩琳琅：首次穿戴任意配饰 */
+	public static final ResourceKey<net.minecraft.advancements.Advancement> ACCESSORY_ATTIRE = key("accessory_attire");
+
+	/** 獠牙礼赞：首次在铁砧产出带本模附魔的狼铠 */
+	public static final ResourceKey<net.minecraft.advancements.Advancement> WOLF_ARMOR = key("wolf_armor");
+
 	private Advancements() {
 	}
 

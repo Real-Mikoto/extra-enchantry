@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "extra-enchantry:wind_feather"
+  ],
+  "result": {
+    "id": "extra-enchantry:copper_ring",
+    "components": {
+      "extra-enchantry:socketed_gem": "wind_feather"
+    }
+  }
+}

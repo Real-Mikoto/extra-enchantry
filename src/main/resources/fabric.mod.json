@@ -3,7 +3,7 @@
 	"id": "extra-enchantry",
 	"version": "${version}",
 	"name": "Extra Enchantry",
-	"description": "Extra Enchantry adds 23 custom enchantments for Minecraft 26.2 (Fabric) - from Limit Break and Emberfall to the Cataclysm of Realms challenge, four shield enchantments and horse armor enchanting.",
+	"description": "Extra Enchantry adds 40 custom enchantments for Minecraft 26.2 (Fabric) - from Limit Break and Emberfall to the Cataclysm of Realms challenge, the accessory system with family gems, wolf armor enchanting and fire-family fire immunity.",
 	"authors": [
 		"RealMikoto"
 	],

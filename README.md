@@ -10,73 +10,88 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 ## 附魔总览
 
-| 附魔                     | 等级  | 可附魔物品                              | 获取方式                                              |
-| ---------------------- | --- | ---------------------------------- | ------------------------------------------------- |
-| 凋零保护 Wither Protection | IV  | 四件护甲                               | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                         |
-| 炽焰行者 Blazing Walker    | II  | 靴子                                 | 宝藏：图书管理员 / 宝箱 / 钓鱼（无附魔台）                          |
-| 破限 Limit Break         | I   | 武器 / 工具 / 护甲 / 弓弩 / 三叉戟 / 钓鱼竿 / 马铠 | 击杀坚守者 0.05%（闪电苦力怕击杀 0.5%）；完成「诸界浩劫」挑战后方可使用         |
-| 拓阶 Tier Break          | III | 镐 / 斧 / 锹 / 锄                      | 击杀凋零 20%（1-3 级随机）                                 |
-| 触及 Reach               | X   | 近战武器 + 工具                          | 非宝藏（仅获得 1 级，铁砧融合升级）                               |
-| 假象 Decoy               | III | 头盔                                 | 非宝藏：与荆棘同稀有度（互斥）                                   |
-| 汲取 Siphon              | III | 武器 / 工具 / 弓弩 / 三叉戟                 | 非宝藏：very_rare，附魔台 / 交易 / 宝箱 / 钓鱼                 |
-| 蚀命 Life Erosion        | III | 武器 / 工具 / 弓弩 / 三叉戟                 | 仅远古城市宝箱（附魔书 / 带附魔的武器工具）                           |
-| 活力 Vitality            | V   | 四件盔甲 / 马铠                          | 非宝藏：普通稀有度，附魔台 / 交易 / 宝箱 / 钓鱼                      |
-| 壁垒 Bulwark             | X   | 胸甲 / 马铠                            | 非宝藏：仅获得 1 级，铁砧融合升级                                |
-| 劫后余辉 Afterglow         | I   | 不死图腾                               | 非宝藏：图书管理员 / 宝箱 / 钓鱼（生存靠铁砧打书）                      |
-| 誓约 Oathbound           | I   | 全装备                                | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                         |
-| 空跃 Skyward             | II  | 靴子                                 | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与冰霜行者 / 深海探索者 / 炽焰行者互斥） |
-| 破阵 Cleave              | III | 近战武器 / 工具                          | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与横扫之刃互斥）                |
-| 御风 Windrider           | III | 鞘翅                                 | 仅末地城宝箱（附魔书 / 带附魔的鞘翅）                              |
-| 无踪 Unseen              | II  | 靴子                                 | 仅远古城市宝箱（与靴子系附魔互斥）                                 |
-| 断罪 Judgement           | II  | 近战武器 / 工具                          | 非宝藏：very_rare，附魔台 / 交易 / 宝箱 / 钓鱼                 |
-| 疾风 Gale                | III | 护腿                                 | 非宝藏：随机最高 II 级，III 级需破限铁砧融合                        |
-| 余烬 Emberfall           | I   | 金胸甲 / 金马铠                          | 仅不祥试炼唯一奖励箱（附魔书 / 带附魔的金胸甲）；金马铠走铁砧 + 书              |
-| 冲阵 Shield Charge       | III | 盾牌                                 | 非宝藏：uncommon，附魔台 / 图书管理员 / 宝箱 / 钓鱼                |
-| 不屈 Defiance            | II  | 盾牌                                 | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
-| 庇护 Sanctuary           | III | 盾牌                                 | 试炼密室基础 / 稀有奖励箱（附魔书 / 带附魔的盾牌）                      |
-| 坚壁 Aegis               | III | 盾牌                                 | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
-| 归羽 Homing Plume        | II  | 弓 / 弩                               | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与无限互斥）                 |
-| 坠星 Starfall            | I   | 弩                                  | 仅末地城宝箱（附魔书 / 带附魔的弩，与多重射击互斥）                     |
-| 霆霓 Stormsurge          | II  | 三叉戟                                | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与引雷互斥）                 |
-| 藏锋 Sheathed Edge       | III | 剑 / 斧                              | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
-| 渊息 Tideheart           | III | 头盔                                 | 宝藏（无附魔台）：海洋系宝箱（沉船 / 宝藏 / 海底废墟）+ 钓鱼；与水下呼吸 / 水下速掘互斥 |
-| 丰壤 Loam                | III | 锄                                  | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                       |
+| #   | 附魔                     | 等级  | 可附魔物品                              | 获取方式                                              |
+| --- | ---------------------- | --- | ---------------------------------- | ------------------------------------------------- |
+| 1 | 凋零保护 Wither Protection | IV  | 四件护甲                               | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                         |
+| 2 | 炽焰行者 Blazing Walker    | II  | 靴子                                 | 宝藏：图书管理员 / 宝箱 / 钓鱼（无附魔台）                          |
+| 3 | 破限 Limit Break         | I   | 武器 / 工具 / 护甲 / 弓弩 / 三叉戟 / 钓鱼竿 / 马铠 | 击杀坚守者 0.05%（闪电苦力怕击杀 0.5%）；完成「诸界浩劫」挑战后方可使用         |
+| 4 | 拓阶 Tier Break          | III | 镐 / 斧 / 锹 / 锄                      | 击杀凋零 20%（1-3 级随机）                                 |
+| 5 | 触及 Reach               | X   | 近战武器 + 工具                          | 非宝藏（仅获得 1 级，铁砧融合升级）                               |
+| 6 | 假象 Decoy               | III | 头盔                                 | 非宝藏：与荆棘同稀有度（互斥）                                   |
+| 7 | 汲取 Siphon              | III | 武器 / 工具 / 弓弩 / 三叉戟                 | 非宝藏：very_rare，附魔台 / 交易 / 宝箱 / 钓鱼                 |
+| 8 | 蚀命 Life Erosion        | III | 武器 / 工具 / 弓弩 / 三叉戟                 | 仅远古城市宝箱（附魔书 / 带附魔的武器工具）                           |
+| 9 | 活力 Vitality            | V   | 四件盔甲 / 马铠                          | 非宝藏：普通稀有度，附魔台 / 交易 / 宝箱 / 钓鱼                      |
+| 10 | 壁垒 Bulwark             | X   | 胸甲 / 马铠                            | 非宝藏：仅获得 1 级，铁砧融合升级                                |
+| 11 | 劫后余辉 Afterglow         | I   | 不死图腾                               | 非宝藏：图书管理员 / 宝箱 / 钓鱼（生存靠铁砧打书）                      |
+| 12 | 誓约 Oathbound           | I   | 全装备                                | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                         |
+| 13 | 空跃 Skyward             | II  | 靴子                                 | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与冰霜行者 / 深海探索者 / 炽焰行者互斥） |
+| 14 | 破阵 Cleave              | III | 近战武器 / 工具                          | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与横扫之刃互斥）                |
+| 15 | 御风 Windrider           | III | 鞘翅                                 | 仅末地城宝箱（附魔书 / 带附魔的鞘翅）                              |
+| 16 | 无踪 Unseen              | II  | 靴子                                 | 仅远古城市宝箱（与靴子系附魔互斥）                                 |
+| 17 | 断罪 Judgement           | II  | 近战武器 / 工具                          | 非宝藏：very_rare，附魔台 / 交易 / 宝箱 / 钓鱼                 |
+| 18 | 疾风 Gale                | III | 护腿                                 | 非宝藏：随机最高 II 级，III 级需破限铁砧融合                        |
+| 19 | 余烬 Emberfall           | I   | 金胸甲 / 金马铠                          | 仅不祥试炼唯一奖励箱（附魔书 / 带附魔的金胸甲）；金马铠走铁砧 + 书              |
+| 20 | 冲阵 Shield Charge       | III | 盾牌                                 | 非宝藏：uncommon，附魔台 / 图书管理员 / 宝箱 / 钓鱼                |
+| 21 | 不屈 Defiance            | II  | 盾牌                                 | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
+| 22 | 庇护 Sanctuary           | III | 盾牌                                 | 试炼密室基础 / 稀有奖励箱（附魔书 / 带附魔的盾牌）                      |
+| 23 | 坚壁 Aegis               | III | 盾牌                                 | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
+| 24 | 归羽 Homing Plume        | II  | 弓 / 弩                               | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与无限互斥）                 |
+| 25 | 坠星 Starfall            | I   | 弩                                  | 仅末地城宝箱（附魔书 / 带附魔的弩，与多重射击互斥）                     |
+| 26 | 霆霓 Stormsurge          | II  | 三叉戟                                | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼（与引雷互斥）                 |
+| 27 | 藏锋 Sheathed Edge       | III | 剑 / 斧                              | 非宝藏：rare，附魔台 / 图书管理员 / 宝箱 / 钓鱼                    |
+| 28 | 渊息 Tideheart           | III | 头盔                                 | 宝藏（无附魔台）：海洋系宝箱（沉船 / 宝藏 / 海底废墟）+ 钓鱼；与水下呼吸 / 水下速掘互斥 |
+| 29 | 丰壤 Loam                | III | 锄                                  | 非宝藏：附魔台 / 图书管理员 / 宝箱 / 钓鱼                       |
+| 30 | 魂铃 Soul Chime          | II  | 耳环                                | 非宝藏：击杀敌对生物回复饥饿与饱和                             |
+| 31 | 盾坠 Shield Pendant       | II  | 耳环                                | 非宝藏：受到的伤害 -3%/级                              |
+| 32 | 雷鸣扣 Thunder Clasp      | II  | 项链                                 | 非宝藏：雷雨时造成的伤害 +4%/级                              |
+| 33 | 翠滴 Verdant Drop          | II  | 项链                                 | 非宝藏：自然恢复 +10%/级                                   |
+| 34 | 刃戒 Blade Ring             | II  | 戒指                                 | 非宝藏：攻击速度 +5%/级                                     |
+| 35 | 羽环 Plume Ring             | II  | 戒指                                 | 非宝藏：弹射物伤害 -6%/级                                   |
+| 36 | 烬镯 Ember Bracelet        | II  | 手镯                                 | 非宝藏：火焰伤害 -10%/级                                    |
+| 37 | 潮镯 Tide Bracelet         | II  | 手镯                                 | 非宝藏：游泳效率 +8%/级                                    |
+| 38 | 锐牙 Sharp Fang             | III | 狼铠                                 | 非宝藏：狼近战伤害 +10%/级                                  |
+| 39 | 哨戒 Vigil                    | II | 狼铠                                 | 非宝藏：狼索敌/跟随范围 +25%/级                              |
+| 40 | 回春 Renewal                 | II | 狼铠                                 | 非宝藏：狼每 4 秒回复 1 HP/级                              |
 
 
 ## 目录
 
 * [附魔](#附魔)
-  * [凋零保护 (Wither Protection)](#凋零保护-wither-protection)
-  * [炽焰行者 (Blazing Walker)](#炽焰行者-blazing-walker)
-  * [破限 (Limit Break)](#破限-limit-break)
-  * [拓阶 (Tier Break)](#拓阶-tier-break)
-  * [触及 (Reach)](#触及-reach)
-  * [假象 (Decoy)](#假象-decoy)
-  * [汲取 (Siphon)](#汲取-siphon)
-  * [蚀命 (Life Erosion)](#蚀命-life-erosion)
-  * [活力 (Vitality)](#活力-vitality)
-  * [壁垒 (Bulwark)](#壁垒-bulwark)
-  * [劫后余辉 (Afterglow)](#劫后余辉-afterglow)
-  * [誓约 (Oathbound)](#誓约-oathbound)
-  * [空跃 (Skyward)](#空跃-skyward)
-  * [破阵 (Cleave)](#破阵-cleave)
-  * [御风 (Windrider)](#御风-windrider)
-  * [无踪 (Unseen)](#无踪-unseen)
-  * [断罪 (Judgement)](#断罪-judgement)
-  * [疾风 (Gale)](#疾风-gale)
-  * [余烬 (Emberfall)](#余烬-emberfall)
-  * [盾牌四附魔 (Shield Enchantments)](#盾牌四附魔-shield-enchantments)
-  * [归羽 (Homing Plume)](#归羽-homing-plume)
-  * [坠星 (Starfall)](#坠星-starfall)
-  * [霆霓 (Stormsurge)](#霆霓-stormsurge)
-  * [藏锋 (Sheathed Edge)](#藏锋-sheathed-edge)
-  * [渊息 (Tideheart)](#渊息-tideheart)
-  * [丰壤 (Loam)](#丰壤-loam)
-* [玩法](#玩法)
-  * [僵尸马骑兵队与「诸界浩劫」 (Zombie Horse Cavalry & Cataclysm of Realms)](#僵尸马骑兵队与诸界浩劫-zombie-horse-cavalry--cataclysm-of-realms)
+  * [1. 凋零保护 (Wither Protection)](#1-凋零保护-wither-protection)
+  * [2. 炽焰行者 (Blazing Walker)](#2-炽焰行者-blazing-walker)
+  * [3. 破限 (Limit Break)](#3-破限-limit-break)
+  * [4. 拓阶 (Tier Break)](#4-拓阶-tier-break)
+  * [5. 触及 (Reach)](#5-触及-reach)
+  * [6. 假象 (Decoy)](#6-假象-decoy)
+  * [7. 汲取 (Siphon)](#7-汲取-siphon)
+  * [8. 蚀命 (Life Erosion)](#8-蚀命-life-erosion)
+  * [9. 活力 (Vitality)](#9-活力-vitality)
+  * [10. 壁垒 (Bulwark)](#10-壁垒-bulwark)
+  * [11. 劫后余辉 (Afterglow)](#11-劫后余辉-afterglow)
+  * [12. 誓约 (Oathbound)](#12-誓约-oathbound)
+  * [13. 空跃 (Skyward)](#13-空跃-skyward)
+  * [14. 破阵 (Cleave)](#14-破阵-cleave)
+  * [15. 御风 (Windrider)](#15-御风-windrider)
+  * [16. 无踪 (Unseen)](#16-无踪-unseen)
+  * [17. 断罪 (Judgement)](#17-断罪-judgement)
+  * [18. 疾风 (Gale)](#18-疾风-gale)
+  * [19. 余烬 (Emberfall)](#19-余烬-emberfall)
+  * [盾牌四附魔 (Shield Enchantments)（20~23）](#盾牌四附魔-shield-enchantments)
+  * [24. 归羽 (Homing Plume)](#24-归羽-homing-plume)
+  * [25. 坠星 (Starfall)](#25-坠星-starfall)
+  * [26. 霆霓 (Stormsurge)](#26-霆霓-stormsurge)
+  * [27. 藏锋 (Sheathed Edge)](#27-藏锋-sheathed-edge)
+  * [28. 渊息 (Tideheart)](#28-渊息-tideheart)
+  * [29. 丰壤 (Loam)](#29-丰壤-loam)
+  * [配饰八附魔 (Accessory Enchantments)（30~37）](#配饰八附魔-accessory-enchantments)
+  * [狼铠三附魔 (Wolf Armor Enchantments)（38~40）](#狼铠三附魔-wolf-armor-enchantments)
+* [版本主题](#版本主题)
+  * [1.0.0「诸界浩劫」 (Cataclysm of Realms)](#100诸界浩劫-cataclysm-of-realms)
   * [1.2.0「共鸣与臻藏」 (Resonance & Collector)](#120共鸣与臻藏-resonance--collector)
   * [1.3.0「铭刻与试炼」 (Inscription & Trials)](#130铭刻与试炼-inscription--trials)
-  * [1.3.1「铭文纪元」 (Era of Inscription)](#131铭文纪元-era-of-inscription)
+    * [1.3.1「铭文纪元」 (Era of Inscription)](#131铭文纪元-era-of-inscription)
+    * [1.3.2 修复补丁 (Hotfix)](#132修复补丁-hotfix)
+    * [1.4.0「环佩与獠牙」 (Trinkets & Fangs)](#140环佩与獠牙-trinkets--fangs)
 * [通用技术模式](#通用技术模式)
 * [记录规范](#记录规范)
 
@@ -84,7 +99,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 ## 附魔
 
-### 凋零保护 (Wither Protection)
+### 1. 凋零保护 (Wither Protection)
 
 **功能**：受到凋零效果时，按装备上的附魔总等级缩短凋零持续时间。每级减少 15%，多件叠加，总减少上限 90%。
 
@@ -107,7 +122,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure` 标签 → 自动获得附魔台（`in_enchanting_table`）、图书管理员（`tradeable`）、宝箱 / 钓鱼（`on_random_loot`）全部途径（这三个标签都引用 `#non_treasure`）。
 
-### 炽焰行者 (Blazing Walker)
+### 2. 炽焰行者 (Blazing Walker)
 
 **功能**：与冰霜行者同构 —— 行走时脚下半径内岩浆凝固成岩浆块（1 级半径 3 格、2 级 4 格），同时免疫踩踏热方块的伤害（含岩浆块）。与冰霜行者、深海探索者互斥。
 
@@ -122,7 +137,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：作为宝藏附魔 —— 追加进 `treasure`、`tradeable`、`on_random_loot` 三个标签（无附魔台）。
 
-### 破限 (Limit Break)
+### 3. 破限 (Limit Break)
 
 **功能**（单级，作用于带此附魔的物品 / 护甲）：
 
@@ -133,7 +148,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 5. 装备上的破限无法被砂轮去除
 6. **等级突破（1.0.1）**：带破限的输入在铁砧融合时，所有"逻辑上可增加一级"的附魔等级上限 **+1**（例：两个保护 IV → 保护 V；触及 X → XI）。覆盖 32 种原版附魔（耐久/四保护/摔落/荆棘/水下呼吸/深海探索者/灵魂疾行/锋利三系/抢夺/击退/横扫/效率/破甲/致密/风爆/穿刺/冲刺/力量/冲击/快速装填/多重射击/忠诚/激流/穿透/时运/海之眷顾/饵钓）+ 7 种本 mod 附魔（凋零保护/触及/汲取/蚀命/活力/壁垒/空跃）。仅对可成长附魔生效，单级附魔（精准采集等）不变。
 
-**使用门禁**：破限附魔书在完成「诸界浩劫」守护挑战（四波，见第 20 节）前**无法使用**—— 未达成「无敌」进度时，铁砧上应用破限书会被拦截（清空产出 + 动作栏提示）；达成「无敌」进度即解锁，进度持久化 = 解锁状态持久化。
+**使用门禁**：破限附魔书在完成「诸界浩劫」守护挑战（四波，见[「1.0.0 诸界浩劫」](#100诸界浩劫-cataclysm-of-realms)）前**无法使用**—— 未达成「无敌」进度时，铁砧上应用破限书会被拦截（清空产出 + 动作栏提示）；达成「无敌」进度即解锁，进度持久化 = 解锁状态持久化。
 
 #### 实现方法
 
@@ -172,7 +187,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * `@Redirect` 拦截 `getDamageAfterMagicAbsorb` 中的 `CombatRules.getDamageAfterMagicAbsorb(damage, protection)`
 * 护甲带破限时改用 `damage × (1 - clamp(EPF, 0, 25)/25)`（原版 clamp 上限 20 = 80% 减免，改 25 = 100%）
 
-**等级突破（1.0.1）**：`AnvilMenuMixin` 重定向 `createResult` 内的 `Enchantment#getMaxLevel`——带破限输入时对 `LEVEL_UP_ENCHANTMENTS`（32 原版 + 7 本 mod）返回原版上限 +1。`hasLimitBreakInput` 同步改用 `carriesLimitBreak`（同时检查 ENCHANTMENTS 与 STORED_ENCHANTMENTS），破限**书**作为附加槽也能触发融合加成。配套扩展蚀命比率表（等级 4 → 19%）与壁垒上限表（等级 11 → 1.5 心）。
+**等级突破（1.0.1）**：`AnvilMenuMixin` 重定向 `createResult` 内的 `Enchantment#getMaxLevel`——带破限输入时对 `LEVEL_UP_ENCHANTMENTS`（32 原版 + 7 本 mod）返回原版上限 +1。`hasLimitBreakInput` 同步改用 `carriesLimitBreak`（同时检查 ENCHANTMENTS 与 STORED_ENCHANTMENTS），破限**书**作为附加槽也能触发融合加成。配套扩展蚀命比率表（等级 4 → 19%）与壁垒上限表（等级 11 → 1.5 HP）。
 
 **跨部位附魔解锁**（摔落保护上腿甲）：主类订阅 fabric-item-api 的 `EnchantmentEvents.ALLOW_ENCHANTING` 事件 —— 附魔是原版 `feather_falling` 且目标是带破限的腿甲（`#minecraft:enchantable/leg_armor`）时返回 `TriState.TRUE` 跳过 canEnchant（supported_items 部位检查）。**不能**用 Mixin Redirect 拦 `Enchantment.canEnchant`：fabric-item-api 自身的 AnvilMenuMixin 已 Redirect 该调用点（Redirect 独占注入，冲突即 Critical injection failure）。
 
@@ -182,7 +197,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * `@Inject` HEAD 时记录装备 ENCHANTMENTS 中的破限 Holder 与等级（ThreadLocal），RETURN 时塞回结果物品
 * 附魔书不保护：书去附魔后本就转换为普通书（原版机制），是自愿清除的合理途径
 
-### 拓阶 (Tier Break)
+### 4. 拓阶 (Tier Break)
 
 **功能**：3 级，每级 +1 挖掘等级（低级工具可采集原本不可掉落的方块，如木镐 + 1 挖铁矿）。下界合金镐 + 3 级拓阶可挖掘基岩，挖掘时间为黑曜石的两倍，受效率影响，破坏后掉落基岩。
 
@@ -200,7 +215,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **数据**：附魔 JSON（3 级，`#minecraft:enchantable/mining_loot`，仅主手）；`entities/wither.json` 追加 20% 掉落池（等级 `uniform 1-3`）；新增 `blocks/bedrock.json` 掉落表（基岩掉自身）。
 
-### 触及 (Reach)
+### 5. 触及 (Reach)
 
 **功能**：10 级，每级 +0.5 实体交互范围与方块交互范围。非宝藏附魔，随机来源仅能获得 1 级，更高等级只能通过铁砧融合升级（I+I→II...）。
 
@@ -226,7 +241,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取**：`supported_items: #extra-enchantry:reach_supported`（weapon + trident + mining_loot 标签，即剑 / 矛 / 斧 / 锤 / 三叉戟 / 镐 / 锄 / 锹）；追加进 `non_treasure`。
 
-### 假象 (Decoy)
+### 6. 假象 (Decoy)
 
 **功能**：3 级，头盔专属，与荆棘互斥。当生物仇恨锁定玩家或被其他玩家伤害时触发判定（判定间隔 10 秒，成功后进入全局冷却）。生成复刻玩家外观的诱饵转移仇恨：
 
@@ -266,7 +281,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：与荆棘同稀有度 → 追加进 `non_treasure`（附魔台 / 图书管理员 / 宝箱 / 钓鱼全途径，获取概率与荆棘一致）。
 
-### 汲取 (Siphon)
+### 7. 汲取 (Siphon)
 
 **功能**：3 级，可附魔在武器 / 工具 / 远程武器上。每次攻击成功造成伤害时回复自身生命：近战每级回复 1 颗心（I/II/III 级 → 2/4/6 HP）；远程武器（弓 / 弩 / 掷出的三叉戟等投射物命中）获得的回复效果减半（→ 1/2/3 HP）。非宝藏附魔，稀有度 very_rare（`weight: 1`）。
 
@@ -289,7 +304,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure` 标签 → 附魔台（`in_enchanting_table` 引用 `#non_treasure`）、图书管理员、宝箱、钓鱼全途径；因 `weight: 1` 实际出现率同荆棘级。
 
-### 蚀命 (Life Erosion)
+### 8. 蚀命 (Life Erosion)
 
 **功能**：3 级，可附魔在近战武器 / 工具与远程武器上。对生物造成伤害时，额外追加百分比**目标最大生命值**的伤害：I 级 14%、II 级 15%、III 级 17%；远程武器（弓 / 弩 / 掷出的三叉戟等投射物）效果减少 1/4（即 ×0.75）。仅远古城市宝箱可获得（附魔书或自带蚀命的武器 / 工具）。
 
@@ -315,7 +330,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **排他性保障**：不加入 `non_treasure`/`tradeable`/`on_random_loot` 任何获取标签 ——`enchant_randomly`（宝箱书 / 交易 / 钓鱼随机附魔）从 `#on_random_loot` 标签筛选候选（反编译 `EnchantRandomlyFunction` 确认），不在标签内则全途径隔离，仅远古城市专属池掉落。
 
-### 活力 (Vitality)
+### 9. 活力 (Vitality)
 
 **功能**：5 级，四件盔甲与全部马铠均可附魔。每级 +4 点最大生命值，多件叠加，叠加上限 +50；任意护甲带破限时上限失效（最高 4 件 × 5 级 × 4 HP = +80）。稀有度普通（`weight: 10`），非宝藏。血条过长遮挡视野的额外生命不在心形栏中展开，而是在原生命值条上方左对齐以 “❤×n/N” 紧凑显示（n = 当前剩余，N = 盔甲提供的最大颗数）。马铠活力对马生效（26.2 `isArmor()` 覆盖动物 BODY 槽，天然参与同一套求和），骑兵队等持械生物的下界合金套同样照常结算。
 
@@ -342,7 +357,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure` → 附魔台 / 图书管理员 / 宝箱 / 钓鱼全途径，普通稀有度出现率。
 
-### 壁垒 (Bulwark)
+### 10. 壁垒 (Bulwark)
 
 **功能**：10 级，胸甲与全部马铠可附魔。锁定受到单次伤害的上限：I 级 5.5 颗心（11 HP），每级递减 0.5 颗心，至 X 级 1 颗心（2 HP）。非宝藏，随机来源仅能获得 1 级（同触及），更高等级只能铁砧融合升级。马铠壁垒对马生效（`applyBulwarkCap` 同时读 CHEST 与 BODY 槽取较大者 —— 玩家 BODY 恒空、马 CHEST 恒空，互不干扰）。
 
@@ -364,7 +379,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`，随机途径仅出 1 级，II 级及以上需铁砧融合。
 
-### 劫后余辉 (Afterglow)
+### 11. 劫后余辉 (Afterglow)
 
 **功能**：单级，**只能附魔在不死图腾上**。带此附魔的不死图腾被触发时，在原版复活效果之外额外给予 "余辉"：生命值立即回满、获得 10 秒锁血（期间生命值不会因任何伤害而降低）、并给予 5 颗伤害吸收的黄色心（10 HP，取自金苹果的伤害吸收效果）。非宝藏附魔，稀有度 rare（`weight: 2`）。效果不做任何持久化 —— 图腾触发时即被消耗，附魔随之消失。
 
@@ -404,7 +419,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure` → 自动进入 `in_enchanting_table`/`tradeable`/`on_random_loot`（图书管理员、宝箱、钓鱼）。注意：附魔台槽位的准入检查是 `ItemStack#isEnchantable()`（要求 `DataComponents.ENCHANTABLE` 组件），不死图腾没有该组件，**实际放不进附魔台**；且 `AnvilMenu` 不做该检查（只看 `supported_items`），所以生存中的正常途径是铁砧把劫后余辉附魔书打到不死图腾上。
 
-### 誓约 (Oathbound)
+### 12. 誓约 (Oathbound)
 
 **功能**：单级。带誓约的物品在玩家死亡时不掉落、不消失（消失诅咒同样无效），重生后回到背包原槽位；四件护甲（头 / 胸 / 腿 / 脚）全部带誓约时，死亡时经验值与分数也全额保留（随身 keepInventory）。`keepInventory` 开启时本附魔逻辑自然短路。
 
@@ -424,7 +439,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-### 空跃 (Skyward)
+### 13. 空跃 (Skyward)
 
 **功能**：2 级，靴子专属。空中可再跳 I 级 1 次 / II 级 2 次。次数在触地 / 进水 / 攀爬时重置；按住空格不连烧次数（按键沿触发）；骑乘、鞘翅滑翔、创造飞行时不触发。与冰霜行者 / 深海探索者 / 炽焰行者互斥。
 
@@ -442,7 +457,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-### 破阵 (Cleave)
+### 14. 破阵 (Cleave)
 
 **功能**：3 级，近战武器 / 工具。命中主目标后，对 2 格内最多 1/2/3 个额外目标造成主目标伤害的 45%/55%/65%（走完整护甲结算；v1.1.0 由 50%/60%/70% 下调，缩小与横扫之刃的差距），按与主目标的距离由近到远选取。触发时附带范围视觉：每个溅射目标身上生成横扫攻击粒子（原版横扫之刃同款），主目标脚下画一圈 2 格半径的暴击粒子范围指示。溅射**不触发**汲取与蚀命（防滚雪球），也**不触发**破阵自身（防递归）。与横扫之刃互斥。
 
@@ -463,7 +478,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-### 御风 (Windrider)
+### 15. 御风 (Windrider)
 
 **功能**：3 级，**鞘翅专属**。I 级滑翔耐久消耗 -50%；II 级在此基础上烟花火箭推进 +50%；III 级将 I、II 级效果各再强化 50%（耐久 -75%、推进 +75%）。仅末地城宝箱可获得。
 
@@ -477,11 +492,11 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 **核心逻辑两处**：
 
 1. **滑翔耐久** `LivingEntityMixin` —— 26.2 反编译确认鞘翅耐久在 `LivingEntity#updateFallFlying` 内：每 10 tick 计一次、每 2 次（即 20 tick）对**可滑翔装备槽中随机一个** `hurtAndBreak(1, this, slot)`。`@Redirect` 该调用，按 `WINDRIDER_DURABILITY_SKIP = {0.5, 0.5, 0.75}` 概率跳过 → 等效耐久消耗 -50%/-75%
-2. **烟花推进** `FireworkRocketEntityMixin`（新建）—— `FireworkRocketEntity#tick` 对**正在滑翔的附着实体**做一次朝视线方向的插值加速后调 `LivingEntity#setDeltaMovement`（该方法内仅此一处以 LivingEntity 为 owner 的调用，其余是火箭自身移动）。`@Redirect` 后取出 “本次推进增量”（新速度 - 旧速度）按 `WINDRIDER_BOOST_FACTOR = {1.0, 1.5, 1.6}` 放大写回，不改动原版插值公式
+2. **烟花推进** `FireworkRocketEntityMixin`（新建）—— `FireworkRocketEntity#tick` 对**正在滑翔的附着实体**做一次朝视线方向的插值加速后调 `LivingEntity#setDeltaMovement`（该方法内仅此一处以 LivingEntity 为 owner 的调用，其余是火箭自身移动）。`@Redirect` 后取出 “本次推进增量”（新速度 - 旧速度）按 `WINDRIDER_BOOST_FACTOR = {1.0, 1.5, 1.75}` 放大写回，不改动原版插值公式
 
 **获取途径（专属掉落表）**：覆盖 `data/minecraft/loot_table/chests/end_city_treasure.json`—— 保留原版两个池，追加第三池（rolls 1）：70% 空 / 18% 御风附魔书（等级 `uniform 1-3`）/ 12% 带御风的鞘翅（`set_damage 0.9-1.0`）。
 
-### 无踪 (Unseen)
+### 16. 无踪 (Unseen)
 
 **功能**：2 级，靴子专属。I 级：消除脚步声与落地声，**且不发出 STEP / HIT_GROUND 震动事件**—— 幽匿感测体与监守者无法通过行走 / 落地侦测到穿戴者（摔落伤害、落地粒子、`Block#fallOn` 行为全部保留）；II 级：额外使怪物索敌范围 -30%。与冰霜行者 / 深海探索者 / 炙焰行者 / 空跃互斥。仅远古城市宝箱可获得。
 
@@ -501,7 +516,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径（专属掉落表）**：`chests/ancient_city.json` 追加第四池（rolls 1）：70% 空 / 16% 无踪附魔书（等级 `uniform 1-2`）/ 14% 带无踪的靴子（铁 5 / 锁甲 5 / 钻石 4，均 `set_damage 0.8-1.0`）。不加入任何获取标签，与监守者（声音侦测）主题绑定。
 
-### 断罪 (Judgement)
+### 17. 断罪 (Judgement)
 
 **功能**：2 级，近战武器 / 工具（复用破阵的 `cleave_supported` 标签：weapon + mining）。目标当前生命（含伤害吸收）≤ 最大生命的 10%/20% 时**直接斩杀**；对 boss（末影龙 / 凋灵 / 监守者）不斩杀，改为该次伤害 ×2；斩杀触发后攻击者 5 秒冷却，触发瞬间目标身上爆发灵魂粒子。非宝藏，very_rare。
 
@@ -521,7 +536,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure` → 附魔台 / 图书管理员 / 宝箱 / 钓鱼，`weight: 1` 出现率极低。
 
-### 疾风 (Gale)
+### 18. 疾风 (Gale)
 
 **功能**：护腿专属。每级 +5% 移动速度（I/II → 5%/10%），**潜行时不生效**（保留潜行的战术价值）。常规途径最高 II 级；**III 级（+15%）只能由两个 II 级在任一输入带破限的铁砧上融合得到**。非宝藏，uncommon。
 
@@ -539,7 +554,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`（附魔台 / 交易 / 宝箱 / 钓鱼，随机最高 II 级）。
 
-### 余烬 (Emberfall)
+### 19. 余烬 (Emberfall)
 
 **功能**：单级，**金胸甲与金马铠可附魔**。受到致命伤害时免死一次：保留 1 颗心（2 HP）+ 5 秒锁血，随后进入 60 秒「余烬」虚弱（缓慢 I + 挖掘疲劳 I，状态栏显示自定义图标与倒计时）；与不死图腾共存时**图腾优先**。仅不祥试炼（试炼密室）唯一奖励箱可获得（金马铠走铁砧 + 附魔书）。
 
@@ -563,30 +578,30 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 ### 盾牌四附魔 (Shield Enchantments)
 
-26.2 盾牌机制已数据组件化（`DataComponents.BLOCKS_ATTACKS`，破盾 = 物品冷却、耐久 =`hurtBlockingItem`），四个盾牌附魔分别挂组件方法与伤害入口。
+26.2 盾牌机制已数据组件化（`DataComponents.BLOCKS_ATTACKS`，破盾 = 物品冷却、耐久 =`hurtBlockingItem`），四个盾牌附魔（编号 20~23）分别挂组件方法与伤害入口。
 
-#### 冲阵 Shield Charge（III，uncommon）
+#### 20. 冲阵 Shield Charge（III，uncommon）
 
 疾跑持盾（主 / 副手任一）近战命中：额外 **4/6/8 伤害** + **强力击退**（击退强度 0.9/1.1/1.3，方向 = 攻击者→受击者，26.2 `knockback(power, xd, zd, source, damage)` 的 (xd, zd) 为 "实体→击退源" 方向，实体被推离），攻击者 1 秒冷却。挂 hurtServer HEAD（蚀命之后、断罪之前 —— 冲阵加伤参与断罪斩杀阈值结算），逻辑在 `ShieldChargeManager`。
 
-#### 不屈 Defiance（II，rare）
+#### 21. 不屈 Defiance（II，rare）
 
 * **I**：盾牌被斧类破盾（26.2 = 盾牌上物品冷却，时长来自攻击者武器组件 `WEAPON.disableBlockingForSeconds` = 5 秒）→ 时长**减半至 2.5 秒** + 等长的**抗性提升 I** 补偿；
 * **II**：**完全免疫破盾**，代价是**格挡耐久消耗 ×2**。
 
 实现：新 `BlocksAttacksMixin` 注入组件方法 ——`disable` HEAD 取消（II 免疫）/ `baseSeconds` 减半 + 抗性（I）；`hurtBlockingItem` 的 damage 参数 ×2（II）。
 
-#### 庇护 Sanctuary（III，试炼密室奖励箱）
+#### 22. 庇护 Sanctuary（III，试炼密室奖励箱）
 
 格挡时每 **2 秒**对 **8 格内所有玩家**（含持有者）回复 **1/2/4 HP**，每次脉冲消耗盾牌 **1 点耐久**（耗尽后格挡中断光环即停）。视觉：受疗者头顶心形粒子 + 持有者周身环绕光点。逻辑在 `SanctuaryManager`（脉冲计时按维度 gameTime，首次举盾起算 2 秒）。
 
 **获取**：`LootTableEvents.MODIFY`（fabric-loot-api-v3）向 `chests/trial_chambers/reward` 与 `reward_rare` 追加池：90% 空 / 7% 庇护书 / 3% 带 1\~3 级庇护的盾牌 ——**事件追加而非整表覆盖**，不丢原版奖励。
 
-#### 坚壁 Aegis（III，rare）
+#### 23. 坚壁 Aegis（III，rare）
 
 格挡中受到**不可格挡类伤害**（`#minecraft:bypasses_shield` 标签：音波 / 魔法等 —— 原版格挡对这类伤害完全无效，`BlocksAttacks#bypassedBy` 直接放行）时按等级减免 **30/45/60%**。挂 hurtServer HEAD（`isBlocking` + `getItemBlockingWith` 读等级 + 伤害标签判定）。
 
-### 归羽 (Homing Plume)
+### 24. 归羽 (Homing Plume)
 
 **功能**：射出的箭 / 弩箭未命中任何实体（插地方或落空）时，按 50% / 100% 概率在 1 秒后自动飞回背包（药箭同样返还）；命中实体不返还。**与无限互斥**（无限 = 不耗箭但禁药箭，归羽 = 省箭 + 保留药箭的经济取舍）。
 
@@ -607,7 +622,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-### 坠星 (Starfall)
+### 25. 坠星 (Starfall)
 
 **功能**：装填烟花火箭发射时，爆炸伤害 +4、爆炸半径 +1 格，爆炸粒子升级为星形散射（末地烛 + 烟花混合）。**与多重射击互斥**（烟花流 vs 散弹流二选一）。
 
@@ -628,7 +643,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径（专属掉落表）**：`chests/end_city_treasure.json` 第四池（rolls 1）：75% 空 / 15% 坠星附魔书 / 10% 带坠星的弩（`set_damage 0.8-1.0`）。
 
-### 霆霓 (Stormsurge)
+### 26. 霆霓 (Stormsurge)
 
 **功能**：雨天 / 雷雨天 / 目标在水中时，掷出的三叉戟命中额外 +2 / +4 伤害，并连锁至 2 格内最近 1 个其他实体（连锁伤害减半）；命中点播放引雷同款雷声与电弧粒子（无真实闪电、不引燃）。仅投掷触发，近战戳刺不生效。**与引雷互斥**。
 
@@ -649,7 +664,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-### 藏锋 (Sheathed Edge)
+### 27. 藏锋 (Sheathed Edge)
 
 **功能**：脱离战斗（未造成且未承受任何伤害）满 5 秒后，首次近战命中额外 +2 / 4 / 6 伤害，伴随拔刀音效与刀光粒子；触发后重新计时。与断罪不互斥——藏锋加伤参与断罪斩杀阈值结算（与冲阵同一设计逻辑），受壁垒上限克制。
 
@@ -668,7 +683,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-### 渊息 (Tideheart)
+### 28. 渊息 (Tideheart)
 
 **功能**：水下呼吸时间每级 +15 秒（I/II/III 级 → 总氧气 30/45/60 秒），III 级时水下挖掘不再减速（等效水下速掘）。**与水下呼吸、水下速掘互斥**。
 
@@ -687,7 +702,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:treasure`（挡附魔台），另以 `LootTableEvents.MODIFY` 向沉船三类 / 埋藏的宝藏 / 海底废墟大小 / 钓鱼宝藏追加专属池（rolls 1：85% 空 / 15% I~III 级附魔书），庇护同款事件追加法，不进 `on_random_loot` 通用随机池。
 
-### 丰壤 (Loam)
+### 29. 丰壤 (Loam)
 
 **功能**：收获完全成熟的作物时 20% / 35% / 50% 概率双倍掉落（复制一份含时运等加成后的完整掉落，含种子）；III 级额外 3×3 范围收获——仅破坏同种且已成熟的作物，未成熟不动，每格消耗 1 点耐久，各格独立走双倍判定。
 
@@ -707,9 +722,61 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 **获取途径**：追加进 `minecraft:non_treasure`。
 
-## 玩法
+### 配饰八附魔 (Accessory Enchantments)（30~37）
 
-### 1.0.0僵尸马骑兵队与「诸界浩劫」 (Zombie Horse Cavalry & Cataclysm of Realms)
+1.4.0 新增：八家族各 1 个、按槽位 2/2/2/2 分布（耳环 / 项链 / 戒指 / 手镯各 2，与同族宝石绑定），全部 `max_level: 2`、非宝藏（`non_treasure` 全途径：附魔台 / 图书管理员 / 宝箱 / 钓鱼）。**计入八系共鸣**（阈值 3/5 → 4/7，计件扩展到配饰 4 槽，装备签名缓存同步含配饰）。`AccessoryManager` 统一结算：属性类 tick 值变化才写瞬态修改器（活力同模式）；受伤 / 造成伤害由 `LivingEntityMixin` hurtServer 侧调静态入口（victim 侧 ModifyVariable）；击杀类挂 `ServerLivingEntityEvents.AFTER_DEATH`；自然恢复用自有计时器（零注入原版回血分支）。
+
+#### 30. 魂铃 Soul Chime（II，耳环，灵魂族）
+
+击杀**敌对生物**（`Enemy` 接口，`AFTER_DEATH` 事件）回复 **2 饥饿 + 1 饱和 / 级**（`FoodData#eat(2×level, level)`）；多件佩戴取最高等级（不叠加）。
+
+#### 31. 盾坠 Shield Pendant（II，耳环，守护族）
+
+受到的**全部伤害 -3%/级**（hurtServer HEAD ModifyVariable，多件线性叠加；总减免统一钳制，至少保留 5% 伤害）。
+
+#### 32. 雷鸣扣 Thunder Clasp（II，项链，风暴族）
+
+**雷雨天气**（`isThundering`）造成的伤害 **+4%/级**（attacker 侧 hurtServer HEAD，多件线性叠加）。
+
+#### 33. 翠滴 Verdant Drop（II，项链，自然族）
+
+自然恢复 **+10%/级**——不注入原版回血分支：自有计时器把 80 tick 基线间隔缩短为 `80/(1+加成)`（下限 40 tick），`food≥18` 且未满血时每跳 heal 1 HP。
+
+#### 34. 刃戒 Blade Ring（II，戒指，锋刃族）
+
+攻击速度 **+5%/级**（`ATTACK_SPEED` 瞬态修改器 `ADD_MULTIPLIED_BASE`，值变化才写）。
+
+#### 35. 羽环 Plume Ring（II，戒指，风族）
+
+受到的**弹射物伤害**（`#minecraft:is_projectile`）**-6%/级**（多件线性叠加）。
+
+#### 36. 烬镯 Ember Bracelet（II，手镯，火焰族）
+
+受到的**火焰伤害**（`#minecraft:is_fire`）**-10%/级**（多件线性叠加）。
+
+#### 37. 潮镯 Tide Bracelet（II，手镯，水渊族）
+
+游泳效率 **+8%/级**（`WATER_MOVEMENT_EFFICIENCY` 瞬态修改器）。
+
+### 狼铠三附魔 (Wolf Armor Enchantments)（38~40）
+
+1.4.0 新增。**复用**：活力 / 壁垒对狼铠开放（纯标签变更 `vitality_supported` / `bulwark_supported` += wolf_armor——BODY 槽 `isArmor()` 既有求和路径零代码）。**新增**锐牙 / 哨戒 / 回春由 `WolfArmorManager` 结算（挂 `LivingEntityMixin` tick HEAD 的 `instanceof Wolf` 分支，活力同款瞬态属性修改器；卸甲自动移除全部修改器）。狼铠无 `ENCHANTABLE` 组件（同马铠），**铁砧上书是生存唯一获取途径**（附魔台必然不可用）；**不计玩家共鸣**（计件只扫玩家自身槽位）。首枚狼铠附魔成就「獠牙礼赞」（`AnvilMenuMixin` TAIL 检测授予）。
+
+#### 38. 锐牙 Sharp Fang（III，狼铠）
+
+狼近战伤害 **+10%/级**（`ATTACK_DAMAGE` 瞬态修改器）。
+
+#### 39. 哨戒 Vigil（II，狼铠）
+
+狼索敌 / 跟随范围 **+25%/级**（`FOLLOW_RANGE` 瞬态修改器）。
+
+#### 40. 回春 Renewal（II，狼铠）
+
+狼每 **4 秒**（80 tick，服务器全局 gameTime 节拍，无需每狼计时器）回复 **1 HP/级**，仅存活且未满血时生效。
+
+## 版本主题
+
+### 1.0.0「诸界浩劫」 (Cataclysm of Realms)
 
 模仿原版骷髅马陷阱的骑兵事件，同时接管原版骷髅马陷阱。**破限附魔书在完成「诸界浩劫」挑战前无法使用**（铁砧应用被门禁拦截）。
 
@@ -765,7 +832,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 #### 家族共鸣 (Family Resonance)
 
 - **计件规则（§1 修正）**：装备四件 + 主副手上的附魔按**其等级**计入所属家族（`#extra-enchantry:family_*` 八系标签；霆霓双归水/风暴、余烬双归火/灵魂）。
-- **档位**：PARTIAL（家族累计 ≥3 级）/ FULL（≥5 级），多系可同时激活；升档聊天提示 + 钟声，降档静默；状态栏 RESONANCE 效果滚动续期（amplifier = 激活家族数 - 1）。
+- **档位**：PARTIAL（家族累计 ≥3 级）/ FULL（≥5 级），多系可同时激活；升档聊天提示 + 钟声，降档静默；状态栏 RESONANCE 效果滚动续期（amplifier = 激活家族数 - 1）。**1.4.0 起阈值调整为 4/7**（配饰附魔计入计件，每家族至多 +2 级来源——见 1.4.0 节；阈值经 `resonance/families/*.json` 数据驱动可调）。
 - **小加成（PARTIAL）**：多等级附魔按 +1 级结算（`FamilyResonanceManager.effectiveLevel`，已接入活力/壁垒/蚀命/汲取结算点，数值由各表钳制在设计上限内）；单级附魔由各 Manager 就地 +20%（后续版本接入）。
 - **完整共鸣（FULL）八系被动**：灵魂·猎魂（击杀后 3 秒隐身）/ 风暴·天象感应（雨天移速 +20%）/ 锋刃·连击（3 秒连击最高 +15%）/ 守护·岿然（击退抗性 +50%）/ 自然·扎根（静止 3 秒后 1 HP/s）/ 水·潮汐亲和（水下移速 +30%、耗氧减半）/ 风·轻盈（摔落 -50%）/ 火焰·炽热之躯（免疫火焰熔岩）。
 
@@ -857,17 +924,19 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 规则 | `resonance/families/` 8 个家族 JSON |
 | 模型 | `items/resonance_codex.json`、`items/family_sigil.json`（原版贴图降级） |
 
-### 1.3.1「铭文纪元」 (Era of Inscription)
+#### 1.3.1「铭文纪元」 (Era of Inscription)
+
+> 完整设计稿：[`DESIGN/1.3.1-design.md`](DESIGN/1.3.1-design.md)（~350 行，含世界观 / 物品表 / 数据 schema / 风险与权衡）
 
 叙事与新手指引版本：不新增附魔 / GUI / NPC，把散落的命名（家族 / 浩劫 / 破限 / 铭刻 / 臻藏）补成一条连贯叙事——初民纪元八家族共举「极限之器」封印浩劫，铭文碎散为附魔残响，玩家是被碎片选中的新一代共鸣者。
 
-#### 世界观「铭文纪元」编年
+##### 世界观「铭文纪元」编年
 
 - 八家族首次获得叙事身份：灵魂「生者暂居，死者长眠」/ 风暴「天不仁而怒」/ 锋刃「一刃既出，万念归尘」/ 自然「根深者不惧风」/ 水渊「行于无形」/ 风「无翅亦可凌云」/ 守护「盾碎之时，魂已无伤」/ 火焰「烬中余温，未灭之心」。
 - 浩劫四幕对应四波挑战：深渊苏醒（第 1 波）→ 风暴失序（第 2 波）→ 火焰焚烧（第 3 波）→ 魂灵迷航（第 4 波）；4 张破限残页拼合「极限之器」铭刻图样——揭示破限书需先历浩劫方能启用的叙事原因。
 - 「臻藏」补完叙事身份：被铭文承认的标志（金渐变字体 + 光晕即铭文回响重亮，1.2.0 既有视觉）。
 
-#### lore 物品（4 类 14 件，均不进创造栏、不可合成）
+##### lore 物品（4 类 14 件，均不进创造栏、不可合成）
 
 | 物品 | 件数 | 获取 | 实现 |
 |------|------|------|------|
@@ -876,14 +945,14 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 破限残页 | 4 | 浩劫每波完成派发（失败不回收） | `LimitBreakShardItem` + `shard_id` 组件：右键研读该幕叙事，名称按幕着色（深岩/雷光/烬红/末影紫） |
 | 编年史卷轴 | 1 | 达成大共鸣者派发 | `ChronicleScrollItem`：完整编年右键展开（全文硬编码 lang，不做数据驱动） |
 
-#### 被动引导（仅首次，不卡进度）
+##### 被动引导（仅首次，不卡进度）
 
 - 一次性触发持久化：`LoreTriggerManager`（Fabric Attachment `lore_triggers`，`copyOnDeath`），`fireOnce` 幂等语义；共鸣扫描每秒重检不会重复触发。
 - 8 个触发点：首次进游戏（手札）/ 首次拾取本模附魔书（秒级背包扫描，触发后永不再扫）/ 首次合成秘典（`onCraftedBy`）/ 任意家族首次 PARTIAL / 家族首次 FULL（铭文）/ 浩劫每波（残页 + 幕格言）/ 浩劫全清（图样收录）/ 大共鸣者（卷轴）。
 - 静默规则：`lore/onboarding.json` 的 `silence_onboarding: true` 关闭全部 chat 提示（物品照发）；不弹窗、不发包、不写客户端日志。
 - **升档追发**：1.3.0 玩家登录后按已有进度补发（「无敌」→ 四残页、grand_resonator → 卷轴、家族试炼完成 → 该族铭文——试炼完成必然达成过 FULL），一次性汇总提示，幂等安全。
 
-#### onboarding/ 引导成就树（新增第 6 棵树）
+##### onboarding/ 引导成就树（新增第 6 棵树）
 
 | 成就 | 触发 |
 |------|------|
@@ -892,18 +961,18 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 初见共鸣 | 首次右键秘典（impossible + 代码授予） |
 | 第一抹铭刻 | 首次铭刻主调（impossible + 代码授予，与首次铭刻格言同点位） |
 
-#### 数据驱动 lore（`data/extra-enchantry/lore/`）
+##### 数据驱动 lore（`data/extra-enchantry/lore/`）
 
 `onboarding.json`（静默开关 + 手札第 1/3/4 页）、`family_inscriptions/` ×8、`limit_break_shards/` ×4、`cataclysm/` ×4（波次完成格言）、`attunement/first_attune.json`（八族首次铭刻格言）。`LoreLoader` 单监听器整目录读原始 JSON（`ExtraCodecs.JSON`）按路径分派手工解析，单文件失败仅该条目回退内置默认（中文文案硬编码于 `LoreLoader`，数据包即完整可编辑副本）。
 
-#### 既有系统叙事绑定（零机制改动）
+##### 既有系统叙事绑定（零机制改动）
 
 - 浩劫波次完成追加幕标题 + 格言（数据驱动 `cataclysm/act_*.json`）+ 残页派发（`CavalryManager` 清波 / 成功结算两处钩子——第 4 波走 `succeedCataclysm` 分支）。
 - 八试炼成就改授「修行名号」：灵魂·不息 → **魂行者的顿悟**（风暴→驭雷者的觉醒 / 锋刃→刃宗师的圆熟 / 守护→盾圣者的岿然 / 自然→大地之子的回春 / 水→渊息者的潜入 / 风→凌虚者的着陆 / 火焰→烬心者的浴炼），描述保留原试炼名——纯 lang 改动。
 - 首次铭刻追加家族格言（两行，家族色渲染；此后铭刻不再重复）。
 - 主类零新 Mixin：登录走 `ServerPlayConnectionEvents.JOIN`，合成走 `Item#onCraftedBy` 覆写，家族 / 波次 / 铭刻 / 大共鸣者全部为既有管理器的回调解用。
 
-#### 1.3.1 新增文件索引
+##### 1.3.1 新增文件索引
 
 | 类型 | 路径 |
 |------|------|
@@ -915,6 +984,50 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 资源 | 贴图 4 张（信封 / 盾形纹章 / 残页 / 卷轴，16×16 脚本生成）+ `items/` / `models/item/` 各 4 |
 | 语言 | zh_cn / en_us 各 +66 条（物品 / 提示 / 手札 / 编年史 / 引导成就 / 试炼名号改写） |
 
+#### 1.3.2 修复补丁 (Hotfix)
+
+纯修复版本，无新附魔 / 新系统：
+
+* **渊息世界创建 NPE 修复**（自 1.1.0 起带雷）：`Entity#<init>` 的 defineSyncker 在定义 `DATA_AIR_SUPPLY_ID` 初值时就回调 `getMaxAirSupply()`——此时 `LivingEntity#equipment` 字段尚未初始化（子类构造体才赋值），Mixin 里 `instanceof LivingEntity` 已为真但 `getItemBySlot` 必 NPE，实体构造直接失败（新世界 / 登录报 "Couldn't place player in world"，服务器停止）。`EntityMixin#tideheartMaxAir` 加 try-catch 防护：构造早期视为无渊息，走原版上限 300
+* **共鸣状态效果图标修复**（自 1.2.0 起缺失）：26.2 状态效果图标走 GUI 图集而非独立贴图——`Hud#getMobEffectSprite` 把效果 ID 前缀 `mob_effect/` 后交给 `blitSprite`，sprite 必须注册进 `textures/atlas/gui.png` 图集。RESONANCE 图标因未注册一直走 missing sprite fallback（日志 "Using missing texture"），新增 `assets/extra-enchantry/atlases/gui.json`（directory source：`mob_effect` → 前缀 `mob_effect/`，与原版 gui.json 同款）后生效
+* **resonance.png 重生成**：旧生成器每扫描行多写一个字节（System.Drawing 能读但 STB 报 `Corrupt PNG`，atlas stitch 阶段 IOException，sprite 永久 missing），新文件通过 `高 × (1 + 宽×4)` IDAT 长度校验
+
+开发客户端实测：世界正常创建、玩家正常落位、零贴图报错、退出存档干净。
+
+### 1.4.0「环佩与獠牙」 (Trinkets & Fangs)
+
+装备面扩展版本：配饰栏系统 + 配饰附魔与宝石合成 + 狼铠附魔 + 火焰家族防火设定。完整设计稿见 [`DESIGN/1.4.0-design.md`](DESIGN/1.4.0-design.md)。
+
+#### 配饰栏（耳环 / 项链 / 戒指 / 手镯，集成原版背包）
+
+* **槽位接入**：`InventoryMenuMixin` 构造 TAIL 追加 4 个 `AccessorySlot`（下标 46~49，副手 45 之后）——生存背包直接可用；创造玩家页签因原版 selectTab 会把 ItemPickerMenu 槽位列表整体替换为 InventoryMenu 槽位的包装（点击按 containerId 0 路由回服务端 InventoryMenu），同样直接可用。**独立 GUI / 按键 / 网络包方案已废弃**
+* **生存背包**：配饰按钮在盾牌列（x=77）头盔行（y=8）——与盾牌同列、与头盔平齐、同尺寸；点击后 4 配饰槽在护甲列左侧（x=-11）平滑滑入（与护甲同排同尺寸）
+* **创造玩家页签**：盾牌栏下移与胸甲平齐（(35,20)→(35,33)）、配饰按钮在头盔左侧头盔行（(35,6)）；展开后配饰 2×2 出现在装备栏左侧（(16/35, 6/33)），按钮与盾牌列让位滑到面板左缘外（x=-3），再点收回。26.2 创造玩家页签护甲为 2×2 环绕人物（纸娃娃）布局
+* **动画与门控**：`isActive()` 为 26.2 纯客户端概念（AbstractContainerMenu / Slot 内部零引用，反编译确认）——折叠时槽位不渲染、不可悬停点击；滑入动画由 Screen 自绘（槽位底纹提取自原版像素 + 幽灵图标 + 动画帧物品 `extractor.item`）
+* **存储**：服务端权威 Fabric Data Attachment `accessories`（ItemStack[4]，**非** copyOnDeath）；Attachment 快照语义——所有写路径收敛到 `AccessoryContainer.setItem → setAttached`
+* **死亡**：随背包掉落（`dropEquipment` HEAD 同点位）；keepInventory / keepEverything / 旁观者经 `restoreFrom` TAIL 显式搬运；带誓约配饰暂存回插（誓约扩展到 4 槽配饰）
+* **右键快捷穿戴**：占用则交换回主手；shift 智能移动（`quickMoveStack` HEAD 拦截：配饰物品进匹配空槽 / 配饰槽物品进背包）
+
+#### 物品与合成（24 新物品，两段式美术产线脚本生成贴图）
+
+* **8 家族宝石**：家族材料 + 固定盔甲纹饰模板（幽寂/闪电/恼鬼/野性/守卫/涡流/猪灵/潮汐一一配对，模板可复制再生）；首次合成播家族格言（静默开关沿用）
+* **16 配饰**（4 槽 × 铜/铁/金/钻四材质）：材质 ×N + 槽位绑定宝石合成，**宝石被动按材质传导**（铜 100% / 铁 125% / 金 150% / 钻 200%）；宝石合成时决定、不可事后更换（配方 result components 写 `socketed_gem`）；耳坠贴图成对
+* **宝石被动**（8 条微缩被动，全身至多 4 条）：魂珀击杀 +5 经验 / 雷光石雷雨 +3% 移速 / 刃晶 +2% 攻速 / 萌芽晶 +5% 自然恢复 / 盾纹玉 -2% 受伤 / 风羽晶 -3% 弹射物伤 / 烬心石 -4% 火伤 / 潮汐珠 +5% 游泳效率
+
+#### 配饰附魔 ×8（编号 30~37，计入八系共鸣）
+
+魂铃 / 盾坠 / 雷鸣扣 / 翠滴 / 刃戒 / 羽环 / 烬镯 / 潮镯——每家族 1 个、按槽位 2/2/2/2 分布（与宝石同族绑定）；`AccessoryManager` 统一结算（属性类 tick 值变化才写瞬态修改器、受伤/造成伤害走 hurtServer ModifyVariable、击杀走 AFTER_DEATH、自然恢复用自有计时器——零注入原版回血分支）。**共鸣阈值 3/5 → 4/7**（计件扩展到配饰 4 槽，装备签名缓存同步含配饰）。
+
+#### 狼铠附魔（编号 38~40）
+
+* **复用**：活力 / 壁垒对狼铠开放（`vitality_supported` / `bulwark_supported` += wolf_armor，BODY 槽 `isArmor()` 既有路径零代码）
+* **新增**：锐牙（近战伤害 +10%/级）/ 哨戒（索敌跟随 +25%/级）/ 回春（每 4 秒回 1 HP/级）——`WolfArmorManager` 挂 `LivingEntityMixin` tick 的 Wolf 分支；铁砧上书获取（狼铠无 ENCHANTABLE 组件同马铠）；不计玩家共鸣
+* **成就**：「环佩琳琅」（首次穿戴）、「獠牙礼赞」（AnvilMenuMixin TAIL 检测首次狼铠附魔）
+
+#### 火焰家族防火（新设定「烬火不侵」）
+
+带火焰家族附魔（`#extra-enchantry:family_fire`：炽焰行者 / 余烬 / 烬镯 / 劫后余辉，含附魔书）或镶嵌烬心石的物品：**掉落物免疫火 / 岩浆烧毁**（`ItemEntityMixin` hurtServer HEAD 取消，下界合金同款行为）；动态判定即时生效，砂轮磨掉附魔即失效。既有旧装备零迁移受益。
+
 ## 通用技术模式
 
 ### 项目结构
@@ -924,15 +1037,23 @@ src/main/resources/
 
 ├── data/extra-enchantry/enchantment/\*.json     附魔定义
 
-├── data/extra-enchantry/tags/item/\*.json        自定义物品标签（可附魔物品）
+├── data/extra-enchantry/tags/item/\*.json        自定义物品标签（可附魔物品；1.4.0 增 accessory/ 四槽位准入 + wolf_armor_supported）
 
 ├── data/extra-enchantry/tags/enchantment/family_\*.json  八家族附魔标签（字体/成就共用）
 
-├── data/extra-enchantry/advancement/...          成就树（collector 图鉴 / usage 实战 / hidden_challenges 隐秘挑战）
+├── data/extra-enchantry/advancement/...          成就树（collector 图鉴 / usage 实战 / hidden_challenges 隐秘挑战 / onboarding 引导 / family_trials 试炼）
+
+├── data/extra-enchantry/recipe/...               配方（共鸣秘典 / 1.4.0 八宝石 + 32 配饰材质×宝石变体，result components 写 socketed_gem）
+
+├── data/extra-enchantry/lore/...                 1.3.1 叙事文本（手札页 / 家族铭文 / 破限残页 / 浩劫四幕 / 首刻格言）
 
 ├── data/minecraft/tags/enchantment/\*.json       追加原版标签（互斥组/宝藏性/交易）
 
 ├── data/minecraft/loot_table/...                掉落表覆盖（warden/wither/矿石/基岩/远古城市/末地城/试炼密室）
+
+├── assets/extra-enchantry/atlases/gui.json      效果图标 GUI 图集注册（v1.3.2，directory source）
+
+├── assets/extra-enchantry/items/ + models/item/  物品客户端模型（1.3.1 起 JSON 同步维护）
 
 ├── assets/extra-enchantry/font/fancy_\*.json     八家族附魔名称字体
 
@@ -946,13 +1067,19 @@ src/main/java/realmikoto/extraenchantry/
 
 ├── Advancements.java                            代码授予成就统一入口（见「成就体系」）
 
-├── \*Manager.java                                各附魔的状态与结算
+├── \*Manager.java                                各附魔的状态与结算（1.4.0 增 AccessoryManager / WolfArmorManager；1.3.x 增 FamilyResonance / FamilyTrials / Attunement / Onboarding / LoreTrigger / Cavalry）
+
+├── Accessories.java / AccessoryItem / GemItem / AccessoryContainer / AccessorySlot / AccessoryAttachments   1.4.0 环佩体系（注册中心 + 物品 + Attachment 容器）
+
+├── LoreLoader.java / TideheartAir.java          lore 数据加载 / 渊息公式（纯函数供单测）
 
 └── mixin/\*.java                                 效果逻辑
 
 src/client/java/realmikoto/extraenchantry/client/
 
-└── mixin/\*.java                                 客户端渲染/输入（字体动效、HUD、空跃）
+├── mixin/\*.java                                 客户端渲染/输入（字体动效、HUD、空跃、背包配饰栏三件套）
+
+└── AccessoryColumnRenderer / AccessoryHudState / SlotReposition   1.4.0 配饰栏自绘（列背景/幽灵图标/动画帧 + 展开状态 + 槽位原地重定位接口）
 ```
 ### 代码注册约定
 
@@ -983,6 +1110,20 @@ public static final ResourceKey\<Enchantment> REACH =
 * `play` 有 `SoundEvent` 与 `Holder<SoundEvent>` 两个重载——26.2 的 `SoundEvents` 常量两种类型并存（如 NOTE_BLOCK_\*、SHIELD_BLOCK、SOUL_ESCAPE 是 Holder），调用前 `javap` 确认字段类型
 * **分级约定（详见 DESIGN_aesthetics.md）**：L1 触发确认（每次生效都给，短促）/ L2 持续氛围（必须 `throttle`，10–20 tick）/ L3 高光时刻（免死、处决等稀有事件才允许大场面）。常态生效的效果（如触及）只给粒子不配音效，防吵
 * 客户端独占反馈（如空跃振翅音）放 client source set 的 Mixin，服务端不可见的实体状态别往服务端发
+* 新增纹理 / 效果图标 / 专属音效走「美术/音效资源生成」脚本化管线（见下节），产物目录镜像 `src/main/resources/assets/extra-enchantry/`，复制即用
+
+### 美术/音效资源生成（脚本化资源管线）
+
+新增物品纹理 / 效果图标 / 专属音效时，优先在 `DESIGN/1.5.0-assets/generate_assets.py` 加绘制函数与合成配方后重跑，不手写二进制资源。纯标准库（无 Pillow / numpy 依赖），确定性输出（同输入重跑结果逐字节一致），清单与集成说明见 `DESIGN/1.5.0-assets/README.md`：
+
+* **纹理（16×16 物品 / 18×18 效果图标 PNG）**：纯 Python 像素绘制 + 手写 PNG 编码（`zlib` + `struct`），支持辉光（径向 alpha 衰减）/ 圆 / 矩形 / 线段 / 逐像素混合；混合时存量 alpha 是 0–255 整数、新 alpha 是 0–1 浮点，**必须先归一化再混**，否则算出 >255 的通道值直接 `bytes()` 报错
+* **PNG 自检（呼应踩坑记录）**：NativeImage(STB) 要求每行恰好 `1 filter 字节 + 宽×4 字节 RGBA`，生成后可 `len(zlib.decompress(IDAT)) == 高 × (1 + 宽×4)` 校验，多一个字节即 `Corrupt PNG` 且 atlas sprite 永久 missing
+* **效果图标落盘即生效**：26.2 效果图标走 GUI 图集，`atlases/gui.json` 的 directory source 已注册（v1.3.2 起），新图标放入 `textures/mob_effect/` 无需改图集配置
+* **物品模型 JSON**：`models/item/*.json` 统一模板（`item/generated` + `layer0`）批量生成，与注册代码一一对应
+* **音效（OGG Vorbis）**：确定性合成——正弦 / 指数与线性扫频 / 固定 seed 噪声 / 包络 / 混音，写 WAV 后 ffmpeg `-c:a libvorbis` 转 44.1 kHz 单声道 OGG；ffmpeg 缺失自动回退保留 WAV。配方即"乐谱"：调基频 / 时长 / 泛音 / 颤音参数即可改风格，重跑覆盖
+* **sounds.json**：脚本同步生成注册（`extra-enchantry:xxx` 键）；代码侧 `Registry.register(Registries.SOUND_EVENT, ...)` 后统一经 FxHelper 播放（音量 ≤1.0 / SoundSource.PLAYERS / 5 tick 节流，见「视听反馈」）
+* **粒子不生成纹理**：遵循 DESIGN_aesthetics 约定不注册自定义粒子类型，全部映射原版粒子（服务端 `sendParticles` 直接引用），资源管线不含粒子纹理
+* **性能纪律**：合成循环避免在列表推导内重复调用会生成长列表的函数（曾踩推导内嵌 `sine()` 的 O(n²)≈50 亿次运算坑，先提出循环再逐元素相乘）
 
 ### 附魔名称字体体系
 
@@ -1029,6 +1170,8 @@ public static final ResourceKey\<Enchantment> REACH =
 | AbstractArrowMixin           | `AbstractArrow`           | 归羽：发射快照等级存箭实体（HomingPlumeAccess）；命中实体置标记；插地方按概率登记延迟返还（注意 26.2 包名为 `projectile.arrow`）                                                                                                                                  |
 | ProjectileWeaponItemMixin    | `ProjectileWeaponItem`    | 归羽：createProjectile RETURN 把武器归羽等级写入箭矢（弓弩共用此生成点）                                                                                                                                                                                          |
 | CrossbowItemMixin            | `CrossbowItem`            | 坠星：createProjectile RETURN 给烟花火箭打坠星标记（StarfallAccess）                                                                                                                                                                                            |
+| InventoryMenuMixin           | `InventoryMenu`           | 配饰槽进背包菜单：构造 TAIL 追加 4 个 AccessorySlot（46~49）+ quickMoveStack shift 智能移动（mixin 继承 AbstractContainerMenu 以访问 protected 成员）                                                               |
+| ItemEntityMixin              | `ItemEntity`              | 火焰家族烧毁免疫：带火焰系附魔 / 烬心石配饰的掉落物免疫火与岩浆伤害（hurtServer HEAD 取消，下界合金同款）                                                                    |
 | BlockMixin                   | `Block`                   | 丰壤：playerDestroy RETURN 判定成熟作物 + 丰壤锄头 → 双倍掉落 / 3×3 范围收获（LoamManager）                                                                                                                                                                    |
 
 客户端 Mixin（`src/client/java/.../client/mixin/`，注册于 `extra-enchantry.client.mixins.json`）：
@@ -1039,6 +1182,10 @@ public static final ResourceKey\<Enchantment> REACH =
 | FontPreparedTextBuilderMixin | `Font$PreparedTextBuilder` | 家族字体逐字 HSV 波形动效（按字体 ID 分派 8 族参数）；拓阶金色波浪闪光；破限名分锁定态：未完成「无敌」进度暗灰平色，完成恢复金色闪光 |
 | ClientAdvancementsAccessor   | `ClientAdvancements`       | 访问器：暴露私有进度表，供破限锁定态的本地判定                   |
 | LocalPlayerMixin             | `LocalPlayer`              | 空跃：客户端空中跳跃（aiStep 按键沿检测 + jumpFromGround）+ 踏空云粒子与振翅音 |
+| InventoryScreenMixin         | `InventoryScreen`         | 生存背包配饰栏：护甲左侧配饰列 + 盾牌列头盔行按钮（extractBackground TAIL 自绘 + 动画）                                                                                                                |
+| CreativeModeInventoryScreenMixin | `CreativeModeInventoryScreen` | 创造玩家页签：盾牌下移与胸甲平齐、头盔左侧按钮、配饰 2×2（selectTab TAIL 重定位 45/46~49 槽包装 + 展开时原地替换条目）                                                                             |
+| AbstractContainerScreenMixin | `AbstractContainerScreen`  | 生存背包配饰按钮点击网关（InventoryScreen 未覆写 mouseClicked，基类注入按实例门控；leftPos/topPos @Shadow——声明于目标类自身）                                                                        |
+| ItemStackFoilMixin           | `ItemStack`                | 臻藏光晕：臻藏资格 / 大共鸣者时本模附魔书与共鸣秘典恒显附魔光效（hasFoil RETURN 改写；进度缺失时静默降级普通外观） |
 
 ### 踩坑记录（26.2）
 
@@ -1088,21 +1235,25 @@ public static final ResourceKey\<Enchantment> REACH =
 * **26.2 状态效果图标走 GUI 图集而非独立贴图**（v1.3.2 踩坑）：`Hud#getMobEffectSprite` 把效果 ID 前缀 `mob_effect/` 后交给 `graphics.blitSprite`——**sprite 必须注册进 `textures/atlas/gui.png` 图集**，mod 需自带 `assets/<ns>/atlases/gui.json`（`{"type": "minecraft:directory", "source": "mob_effect", "prefix": "mob_effect/"}`，与原版 gui.json 同款 directory source）。v1.2.0 起共鸣图标一直走 missing sprite fallback（日志 "Using missing texture"），v1.3.2 补注册后生效
 * **NativeImage(STB) 对 PNG 校验严格**（v1.3.2 踩坑）：脚本生成 PNG 时每行必须恰好是 `1 filter 字节 + 宽×4 字节(RGBA)`，多一个字节 System.Drawing 能读但 STB 报 `Corrupt PNG`（atlas stitch 阶段 IOException，sprite 永久 missing）。用 Python 校验：`zlib.decompress(IDAT)` 后长度应等于 `高 × (1 + 宽×4)`
 * **实体构造早期钩子的装备陷阱**（v1.3.2 踩坑）：`Entity#<init>` 的 defineSyncker 在定义 `DATA_AIR_SUPPLY_ID` 初值时就回调 `getMaxAirSupply()`——此时 `LivingEntity#equipment` 字段尚未初始化（子类构造体才赋值），Mixin 里 `instanceof LivingEntity` 已为真但 `getItemBySlot` 必 NPE，**实体构造直接失败**（新世界/登录 "Couldn't place player in world"，服务器停止）。渊息的 `tideheartMaxAir` 自 1.1.0 起带此雷，v1.3.2 加 try-catch NPE 防护（构造早期视为无渊息走原版上限）
+* **26.2 创造页签槽位列表不可替换**（v1.4.0 踩坑）：`CreativeModeInventoryScreen#selectTab` 把 ItemPickerMenu 槽位列表**整体替换**为 InventoryMenu 槽位的 SlotWrapper 包装（点击按 containerId 0 路由回服务端 InventoryMenu），而 `slotClicked` 把点击槽**硬转 SlotWrapper**——向列表插入/替换自定义槽位条目会每次点击 ClassCastException。重定位只能**原地改坐标**：向 `Slot` 基类织入 `@Shadow @Final @Mutable x/y` 改写接口（SlotMixin + SlotReposition），列表结构保持原样
+* **Mixin 访问目标类 protected 成员的标准手法**（v1.4.0）：`InventoryMenuMixin extends AbstractContainerMenu`——mixin 继承目标类的父类即可访问 protected 的 `addSlot` / `moveItemStackTo`（构造器仅 `super(type, containerId)` 服务访问、不参与合并）；比 `@Invoker` 逐个透传省事
+* **`Slot#isActive` 是纯客户端概念**（v1.4.0，反编译确认）：26.2 的 `AbstractContainerMenu` / `Slot` 服务端路径**零调用** isActive——折叠/展开门控只影响渲染与点击判定，服务端逻辑完全无感知（shift 移动不做门禁的依据：折叠时放入的物品展开后可见，属可接受便利）
+* **Fabric Data Attachment 是快照语义**（v1.4.0）：`getAttached` 返回的是落盘快照，**原地修改其中的 ItemStack 不会自动保存**——所有写路径必须收敛到 `setAttached` 回写（配饰统一走 `AccessoryContainer.setItem → setChanged → setAttached`；Menu `removed` 钩子做关闭界面时的最终写回兜底）
 
 ## 记录规范
 
 ### 附魔记录规范
 
-> **约定：每新增一个附魔，必须在本 README 追加对应章节。**
+> **约定：每新增一个附魔，必须在本 README 追加对应章节（编号接续「附魔总览」表的行号）。**
 
 新增附魔时按以下格式记录（保持与现有章节一致）：
 
 ```
-## N. 附魔名 (English Name)
+### N. 附魔名 (English Name)
 
 **功能**：<一句话描述效果与数值>
 
-### 实现方法
+#### 实现方法
 
 **数据定义** `<json 路径>`：
 

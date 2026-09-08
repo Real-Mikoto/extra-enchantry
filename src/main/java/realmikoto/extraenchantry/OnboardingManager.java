@@ -204,6 +204,28 @@ public final class OnboardingManager {
 		}
 	}
 
+	// ============ 1.4.0「环佩与獠牙」钩子 ============
+
+	/** 首次穿戴任意配饰（AccessoryItem.use 服务端成功路径调用）：授予「环佩琳琅」 */
+	public static void onAccessoryEquipped(ServerPlayer player) {
+		Advancements.award(player, Advancements.ACCESSORY_ATTIRE);
+	}
+
+	/**
+	 * 首次合成家族宝石（GemItem.onCraftedBy 调用）：播一句家族格言。
+	 * 触发键按宝石区分（gem_crafted:{path}），静默开关沿用 silence_onboarding。
+	 */
+	public static void onGemCrafted(ServerPlayer player, String gemPath) {
+		if (!LoreTriggerManager.fireOnce(player, "gem_crafted:" + gemPath)) {
+			return;
+		}
+		if (LoreLoader.silenced()) {
+			return;
+		}
+		player.sendSystemMessage(Component.translatable("message.extra-enchantry.gem." + gemPath)
+				.withStyle(net.minecraft.ChatFormatting.GRAY));
+	}
+
 	// ============ 内部辅助 ============
 
 	/** 静默规则：silence_onboarding 开启时跳过 chat（物品照发） */

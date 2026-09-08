@@ -1,6 +1,6 @@
 {
-  "partial_threshold": 3,
-  "full_threshold": 5,
+  "partial_threshold": 4,
+  "full_threshold": 7,
   "storm_speed_bonus": 0.20,
   "attuned_storm_speed_bonus": 0.25,
   "attuned_lightning_reduction": 0.25,

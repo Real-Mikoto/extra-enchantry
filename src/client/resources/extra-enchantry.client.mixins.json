@@ -8,7 +8,11 @@
 		"HudMixin",
 		"LocalPlayerMixin",
 		"ClientAdvancementsAccessor",
-		"ItemStackFoilMixin"
+		"ItemStackFoilMixin",
+		"SlotMixin",
+		"InventoryScreenMixin",
+		"CreativeModeInventoryScreenMixin",
+		"AbstractContainerScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

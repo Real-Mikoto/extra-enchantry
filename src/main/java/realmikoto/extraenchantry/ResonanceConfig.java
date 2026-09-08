@@ -207,8 +207,10 @@ public final class ResonanceConfig {
 
 	private static Map<FamilyResonanceManager.Family, FamilyRules> buildDefaults() {
 		Map<FamilyResonanceManager.Family, FamilyRules> map = new EnumMap<>(FamilyResonanceManager.Family.class);
+		// 阈值 4/7（1.4.0）：配饰附魔（每家族至多 +2 级）计入计件后，
+		// 3/5 会显著降低 FULL 门槛——按 1.4.0 设计决策同步上调
 		FamilyRules base = new FamilyRules(
-				3, 5,
+				4, 7,
 				60, 100,
 				0.20D, 0.25D, 0.25D,
 				0.05D, 3, 4, 60L,

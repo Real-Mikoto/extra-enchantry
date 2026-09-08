@@ -1,6 +1,6 @@
 {
-  "partial_threshold": 3,
-  "full_threshold": 5,
+  "partial_threshold": 4,
+  "full_threshold": 7,
   "blade_combo_per_hit": 0.05,
   "blade_combo_max_hits": 3,
   "attuned_blade_combo_max_hits": 4,

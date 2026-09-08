@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:quartz",
+    "minecraft:vex_armor_trim_smithing_template"
+  ],
+  "result": {
+    "id": "extra-enchantry:blade_shard"
+  }
+}

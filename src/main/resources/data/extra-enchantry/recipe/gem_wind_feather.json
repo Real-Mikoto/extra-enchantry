@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:diamond",
+    "minecraft:flow_armor_trim_smithing_template"
+  ],
+  "result": {
+    "id": "extra-enchantry:wind_feather"
+  }
+}

@@ -238,6 +238,40 @@ public abstract class LivingEntityMixin {
 		}
 	}
 
+	// ============ 1.4.0「环佩与獠牙」============
+
+	/**
+	 * 配饰受伤减免（盾坠/盾纹玉全伤害、羽环/风羽晶弹射物、烬镯/烬心石火）：
+	 * victim 侧 ModifyVariable，结算全部收敛在 AccessoryManager。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$accessoryIncoming(float amount, ServerLevel level, DamageSource source) {
+		if (amount <= 0.0F || !((Object) this instanceof net.minecraft.server.level.ServerPlayer)) {
+			return amount;
+		}
+		return realmikoto.extraenchantry.AccessoryManager.incomingDamage((LivingEntity) (Object) this, amount, source);
+	}
+
+	/**
+	 * 配饰造成伤害加成（雷鸣扣：雷雨天气全伤害 +4%/级）：attacker 侧 ModifyVariable。
+	 */
+	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
+	private float extraenchantry$accessoryOutgoing(float amount, ServerLevel level, DamageSource source) {
+		if (amount <= 0.0F) {
+			return amount;
+		}
+		return realmikoto.extraenchantry.AccessoryManager.outgoingDamage((LivingEntity) (Object) this, amount, source);
+	}
+
+	/**
+	 * 狼铠附魔（锐牙/哨戒/回春）：Wolf 实例 tick 分支，
+	 * 活力同款属性修改器模式（详见 WolfArmorManager）。
+	 */
+	@Inject(method = "tick", at = @At("HEAD"))
+	private void extraenchantry$wolfArmorTick(CallbackInfo ci) {
+		realmikoto.extraenchantry.WolfArmorManager.tick((LivingEntity) (Object) this);
+	}
+
 	/**
 	 * 假象（Decoy）PvP 触发：被其他玩家造成伤害时执行假象判定
 	 * （内部含 1 秒判定间隔与全局冷却，由 DecoyManager 控制）。

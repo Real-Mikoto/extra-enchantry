@@ -1,6 +1,6 @@
 {
-  "partial_threshold": 3,
-  "full_threshold": 5,
+  "partial_threshold": 4,
+  "full_threshold": 7,
   "fire_lava_speed_bonus": 0.15,
   "trial_fire_seconds": 60,
   "trial_fire_distance": 100.0

@@ -1,11 +1,28 @@
 {
-	"values": [
-		"#minecraft:enchantable/armor",
-		"minecraft:leather_horse_armor",
-		"minecraft:iron_horse_armor",
-		"minecraft:copper_horse_armor",
-		"minecraft:golden_horse_armor",
-		"minecraft:diamond_horse_armor",
-		"minecraft:netherite_horse_armor"
-	]
+  "values": [
+    "#minecraft:enchantable/armor",
+    "minecraft:leather_horse_armor",
+    "minecraft:iron_horse_armor",
+    "minecraft:copper_horse_armor",
+    "minecraft:golden_horse_armor",
+    "minecraft:diamond_horse_armor",
+    "minecraft:netherite_horse_armor",
+    "minecraft:wolf_armor",
+    "extra-enchantry:copper_earring",
+    "extra-enchantry:copper_necklace",
+    "extra-enchantry:copper_ring",
+    "extra-enchantry:copper_bracelet",
+    "extra-enchantry:iron_earring",
+    "extra-enchantry:iron_necklace",
+    "extra-enchantry:iron_ring",
+    "extra-enchantry:iron_bracelet",
+    "extra-enchantry:gold_earring",
+    "extra-enchantry:gold_necklace",
+    "extra-enchantry:gold_ring",
+    "extra-enchantry:gold_bracelet",
+    "extra-enchantry:diamond_earring",
+    "extra-enchantry:diamond_necklace",
+    "extra-enchantry:diamond_ring",
+    "extra-enchantry:diamond_bracelet"
+  ]
 }

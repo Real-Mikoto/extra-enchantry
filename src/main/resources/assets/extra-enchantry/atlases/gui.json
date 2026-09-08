@@ -2,8 +2,13 @@
   "sources": [
     {
       "type": "minecraft:directory",
-      "source": "mob_effect",
-      "prefix": "mob_effect/"
+      "prefix": "",
+      "source": "gui/sprites"
+    },
+    {
+      "type": "minecraft:directory",
+      "prefix": "mob_effect/",
+      "source": "mob_effect"
     }
   ]
 }

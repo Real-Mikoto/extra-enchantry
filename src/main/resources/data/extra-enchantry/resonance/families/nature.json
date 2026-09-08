@@ -1,6 +1,6 @@
 {
-  "partial_threshold": 3,
-  "full_threshold": 5,
+  "partial_threshold": 4,
+  "full_threshold": 7,
   "nature_still_ticks": 60,
   "nature_regen_hp": 1.0,
   "attuned_nature_regen_hp": 1.5,

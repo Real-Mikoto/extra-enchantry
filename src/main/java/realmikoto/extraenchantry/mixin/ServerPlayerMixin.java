@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.world.damagesource.DamageSource;
+import realmikoto.extraenchantry.AccessoryManager;
 import realmikoto.extraenchantry.CavalryManager;
 import realmikoto.extraenchantry.OathboundManager;
 
@@ -75,5 +76,15 @@ public abstract class ServerPlayerMixin {
 			realmikoto.extraenchantry.FxHelper.play(serverLevel, self,
 					net.minecraft.sounds.SoundEvents.NOTE_BLOCK_CHIME, 0.5F, 1.0F);
 		}
+	}
+
+	/**
+	 * 配饰栏重生搬运（1.4.0）：暂存的誓约配饰回插；keepEverything / 旁观者 /
+	 * keepInventory 时整体跟随（Attachment 非 copyOnDeath，须显式搬运）。
+	 */
+	@Inject(method = "restoreFrom", at = @At("TAIL"))
+	private void extraenchantry$accessoryCarryOver(ServerPlayer oldPlayer, boolean keepEverything,
+			CallbackInfo ci) {
+		AccessoryManager.onRestoreFrom(oldPlayer, (ServerPlayer) (Object) this, keepEverything);
 	}
 }

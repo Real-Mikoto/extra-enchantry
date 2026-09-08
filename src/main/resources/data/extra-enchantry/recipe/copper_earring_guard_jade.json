@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:string",
+    "extra-enchantry:guard_jade"
+  ],
+  "result": {
+    "id": "extra-enchantry:copper_earring",
+    "components": {
+      "extra-enchantry:socketed_gem": "guard_jade"
+    }
+  }
+}

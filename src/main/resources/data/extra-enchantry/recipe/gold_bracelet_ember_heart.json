@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:gold_ingot",
+    "minecraft:gold_ingot",
+    "minecraft:string",
+    "extra-enchantry:ember_heart"
+  ],
+  "result": {
+    "id": "extra-enchantry:gold_bracelet",
+    "components": {
+      "extra-enchantry:socketed_gem": "ember_heart"
+    }
+  }
+}

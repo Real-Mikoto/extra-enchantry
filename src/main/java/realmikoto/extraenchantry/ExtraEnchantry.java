@@ -34,6 +34,10 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
+	// 1.4.0 配饰（防火判定）
+	import net.minecraft.core.component.DataComponents;
+	import net.minecraft.server.level.ServerPlayer;
+
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -166,6 +170,43 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final ResourceKey<Enchantment> LOAM =
 			ResourceKey.create(Registries.ENCHANTMENT, id("loam"));
 
+	// ============ 1.4.0「环佩与獠牙」附魔 ============
+
+	// 配饰附魔 ×8（数据驱动定义于 data/extra-enchantry/enchantment/*.json，计入八系共鸣）
+	public static final ResourceKey<Enchantment> SOUL_CHIME =
+			ResourceKey.create(Registries.ENCHANTMENT, id("soul_chime"));
+
+	public static final ResourceKey<Enchantment> SHIELD_PENDANT =
+			ResourceKey.create(Registries.ENCHANTMENT, id("shield_pendant"));
+
+	public static final ResourceKey<Enchantment> THUNDER_CLASP =
+			ResourceKey.create(Registries.ENCHANTMENT, id("thunder_clasp"));
+
+	public static final ResourceKey<Enchantment> VERDANT_DROP =
+			ResourceKey.create(Registries.ENCHANTMENT, id("verdant_drop"));
+
+	public static final ResourceKey<Enchantment> BLADE_RING =
+			ResourceKey.create(Registries.ENCHANTMENT, id("blade_ring"));
+
+	public static final ResourceKey<Enchantment> PLUME_RING =
+			ResourceKey.create(Registries.ENCHANTMENT, id("plume_ring"));
+
+	public static final ResourceKey<Enchantment> EMBER_BRACELET =
+			ResourceKey.create(Registries.ENCHANTMENT, id("ember_bracelet"));
+
+	public static final ResourceKey<Enchantment> TIDE_BRACELET =
+			ResourceKey.create(Registries.ENCHANTMENT, id("tide_bracelet"));
+
+	// 狼铠附魔 ×3（铁砧上书，不计玩家共鸣）
+	public static final ResourceKey<Enchantment> SHARP_FANG =
+			ResourceKey.create(Registries.ENCHANTMENT, id("sharp_fang"));
+
+	public static final ResourceKey<Enchantment> VIGIL =
+			ResourceKey.create(Registries.ENCHANTMENT, id("vigil"));
+
+	public static final ResourceKey<Enchantment> RENEWAL =
+			ResourceKey.create(Registries.ENCHANTMENT, id("renewal"));
+
 	/**
 	 * 破限可提升一级上限的附魔：所有在逻辑上可以增加一级的附魔（原版 + 本 mod）。
 	 * 带破限的输入在铁砧融合时，这些附魔的等级上限从原版最大值提升 1
@@ -274,6 +315,36 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final TagKey<Enchantment> ANY_FAMILY_TAG =
 			TagKey.create(Registries.ENCHANTMENT, id("families"));
 
+	/** 火焰家族附魔标签（family_fire）：防火判定依据（带任一火焰系附魔的物品免烧毁/免火损耐久） */
+	public static final TagKey<Enchantment> FIRE_FAMILY_TAG =
+			TagKey.create(Registries.ENCHANTMENT, id("family_fire"));
+
+	/**
+	 * 火焰家族物品判定（1.4.0 新增设定「烬火不侵」）：
+	 * 1) 附魔命中 #extra-enchantry:family_fire（炽焰行者/余烬/烬镯/劫后余辉，含附魔书 STORED_ENCHANTMENTS）；
+	 * 2) 配饰镶嵌烬心石（宝石即火焰家族凭证，未附魔也防火）。
+	 * 动态判定即时生效，砂轮磨掉附魔即失效——用于 ItemEntity 烧毁免疫与穿戴耐久过滤。
+	 */
+	public static boolean isFireFamilyItem(ItemStack stack) {
+		if (stack == null || stack.isEmpty()) {
+			return false;
+		}
+		for (Holder<Enchantment> enchantment : stack.getEnchantments().keySet()) {
+			if (enchantment.is(FIRE_FAMILY_TAG)) {
+				return true;
+			}
+		}
+		var stored = stack.get(DataComponents.STORED_ENCHANTMENTS);
+		if (stored != null) {
+			for (Holder<Enchantment> enchantment : stored.keySet()) {
+				if (enchantment.is(FIRE_FAMILY_TAG)) {
+					return true;
+				}
+			}
+		}
+		return "ember_heart".equals(Accessories.socketedGem(stack));
+	}
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -305,6 +376,26 @@ public class ExtraEnchantry implements ModInitializer {
 		Registry.register(BuiltInRegistries.ITEM, id("limit_break_shard"), LIMIT_BREAK_SHARD);
 		Registry.register(BuiltInRegistries.ITEM, id("chronicle_scroll"), CHRONICLE_SCROLL);
 		LimitBreakShardItem.register();
+
+		// ============ 1.4.0「环佩与獠牙」注册 ============
+
+		// 环佩物品与组件（16 配饰 + 8 宝石 + socketed_gem 组件）
+		Accessories.register();
+
+
+		// 配饰结算：属性类 + 自然恢复 tick（每玩家）
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				AccessoryManager.tick(player);
+			}
+		});
+
+		// 配饰击杀类被动（魂铃 / 魂珀）
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (source.getEntity() instanceof ServerPlayer killer) {
+				AccessoryManager.onKillMob(killer, entity);
+			}
+		});
 
 		// lore 文本数据化（1.3.1）：SERVER_DATA 阶段读取 lore/ 目录（五类 schema，逐条容错）
 		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
@@ -623,7 +714,11 @@ public class ExtraEnchantry implements ModInitializer {
 		return getEnchantmentLevel(stack, SIPHON);
 	}
 
-	/** 通用：读取物品上指定附魔的等级（无则返回 0，stack 可为 null） */
+	/** 通用：读取物品上指定附魔的等级（无则返回 0，stack 可为 null）——供 Manager 层复用的公开入口 */
+	public static int getEnchantmentLevelPublic(ItemStack stack, ResourceKey<Enchantment> key) {
+		return getEnchantmentLevel(stack, key);
+	}
+
 	private static int getEnchantmentLevel(ItemStack stack, ResourceKey<Enchantment> key) {
 		if (stack == null || stack.isEmpty()) {
 			return 0;

@@ -1,6 +1,6 @@
 {
-  "partial_threshold": 3,
-  "full_threshold": 5,
+  "partial_threshold": 4,
+  "full_threshold": 7,
   "guard_knockback_resist": 0.50,
   "attuned_guard_knockback_resist": 0.70,
   "trial_guard_seconds": 30,

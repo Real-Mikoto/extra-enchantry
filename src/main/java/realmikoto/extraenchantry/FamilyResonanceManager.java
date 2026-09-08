@@ -179,6 +179,22 @@ public final class FamilyResonanceManager {
 					}
 				}
 			}
+			// 1.4.0：配饰 4 槽（Attachment）同样计入家族计件——宝石不计数，只算附魔等级
+			for (ItemStack stack : AccessoryAttachments.slots(player)) {
+				if (stack.isEmpty()) {
+					continue;
+				}
+				AccessoryLoop:
+				for (Holder<Enchantment> holder : stack.getEnchantments().keySet()) {
+					int enchantLevel = stack.getEnchantments().getLevel(holder);
+					for (Family family : Family.values()) {
+						if (holder.is(family.tag)) {
+							totals.merge(family, enchantLevel, Integer::sum);
+							continue AccessoryLoop;
+						}
+					}
+				}
+			}
 			Map<Family, Tier> tiers = new EnumMap<>(Family.class);
 			for (Family family : Family.values()) {
 				int total = totals.get(family);
@@ -251,6 +267,11 @@ public final class FamilyResonanceManager {
 		int signature = 0;
 		for (EquipmentSlot slot : SCORED_SLOTS) {
 			ItemStack stack = player.getItemBySlot(slot);
+			signature = signature * 31 + (stack.isEmpty() ? 0
+					: Objects.hash(stack.getItem(), stack.get(DataComponents.ENCHANTMENTS)));
+		}
+		// 1.4.0：配饰 4 槽纳入签名（物品 + 附魔组件变化即触发全量重算）
+		for (ItemStack stack : AccessoryAttachments.slots(player)) {
 			signature = signature * 31 + (stack.isEmpty() ? 0
 					: Objects.hash(stack.getItem(), stack.get(DataComponents.ENCHANTMENTS)));
 		}

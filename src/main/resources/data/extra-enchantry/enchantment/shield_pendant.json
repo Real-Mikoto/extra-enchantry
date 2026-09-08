@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.extra-enchantry.shield_pendant"
+  },
+  "supported_items": "#extra-enchantry:accessory/earring",
+  "primary_items": "#extra-enchantry:accessory/earring",
+  "weight": 5,
+  "max_level": 2,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 10
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "any"
+  ],
+  "effects": {},
+  "max_cost": {
+    "base": 25,
+    "per_level_above_first": 15
+  }
+}

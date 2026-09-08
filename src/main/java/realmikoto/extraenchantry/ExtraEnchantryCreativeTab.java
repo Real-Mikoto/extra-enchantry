@@ -55,7 +55,19 @@ public final class ExtraEnchantryCreativeTab {
 			new EnchantmentEntry(ExtraEnchantry.STORMSURGE, 2),
 			new EnchantmentEntry(ExtraEnchantry.SHEATHED_EDGE, 3),
 			new EnchantmentEntry(ExtraEnchantry.TIDEHEART, 3),
-			new EnchantmentEntry(ExtraEnchantry.LOAM, 3)
+			new EnchantmentEntry(ExtraEnchantry.LOAM, 3),
+			// 1.4.0「环佩与獠牙」：8 配饰附魔 + 3 狼铠附魔
+			new EnchantmentEntry(ExtraEnchantry.SOUL_CHIME, 2),
+			new EnchantmentEntry(ExtraEnchantry.SHIELD_PENDANT, 2),
+			new EnchantmentEntry(ExtraEnchantry.THUNDER_CLASP, 2),
+			new EnchantmentEntry(ExtraEnchantry.VERDANT_DROP, 2),
+			new EnchantmentEntry(ExtraEnchantry.BLADE_RING, 2),
+			new EnchantmentEntry(ExtraEnchantry.PLUME_RING, 2),
+			new EnchantmentEntry(ExtraEnchantry.EMBER_BRACELET, 2),
+			new EnchantmentEntry(ExtraEnchantry.TIDE_BRACELET, 2),
+			new EnchantmentEntry(ExtraEnchantry.SHARP_FANG, 3),
+			new EnchantmentEntry(ExtraEnchantry.VIGIL, 2),
+			new EnchantmentEntry(ExtraEnchantry.RENEWAL, 2)
 	);
 
 	public static final ResourceKey<CreativeModeTab> TAB_KEY =
@@ -72,6 +84,15 @@ public final class ExtraEnchantryCreativeTab {
 						ItemStack sigil = new ItemStack(FamilySigils.FAMILY_SIGIL);
 						sigil.set(FamilySigils.FAMILY_ID, family.name().toLowerCase(java.util.Locale.ROOT));
 						output.accept(sigil);
+					}
+					// 1.4.0「环佩与獠牙」：8 宝石 + 16 配饰（宝石被动展示由配方产物体现）
+					for (net.minecraft.world.item.Item gem : Accessories.GEM_ITEMS) {
+						output.accept(new ItemStack(gem));
+					}
+					for (Accessories.Material material : Accessories.Material.values()) {
+						for (Accessories.SlotType slot : Accessories.SlotType.values()) {
+						output.accept(new ItemStack(Accessories.ACCESSORY_ITEMS[material.ordinal()][slot.ordinal()]));
+					}
 					}
 					for (EnchantmentEntry entry : ENCHANTMENTS) {
 						Holder<Enchantment> holder = parameters.holders()

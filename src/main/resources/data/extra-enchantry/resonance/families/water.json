@@ -1,6 +1,6 @@
 {
-  "partial_threshold": 3,
-  "full_threshold": 5,
+  "partial_threshold": 4,
+  "full_threshold": 7,
   "water_speed_bonus": 0.30,
   "attuned_water_speed_bonus": 0.40,
   "water_air_replenish_divisor": 40,

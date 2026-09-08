@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import realmikoto.extraenchantry.AccessoryManager;
 import realmikoto.extraenchantry.AfterglowManager;
 import realmikoto.extraenchantry.EmberfallManager;
 import realmikoto.extraenchantry.ExtraEnchantry;
@@ -71,6 +72,18 @@ public abstract class PlayerMixin {
 			return;
 		}
 		extraenchantry$oathboundKept = OathboundManager.extractOathbound((Player) (Object) this);
+	}
+
+	/**
+	 * 配饰栏死亡掉落（1.4.0）：keepInventory 关闭时——非誓约配饰掉落尸体处、
+	 * 誓约配饰暂存（restoreFrom 回插）、Attachment 清空。与背包掉落同点位同时机。
+	 */
+	@Inject(method = "dropEquipment", at = @At("HEAD"))
+	private void extraenchantry$dropAccessories(ServerLevel level, CallbackInfo ci) {
+		if (level.getGameRules().get(GameRules.KEEP_INVENTORY)) {
+			return;
+		}
+		AccessoryManager.onDropEquipment((Player) (Object) this);
 	}
 
 	/**

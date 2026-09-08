@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:iron_ingot",
+    "minecraft:iron_ingot",
+    "minecraft:string",
+    "extra-enchantry:soul_amber"
+  ],
+  "result": {
+    "id": "extra-enchantry:iron_earring",
+    "components": {
+      "extra-enchantry:socketed_gem": "soul_amber"
+    }
+  }
+}

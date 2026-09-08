@@ -150,23 +150,47 @@ public abstract class AnvilMenuMixin {
 	 * EnchantRandomlyFunctionMixin 钳制，铁砧融合是 III 级的唯一途径）
 	 */
 	@Inject(method = "createResult", at = @At("TAIL"))
-	private void extraenchantry$clampGaleWithoutLimitBreak(CallbackInfo ci) {
-		AnvilMenu menu = (AnvilMenu) (Object) this;
-		if (extraenchantry$hasLimitBreakInput(menu)) {
-			return;
+		private void extraenchantry$clampGaleWithoutLimitBreak(CallbackInfo ci) {
+			AnvilMenu menu = (AnvilMenu) (Object) this;
+			if (extraenchantry$hasLimitBreakInput(menu)) {
+				return;
+			}
+			ItemStack result = menu.getSlot(2).getItem();
+			if (result.isEmpty()
+					|| ExtraEnchantry.getGaleLevel(result) <= EXTRAENCHANTRY$GALE_MAX_WITHOUT_LIMIT_BREAK) {
+				return;
+			}
+			ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(result.getEnchantments());
+			for (Holder<Enchantment> enchantment : result.getEnchantments().keySet()) {
+				if (enchantment.is(ExtraEnchantry.GALE)) {
+					mutable.set(enchantment, EXTRAENCHANTRY$GALE_MAX_WITHOUT_LIMIT_BREAK);
+					break;
+				}
+			}
+			result.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
 		}
-		ItemStack result = menu.getSlot(2).getItem();
-		if (result.isEmpty()
-				|| ExtraEnchantry.getGaleLevel(result) <= EXTRAENCHANTRY$GALE_MAX_WITHOUT_LIMIT_BREAK) {
-			return;
-		}
-		ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(result.getEnchantments());
-		for (Holder<Enchantment> enchantment : result.getEnchantments().keySet()) {
-			if (enchantment.is(ExtraEnchantry.GALE)) {
-				mutable.set(enchantment, EXTRAENCHANTRY$GALE_MAX_WITHOUT_LIMIT_BREAK);
-				break;
+
+		/**
+		 * 獠牙礼赞（1.4.0 usage 成就）：首次在铁砧产出带本模附魔的狼铠时授予。
+		 * award 幂等，无重复发放风险；持有者取不到时静默跳过。
+		 */
+		@Inject(method = "createResult", at = @At("TAIL"))
+		private void extraenchantry$wolfArmorAchievement(CallbackInfo ci) {
+			AnvilMenu menu = (AnvilMenu) (Object) this;
+			ItemStack result = menu.getSlot(2).getItem();
+			if (result.isEmpty() || !result.is(net.minecraft.world.item.Items.WOLF_ARMOR)) {
+				return;
+			}
+			for (Holder<Enchantment> enchantment : result.getEnchantments().keySet()) {
+				if (enchantment.is(ExtraEnchantry.SHARP_FANG) || enchantment.is(ExtraEnchantry.VIGIL)
+						|| enchantment.is(ExtraEnchantry.RENEWAL)) {
+					Player player = ((ItemCombinerMenuAccessor) menu).extraenchantry$player();
+					if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+						realmikoto.extraenchantry.Advancements.award(serverPlayer,
+								realmikoto.extraenchantry.Advancements.WOLF_ARMOR);
+					}
+					return;
+				}
 			}
 		}
-		result.set(DataComponents.ENCHANTMENTS, mutable.toImmutable());
 	}
-}

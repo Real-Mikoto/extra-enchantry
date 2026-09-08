@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import realmikoto.extraenchantry.ExtraEnchantry;
+import realmikoto.extraenchantry.TideheartAir;
 
 /**
  * 无踪（Unseen）I 级——声音与震动屏蔽：
@@ -89,7 +90,7 @@ public abstract class EntityMixin {
 				return;
 			}
 			if (level > 0) {
-				cir.setReturnValue(300 + 300 * level);
+				cir.setReturnValue(TideheartAir.airCap(level));
 			}
 		}
 	}
