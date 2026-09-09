@@ -407,6 +407,8 @@ public final class FamilyTrialsManager {
 		// 首次完成：铭印 + 反馈（进度树自带 toast，聊天补一条总结 + 音效 + 粒子）
 		FamilySigils.grant(player, family);
 		FamilySigils.awardGrandResonatorIfComplete(player);
+		// 1.7.0 谱系主线：试炼章三节点（1/4/8）按完成数推进
+		LineageManager.onTrialComplete(player, family);
 		player.sendSystemMessage(Component.translatable("message.extra-enchantry.trial.complete",
 				Component.translatable("family.extra-enchantry." + path)));
 		if (player.level() instanceof ServerLevel serverLevel) {

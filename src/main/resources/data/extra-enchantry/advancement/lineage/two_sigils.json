@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:family_sigil"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.lineage.two_sigils.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.lineage.two_sigils.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ],
+  "parent": "extra-enchantry:lineage/first_sigil"
+}

@@ -485,6 +485,16 @@ public class ExtraEnchantry implements ModInitializer {
 		// 归一之战链式调度：回合推进 / 超时 / 单血条五色切换
 		ServerTickEvents.END_SERVER_TICK.register(ConvergenceManager::tick);
 
+		// ============ 1.7.0「谱系与传承」注册 ============
+
+		// 谱系回响匣（铭印补齐渠道）+ 遗辉纹饰模板（armor trim）
+		LineageEchoItem.register();
+		AfterglowTrim.register();
+
+		// 归一之战重启打断提示（上线检查）
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+				ConvergenceManager.onJoin(handler.player));
+
 		// 精英遭遇规则数据化：elite_encounter/<境>.json + elite_encounter_global/global.json
 		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
 				id("elite_encounter_rules"), provider -> new EliteEncounterConfig.RealmLoader());

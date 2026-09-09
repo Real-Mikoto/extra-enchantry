@@ -233,6 +233,9 @@ public final class EliteEncounterManager {
 		Advancements.award(player, LORDS_ROOT);
 		Advancements.award(player, def.triggerAdv());
 		Advancements.award(player, Advancements.WAR_TOTEM_USED);
+		// 1.7.0 谱系主线：触遇五境 + 首次宣战（图腾路径）
+		LineageManager.onRealmEncounter(player);
+		LineageManager.onFirstWar(player);
 		ExtraEnchantry.LOGGER.info("[extra-enchantry] 宣战图腾：{} 觉醒遭遇开始（玩家 {}）", def.id(),
 				player.getName().getString());
 		return ChallengeResult.OK;
@@ -334,6 +337,8 @@ public final class EliteEncounterManager {
 		// 进度树根「境主降临」+ 本境触发进度（幂等）
 		Advancements.award(player, LORDS_ROOT);
 		Advancements.award(player, def.triggerAdv());
+		// 1.7.0 谱系主线：触遇五境（普通遭遇路径）
+		LineageManager.onRealmEncounter(player);
 		ExtraEnchantry.LOGGER.info("[extra-enchantry] 精英遭遇开始：{}（玩家 {}）", def.id(),
 				player.getName().getString());
 	}
@@ -594,6 +599,8 @@ public final class EliteEncounterManager {
 		// 1.6.0 觉醒掉落分支（§1.5）：材料 ×2 + 器魂书 II–III 100% + 觉醒徽记 100% + 进度
 		if (encounter != null && encounter.awakened) {
 			Advancements.award(killer, Advancements.AWAKENED_SLAIN);
+			// 1.7.0 谱系主线：首杀觉醒
+			LineageManager.onFirstAwakenedSlain(killer);
 			RealmTreasures.dropAwakenedLoot(lord, def, encounter.level, killer);
 		}
 	}

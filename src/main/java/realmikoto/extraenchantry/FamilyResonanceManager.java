@@ -89,9 +89,17 @@ public final class FamilyResonanceManager {
 		GUARD("guard"), WIND("wind"), FIRE("fire"), WATER("water");
 
 		final TagKey<Enchantment> tag;
+		/** 1.7.0 原版谱系标签（vanilla_lineage/<family>）：原版附魔书的家族归属声明 */
+		final TagKey<Enchantment> vanillaTag;
 
 		Family(String path) {
 			this.tag = TagKey.create(Registries.ENCHANTMENT, ExtraEnchantry.id("family_" + path));
+			this.vanillaTag = TagKey.create(Registries.ENCHANTMENT, ExtraEnchantry.id("vanilla_lineage/" + path));
+		}
+
+		/** 双标签命中（本模 family_xxx ∪ 原版 vanilla_lineage/xxx，1.7.0 计件合并） */
+		public boolean matches(Holder<Enchantment> holder) {
+			return holder.is(tag) || holder.is(vanillaTag);
 		}
 	}
 
@@ -218,11 +226,17 @@ public final class FamilyResonanceManager {
 					FxHelper.play((ServerLevel) player.level(), player, SoundEvents.AMETHYST_BLOCK_CHIME, 1.0F, 1.2F);
 					// 首次共鸣入门提示（全局一次，1.3.1 被动引导）
 					OnboardingManager.onFamilyPartial(player);
+					// 1.7.0 谱系主线：首次 PARTIAL / FULL 授予
+					if (now == Tier.PARTIAL) {
+						LineageManager.onFirstPartial(player);
+					}
 				}
 				if (now == Tier.FULL && before != Tier.FULL) {
 					// 首次 FULL → 显示试炼进度树根节点 + 派发家族铭文（1.3.1）
 					FamilyTrialsManager.onReachFull(player);
 					OnboardingManager.onFamilyFull(player, family);
+					// 1.7.0 谱系主线：首次 FULL 授予
+					LineageManager.onFirstFull(player);
 				}
 				if (before == Tier.FULL && now != Tier.FULL
 						&& AttunementManager.attunedFamily(player) == family) {

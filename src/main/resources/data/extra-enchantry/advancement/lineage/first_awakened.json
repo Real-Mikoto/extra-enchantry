@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:realm_sigil"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.lineage.first_awakened.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.lineage.first_awakened.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ],
+  "parent": "extra-enchantry:lineage/first_war"
+}

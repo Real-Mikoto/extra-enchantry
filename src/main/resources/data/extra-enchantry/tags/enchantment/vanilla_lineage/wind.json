@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:power",
+    "minecraft:punch",
+    "minecraft:infinity"
+  ]
+}

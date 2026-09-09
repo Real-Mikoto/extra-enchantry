@@ -268,6 +268,8 @@ public final class ConvergenceManager {
 				ParticleTypes.TOTEM_OF_UNDYING, 48, 0.8D);
 		FxHelper.play(level, player, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
 		Advancements.award(player, Advancements.CONVERGENCE_DONE);
+		// 1.7.0 谱系主线：归一节点（含谱系圆满判定链）
+		LineageManager.onConvergenceDone(player);
 		LOCKOUT_UNTIL.put(player.getUUID(),
 				System.currentTimeMillis() + LOCKOUT_MINUTES * MINUTE_MS);
 	}
@@ -301,6 +303,26 @@ public final class ConvergenceManager {
 	/** 是否进行中（供 EliteEncounterManager 的互斥判定与浩劫冻结） */
 	public static boolean isRunning() {
 		return !ACTIVE.isEmpty();
+	}
+
+	/**
+	 * 玩家上线检查（1.7.0 §4 重启提示）：若有未完成的归一印记在背包（说明挑战被重启打断），
+	 * 动作栏提示一次「归一之辉被打断，印记仍在」。挑战状态本身不持久化（按打断计，30 分钟锁同语义）。
+	 */
+	public static void onJoin(ServerPlayer player) {
+		boolean hasMark = false;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (player.getInventory().getItem(i).getItem() == WarArtifacts.CONVERGENCE_MARK) {
+				hasMark = true;
+				break;
+			}
+		}
+		Long until = LOCKOUT_UNTIL.get(player.getUUID());
+		if (hasMark && until == null) {
+			// 有印记且不在锁内：大概率是重启丢失了进行中的挑战（重启不写锁）
+			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+					"message.extra-enchantry.convergence.interrupted"));
+		}
 	}
 
 	/** 是否为归一回响（isBossLike 同领主：断罪 ×2 / 不可拉拽） */

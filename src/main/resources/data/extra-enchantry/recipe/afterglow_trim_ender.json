@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "extra-enchantry:convergence_core",
+    "extra-enchantry:void_shard",
+    "extra-enchantry:void_shard"
+  ],
+  "result": {
+    "id": "extra-enchantry:afterglow_trim",
+    "count": 1
+  }
+}

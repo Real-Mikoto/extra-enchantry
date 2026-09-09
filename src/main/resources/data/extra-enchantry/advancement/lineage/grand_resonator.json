@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:chronicle_scroll"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.lineage.grand_resonator.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.lineage.grand_resonator.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ],
+  "parent": "extra-enchantry:lineage/convergence"
+}

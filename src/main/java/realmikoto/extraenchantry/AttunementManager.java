@@ -148,6 +148,8 @@ public final class AttunementManager {
 		}
 		// 首次铭刻：家族格言 + 引导进度（1.3.1「铭文纪元」）
 		OnboardingManager.onFirstAttune(player, family);
+		// 1.7.0 谱系主线：铭刻之章首节点
+		LineageManager.onFirstAttune(player);
 		return AttuneResult.OK;
 	}
 

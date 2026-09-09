@@ -69,6 +69,8 @@ public final class FamilySigils {
 		if (player.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
 			FxHelper.play(serverLevel, player, SoundEvents.PLAYER_LEVELUP, 0.8F, 1.4F);
 		}
+		// 1.7.0 谱系主线：铭印授予节点（first_sigil 数据驱动补授 / two_sigils 计数）
+		LineageManager.onSigilGranted(player);
 	}
 
 	/**
@@ -96,6 +98,8 @@ public final class FamilySigils {
 		if (grand != null && player.getAdvancements().award(grand, "triggered")) {
 			// 首次达成大共鸣者 → 派发编年史卷轴（1.3.1「铭文纪元」）
 			OnboardingManager.onGrandResonator(player);
+			// 1.7.0 谱系主线：大共鸣者节点 + 谱系圆满判定
+			LineageManager.onGrandResonator(player);
 		}
 	}
 

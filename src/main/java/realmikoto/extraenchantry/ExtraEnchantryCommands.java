@@ -67,12 +67,47 @@ public final class ExtraEnchantryCommands {
 						.then(Commands.argument("family", StringArgumentType.word())
 								.suggests(FAMILY_SUGGESTIONS)
 								.executes(ExtraEnchantryCommands::attune)))
+				// ---- status：一站式总览（1.7.0 §4）----
+				.then(Commands.literal("status")
+						.executes(ctx -> {
+							ServerPlayer self = ctx.getSource().getPlayerOrException();
+							return showStatus(self);
+						}))
 				// ---- debug resonance <player>：管理员诊断 ----
 				.then(Commands.literal("debug")
 						.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 						.then(Commands.literal("resonance")
 								.then(Commands.argument("player", EntityArgument.player())
 										.executes(ExtraEnchantryCommands::debugResonance)))));
+	}
+
+	/** status：谱系一站式总览——共鸣档位 / 主调 / 试炼 / 归一资格（1.7.0） */
+	private static int showStatus(ServerPlayer player) {
+		// 主调
+		var attuned = realmikoto.extraenchantry.AttunementManager.attunedFamily(player);
+		player.sendSystemMessage(Component.translatable("command.extra-enchantry.status.header"));
+		player.sendSystemMessage(Component.translatable("command.extra-enchantry.status.attunement",
+				attuned != null
+						? Component.translatable("family.extra-enchantry." + attuned.name().toLowerCase())
+						: Component.translatable("command.extra-enchantry.status.none")));
+		// 试炼进度
+		int trials = realmikoto.extraenchantry.LineageManager.countDoneTrials(player);
+		player.sendSystemMessage(Component.translatable("command.extra-enchantry.status.trials", trials));
+		// 归一资格（印记在包）
+		boolean hasMark = false;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (player.getInventory().getItem(i).getItem()
+					== realmikoto.extraenchantry.WarArtifacts.CONVERGENCE_MARK) {
+				hasMark = true;
+				break;
+			}
+		}
+		player.sendSystemMessage(Component.translatable("command.extra-enchantry.status.convergence",
+				hasMark ? Component.translatable("command.extra-enchantry.status.ready")
+						: Component.translatable("command.extra-enchantry.status.not_ready")));
+		// 共鸣总览走秘典总览页（复用唯一口径）
+		ResonanceCodexItem.sendPage(player, 0);
+		return 1;
 	}
 
 	// ============ 子命令实现 ============

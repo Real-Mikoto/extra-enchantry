@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "extra-enchantry:convergence_core",
+    "extra-enchantry:sculk_core",
+    "extra-enchantry:sculk_core"
+  ],
+  "result": {
+    "id": "extra-enchantry:afterglow_trim",
+    "count": 1
+  }
+}
