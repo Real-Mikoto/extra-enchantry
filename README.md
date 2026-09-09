@@ -1214,14 +1214,16 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 #### 支柱一：谱系主线树 `lineage/`（第七棵树）
 
-六棵既有树平行孤立 → 一条主线弧。四章 16 节点，**数据驱动 2 个 + 代码授予 14 个**（26.2 `AdvancementRequirements` 仅绑定本节点 criteria，跨树引用不可行——见 §5.1 验证结论①）：
+六棵既有树平行孤立 → 一条主线弧。**树状结构**：root 下五条支线并行（1.7.2 由单链重构），16 节点，**数据驱动 2 个 + 代码授予 14 个**（26.2 `AdvancementRequirements` 仅绑定本节点 criteria，跨树引用不可行——见 §5.1 验证结论①）：
 
-| 章 | 节点 | frame |
+| 支线 | 节点链 | frame |
 | --- | --- | --- |
-| I 觉醒 | root（tick）→ 拾遗（inventory_changed 附魔书）→ 初次共鸣 → 铭文回响 | task |
-| II 铭刻 | 铭刻于心 → 持印者 → 双辉映照 | task / challenge |
-| III 试炼 | 试炼之始 → 四境行者 → 八试炼全录 | task / challenge |
-| IV 归一 | 境主之影 → 宣战者 → 唤醒之敌 → 归一 → 大共鸣者 → **谱系圆满**（隐藏 challenge） | task → goal |
+| root | 谱系：觉醒（tick） | task |
+| 共鸣支 | 拾遗（获得附魔书）→ 初次共鸣（PARTIAL）→ 铭文回响（FULL） | task |
+| 铭刻支 | 铭刻于心（首次主调）→ 持印者（首枚铭印）→ 双辉映照（两枚铭印） | task / challenge |
+| 试炼支 | 试炼之始 → 四境行者 → 八试炼全录 | task / challenge |
+| 归一支 | 境主之影（触遇领主）→ 宣战者 → 唤醒之敌 → 归一 | task → goal |
+| 终局支 | 大共鸣者 → **谱系圆满**（隐藏 challenge） | task → goal |
 
 授予接线（各系统完成处调 `LineageManager`）：升档钩子 / `AttunementManager.tryAttune` / `FamilySigils.grant` / `FamilyTrialsManager.complete` / `EliteEncounterManager.start·startChallenged·onLordDeath` / `ConvergenceManager.succeed`。**「谱系圆满」= 八试炼 + 大共鸣者 + 归一三者全 done**（`LineageManager.checkLineageComplete` 轮询判定）。
 
