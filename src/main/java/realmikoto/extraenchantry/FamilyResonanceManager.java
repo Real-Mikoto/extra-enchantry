@@ -119,8 +119,10 @@ public final class FamilyResonanceManager {
 	private static final Map<UUID, Long> NATURE_STILL_SINCE = new ConcurrentHashMap<>();
 	/** 自然扎根：最近受伤时刻（受伤暂停，主调自然专属） */
 	private static final Map<UUID, Long> LAST_HURT_TICK = new ConcurrentHashMap<>();
-	/** 通用上次位置（自然扎根 / 熔岩骑乘测距共用） */
-	private static final Map<UUID, Vec3> LAST_POS = new ConcurrentHashMap<>();
+	/** 自然扎根：上一采样位置（独立 Map——旧版与熔岩骑乘共用导致 moved 恒 false） */
+	private static final Map<UUID, Vec3> LAST_POS_NATURE = new ConcurrentHashMap<>();
+	/** 劫火余生：上一采样位置（独立 Map——与自然扎根的写入互相污染会导致位移恒 0） */
+	private static final Map<UUID, Vec3> LAST_POS_LAVA = new ConcurrentHashMap<>();
 	/** 劫火余生：熔岩骑乘累计距离（格） */
 	private static final Map<UUID, Double> LAVA_RIDE_DISTANCE = new ConcurrentHashMap<>();
 
@@ -131,6 +133,41 @@ public final class FamilyResonanceManager {
 
 	public enum Tier {
 		NONE, PARTIAL, FULL
+	}
+
+	/**
+	 * 玩家登出清理（DISCONNECT 调用）：全部运行时快照表按 UUID 移除。
+	 * 修复：旧实现 11 张表无任何回收，每个连接过的玩家永久保留约 11 条记录。
+	 */
+	public static void onDisconnect(java.util.UUID playerId) {
+		TIERS.remove(playerId);
+		PREV_TIERS.remove(playerId);
+		TOTALS.remove(playerId);
+		EQUIP_SIGS.remove(playerId);
+		LAST_FULL_SCAN.remove(playerId);
+		NATURE_STILL_SINCE.remove(playerId);
+		LAST_HURT_TICK.remove(playerId);
+		LAST_POS_NATURE.remove(playerId);
+		LAST_POS_LAVA.remove(playerId);
+		LAVA_RIDE_DISTANCE.remove(playerId);
+		BLADE_LAST_HIT.remove(playerId);
+		BLADE_COMBO.remove(playerId);
+	}
+
+	/** 服务器停止全清（ServerLifecycleEvents.SERVER_STOPPED 调用） */
+	public static void onServerStopped() {
+		TIERS.clear();
+		PREV_TIERS.clear();
+		TOTALS.clear();
+		EQUIP_SIGS.clear();
+		LAST_FULL_SCAN.clear();
+		NATURE_STILL_SINCE.clear();
+		LAST_HURT_TICK.clear();
+		LAST_POS_NATURE.clear();
+		LAST_POS_LAVA.clear();
+		LAVA_RIDE_DISTANCE.clear();
+		BLADE_LAST_HIT.clear();
+		BLADE_COMBO.clear();
 	}
 
 	private FamilyResonanceManager() {
@@ -180,32 +217,34 @@ public final class FamilyResonanceManager {
 				if (stack.isEmpty()) {
 					continue;
 				}
-				ItemEnchantmentsLoop:
-				for (Holder<Enchantment> holder : stack.getEnchantments().keySet()) {
-					int enchantLevel = stack.getEnchantments().getLevel(holder);
-					for (Family family : Family.values()) {
-						if (holder.is(family.tag)) {
-							totals.merge(family, enchantLevel, Integer::sum);
-							continue ItemEnchantmentsLoop;
-						}
+			ItemEnchantmentsLoop:
+			for (Holder<Enchantment> holder : stack.getEnchantments().keySet()) {
+				int enchantLevel = stack.getEnchantments().getLevel(holder);
+				// 修复 #7：用 family.matches（family_xxx ∪ vanilla_lineage/xxx）——
+				// 旧实现只查 family.tag，1.7.0 原版附魔归族完全未生效
+				// 修复 #8：命中后不再 continue，双归附魔（霆霓/余烬）同时计入所有匹配家族
+				for (Family family : Family.values()) {
+					if (family.matches(holder)) {
+						totals.merge(family, enchantLevel, Integer::sum);
 					}
 				}
+			}
 			}
 			// 1.4.0：配饰 4 槽（Attachment）同样计入家族计件——宝石不计数，只算附魔等级
 			for (ItemStack stack : AccessoryAttachments.slots(player)) {
 				if (stack.isEmpty()) {
 					continue;
 				}
-				AccessoryLoop:
-				for (Holder<Enchantment> holder : stack.getEnchantments().keySet()) {
-					int enchantLevel = stack.getEnchantments().getLevel(holder);
-					for (Family family : Family.values()) {
-						if (holder.is(family.tag)) {
-							totals.merge(family, enchantLevel, Integer::sum);
-							continue AccessoryLoop;
-						}
+			AccessoryLoop:
+			for (Holder<Enchantment> holder : stack.getEnchantments().keySet()) {
+				int enchantLevel = stack.getEnchantments().getLevel(holder);
+				// 修复 #7/#8：同装备槽——matches 并集 + 双归全计
+				for (Family family : Family.values()) {
+					if (family.matches(holder)) {
+						totals.merge(family, enchantLevel, Integer::sum);
 					}
 				}
+			}
 			}
 		Map<Family, Tier> tiers = new EnumMap<>(Family.class);
 		for (Family family : Family.values()) {
@@ -387,7 +426,7 @@ public final class FamilyResonanceManager {
 		boolean attuned = AttunementManager.attunementActive(player, Family.NATURE);
 		long now = gameTime;
 		Vec3 pos = player.position();
-		Vec3 last = LAST_POS.put(player.getUUID(), pos);
+		Vec3 last = LAST_POS_NATURE.put(player.getUUID(), pos);
 		boolean moved = last != null && last.distanceToSqr(pos) > 0.001D;
 		boolean canRegen = natureFull && player.isAlive() && player.getFoodData().getFoodLevel() > 0
 				&& player.getHealth() < player.getMaxHealth();
@@ -424,10 +463,10 @@ public final class FamilyResonanceManager {
 		Vec3 pos = player.position();
 		if (!(player.getVehicle() instanceof LivingEntity mount) || !mount.isInLava()
 				|| ExtraEnchantry.getEmberfallLevel(mount.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.BODY)) <= 0) {
-			LAST_POS.remove(playerId);
+			LAST_POS_LAVA.remove(playerId);
 			return;
 		}
-		Vec3 last = LAST_POS.put(playerId, pos);
+		Vec3 last = LAST_POS_LAVA.put(playerId, pos);
 		if (last == null) {
 			return;
 		}

@@ -40,7 +40,20 @@ public final class EmberfallManager {
 	/** 免死后保留的生命值：1 颗心 = 2 HP（比不死图腾的半颗心宽裕） */
 	private static final float SURVIVE_HEALTH = 2.0F;
 
+	/**
+	 * 修复：金胸甲路径每实体冷却（毫秒）——旧实现无冷却且 setDamageValue 绕过经验修补，
+	 * 经验修补补回耐久后可无限重复免死；冷却窗口内不触发。
+	 */
+	private static final long CHESTPLATE_COOLDOWN_MS = 60_000L;
+	private static final java.util.Map<java.util.UUID, Long> CHESTPLATE_COOLDOWNS =
+			new java.util.concurrent.ConcurrentHashMap<>();
+
 	private EmberfallManager() {
+	}
+
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(java.util.UUID playerId) {
+		CHESTPLATE_COOLDOWNS.remove(playerId);
 	}
 
 	/**
@@ -78,14 +91,29 @@ public final class EmberfallManager {
 		}
 	}
 
-	/** 金胸甲路径：耐久消耗 + 免死 + 效果（原版行为） */
+	/** 金胸甲路径：材质校验 + 冷却 + 耐久消耗 + 免死 + 效果 */
 	private static boolean triggerChestplate(LivingEntity entity, ItemStack chest, ServerLevel level) {
+		// 修复：限定金胸甲——旧实现任何带余烬的可损坏胸甲（如下界合金）都能免死
+		if (!chest.is(net.minecraft.world.item.Items.GOLDEN_CHESTPLATE)) {
+			return false;
+		}
+		// 修复：每实体 60 秒冷却——堵住"经验修补补耐久 → 反复免死"的循环
+		Long last = CHESTPLATE_COOLDOWNS.get(entity.getUUID());
+		long now = System.currentTimeMillis();
+		if (last != null && now - last < CHESTPLATE_COOLDOWN_MS) {
+			return false;
+		}
 		int cost = Math.max(1, chest.getMaxDamage() / 2);
 		int remaining = chest.getMaxDamage() - chest.getDamageValue();
 		if (remaining <= cost) {
 			return false; // 耐久不足，不触发
 		}
-		chest.setDamageValue(chest.getDamageValue() + cost);
+		// 走原版耐久结算（hurtAndBreak）：经验修补可按预期吸收损耗
+		chest.hurtAndBreak(cost, entity, EquipmentSlot.CHEST);
+		if (chest.isEmpty()) {
+			entity.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
+		}
+		CHESTPLATE_COOLDOWNS.put(entity.getUUID(), now);
 		applySurvivalEffects(entity);
 		playSaveFx(entity, level);
 		awardEmberSave(entity);

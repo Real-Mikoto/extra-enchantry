@@ -46,6 +46,9 @@ public final class JudgementManager {
 
 	/**
 	 * 断罪入口：返回本次伤害应采用的值（不触发时原样返回 amount）。
+	 * 修复：boss 变体补上同一套冷却 + 音效节流——旧实现每次命中都 ×1.75 且播放诅咒音，
+	 * boss 战节奏远超设计；斩杀改为 Math.max(amount, 必死量)——旧实现直接替换会丢弃
+	 * 蚀命/冲阵/霆霓/藏锋等前序加成，超高伤害下反而降低伤害。
 	 */
 	public static float applyJudgement(ServerLevel serverLevel, LivingEntity victim, DamageSource source, float amount) {
 		if (amount <= 0.0F || CleaveManager.isCleaving() || source.getEntity() == victim) {
@@ -58,10 +61,15 @@ public final class JudgementManager {
 		if (enchantLevel <= 0 || enchantLevel > EXECUTE_THRESHOLD.length) {
 			return amount;
 		}
-		// boss 不斩杀，改为 ×1.75 伤害（无冷却）——附远古守卫诅咒低音区分"触发了 boss 变体"
+		// boss 不斩杀，改为 ×1.75 伤害——补冷却（与斩杀共用 5 秒）+ 音效节流（10s/次）
 		if (ExtraEnchantry.isBossLike(victim)) {
-			FxHelper.play(serverLevel, victim, net.minecraft.sounds.SoundEvents.ELDER_GUARDIAN_CURSE,
-					0.2F, 1.0F);
+			if (!tryConsumeCooldown(attacker)) {
+				return amount;
+			}
+			if (FxHelper.throttle(victim, "judgement_boss", 200)) {
+				FxHelper.play(serverLevel, victim, net.minecraft.sounds.SoundEvents.ELDER_GUARDIAN_CURSE,
+						0.2F, 1.0F);
+			}
 			return amount * BOSS_DAMAGE_MULTIPLIER;
 		}
 		float current = victim.getHealth() + victim.getAbsorptionAmount();
@@ -76,8 +84,9 @@ public final class JudgementManager {
 		if (attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
 			Advancements.award(serverPlayer, Advancements.EXECUTOR);
 		}
-		// 放大到必死量：足以穿透伤害吸收与护甲减免（壁垒仍会在减免后钳制，见类注释）
-		return victim.getMaxHealth() * 4.0F + 100.0F;
+		// 放大到必死量：足以穿透伤害吸收与护甲减免（壁垒仍会在减免后钳制，见类注释）；
+		// 取 max 保证前序加成不被丢弃
+		return Math.max(amount, victim.getMaxHealth() * 4.0F + 100.0F);
 	}
 
 	/** 冷却判定并记账：距上次斩杀不足 5 秒则返回 false */
@@ -90,6 +99,11 @@ public final class JudgementManager {
 		}
 		LAST_EXECUTE_MS.put(id, now);
 		return true;
+	}
+
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(UUID playerId) {
+		LAST_EXECUTE_MS.remove(playerId);
 	}
 
 	/** 斩杀视听（L3）：灵魂爆发 + 灵魂逸散处决音（服务端生成，自动广播附近玩家） */

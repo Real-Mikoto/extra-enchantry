@@ -169,9 +169,10 @@ public final class AccessoryManager {
 		}
 		int interval = Math.max(MIN_REGEN_INTERVAL,
 				(int) Math.round(VANILLA_REGEN_INTERVAL / (1.0D + bonus)));
-		int countdown = REGEN_COUNTDOWN.merge(player.getUUID(), interval, Integer::sum) - interval;
-		countdown = REGEN_COUNTDOWN.getOrDefault(player.getUUID(), interval);
-		if (countdown <= 0) {
+		// 修复：旧实现 merge 后立即 getOrDefault 覆盖递减结果，countdown 恒为累加值、heal 永不可达
+		Integer remaining = REGEN_COUNTDOWN.compute(player.getUUID(),
+				(uuid, current) -> current == null ? interval : current - 1);
+		if (remaining != null && remaining <= 0) {
 			REGEN_COUNTDOWN.put(player.getUUID(), interval);
 			player.heal(1.0F);
 		}
@@ -248,15 +249,16 @@ public final class AccessoryManager {
 	}
 
 	/**
-	 * 造成伤害加成（attacker 侧，hurtServer HEAD ModifyVariable）：
+	 * 造成伤害加成（攻击者侧）：
 	 * 雷鸣扣——雷雨天气（isThundering）时全伤害 +4%/级。
+	 * attacker 由 LivingEntityMixin 从 source.getEntity() 解析后传入（hurtServer 的 this 是受害者）。
 	 */
-	public static float outgoingDamage(LivingEntity attacker, float amount, DamageSource source) {
-		if (!(attacker instanceof ServerPlayer player) || !player.level().isThundering()) {
+	public static float outgoingDamage(ServerPlayer attacker, float amount, DamageSource source) {
+		if (!attacker.level().isThundering()) {
 			return amount;
 		}
 		double bonus = 0.0D;
-		for (ItemStack stack : AccessoryAttachments.slots(player)) {
+		for (ItemStack stack : AccessoryAttachments.slots(attacker)) {
 			bonus += enchantmentLevel(stack, ExtraEnchantry.THUNDER_CLASP) * THUNDER_CLASP_BONUS;
 		}
 		return bonus <= 0.0D ? amount : amount * (float) (1.0D + bonus);
@@ -332,11 +334,33 @@ public final class AccessoryManager {
 		}
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用）：暂存的誓约配饰若从未走 restoreFrom，直接写回其附件存档 */
+	public static void onDisconnect(net.minecraft.world.entity.player.Player player) {
+		ItemStack[] kept = DEATH_KEPT.remove(player.getUUID());
+		if (kept != null) {
+			// 玩家实体登出时仍可写 attachment（随 save 落盘），物品不会凭空消失
+			AccessoryAttachments.set(player, kept);
+		}
+		ATTRIBUTE_CACHE.remove(player.getUUID());
+		REGEN_COUNTDOWN.remove(player.getUUID());
+	}
+
+	/**
+	 * 玩家重生 / 维度切换后强制重建属性修改器（restoreFrom TAIL 调用）。
+	 * 修复：缓存按 UUID 键控，但瞬态修改器随旧实体销毁——重登/重生后缓存命中导致
+	 * 加成静默丢失（直到数值变化才恢复）。清缓存让下一 tick 全量重写。
+	 */
+	public static void onPlayerRestore(ServerPlayer newPlayer) {
+		ATTRIBUTE_CACHE.remove(newPlayer.getUUID());
+	}
+
 	/**
 	 * restoreFrom TAIL：暂存的誓约配饰回插；否则 keepEverything / 旁观者 /
 	 * keepInventory 时整体搬运（Attachment 非 copyOnDeath，须显式跟随）。
 	 */
 	public static void onRestoreFrom(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean keepEverything) {
+		// 修复 #13：瞬态属性修改器随旧实体销毁，必须让新玩家全量重写（清值缓存）
+		ATTRIBUTE_CACHE.remove(newPlayer.getUUID());
 		ItemStack[] kept = DEATH_KEPT.remove(oldPlayer.getUUID());
 		if (kept != null) {
 			AccessoryAttachments.set(newPlayer, kept);

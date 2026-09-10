@@ -43,6 +43,13 @@ public final class AccessoryHudState {
 		Accessories.ANIMATION_DONE = false;
 	}
 
+	/** 修复 #29：离开世界时重置全部动画状态（旧实现跨世界残留导致物品画在偏移位置） */
+	public static void reset() {
+		progress = 0.0F;
+		Accessories.EXPANDED = false;
+		Accessories.ANIMATION_DONE = false;
+	}
+
 	/** 缓动：ease-out（滑入前快后慢） */
 	public static float eased() {
 		float p = progress;

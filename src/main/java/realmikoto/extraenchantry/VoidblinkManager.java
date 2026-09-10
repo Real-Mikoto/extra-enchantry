@@ -39,6 +39,11 @@ public final class VoidblinkManager {
 	private VoidblinkManager() {
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(UUID playerId) {
+		BLINK_READY_AT.remove(playerId);
+	}
+
 	/** 胸甲上的虚闪等级（0 = 无） */
 	public static int blinkLevel(ServerPlayer player) {
 		ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);

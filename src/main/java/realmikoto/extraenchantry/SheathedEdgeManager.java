@@ -34,6 +34,11 @@ public final class SheathedEdgeManager {
 	/** 生物 UUID → 最近一次参与战斗的时间戳（服务端单线程访问） */
 	private static final Map<UUID, Long> LAST_COMBAT_MS = new HashMap<>();
 
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(UUID playerId) {
+		LAST_COMBAT_MS.remove(playerId);
+	}
+
 	private SheathedEdgeManager() {
 	}
 
@@ -64,6 +69,13 @@ public final class SheathedEdgeManager {
 		long now = System.currentTimeMillis();
 		Long last = LAST_COMBAT_MS.get(attacker.getUUID());
 		if (last != null && now - last < SHEATH_MS) {
+			// 修复 #30：冷却就绪提示（10 秒节流，L1 级别）——旧实现静默跳过，玩家无从知晓何时可用
+			if (attacker instanceof net.minecraft.server.level.ServerPlayer readyPlayer
+					&& FxHelper.throttle(readyPlayer, "sheathed_ready", 200)) {
+				readyPlayer.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+						"message.extra-enchantry.sheathed_ready").withStyle(
+						net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+			}
 			return amount;
 		}
 		// 拔刀：立刻重新计时（本次命中即"造成伤害"，双记账合一）

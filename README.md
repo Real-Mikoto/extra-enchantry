@@ -103,6 +103,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
     - [1.7.1 物品贴图补全 (Art Completion)](#171-物品贴图补全-art-completion)
     - [1.7.2 谱系树重构与纹饰贴图 (Advancement Tree & Trim)](#172-谱系树重构与纹饰贴图-advancement-tree--trim)
     - [1.7.3 领主外观回退与浩劫调优 (Visual Rollback & Cataclysm Tuning)](#173-领主外观回退与浩劫调优-visual-rollback--cataclysm-tuning)
+    - [1.7.4 全量代码审计修复 (Code Audit & Hardening)](#174-全量代码审计修复-code-audit--hardening)
 - [通用技术模式](#通用技术模式)
 - [记录规范](#记录规范)
   - [附魔记录规范](#附魔记录规范)
@@ -782,7 +783,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 #### 32. 雷鸣扣 Thunder Clasp（II，项链，风暴族）
 
-**雷雨天气**（`isThundering`）造成的伤害 **+4%/级**（attacker 侧 hurtServer HEAD，多件线性叠加）。
+**雷雨天气**（`isThundering`）造成的伤害 **+4%/级**（多件线性叠加）。实现为 `LivingEntityMixin` hurtServer HEAD 的 ModifyVariable 从 `source.getEntity()` 解析攻击者（v1.7.4 修正：`hurtServer` 的 `this` 是受害者，旧实现误把受害者当攻击者导致效果反向）。
 
 #### 33. 翠滴 Verdant Drop（II，项链，自然族）
 
@@ -1311,6 +1312,54 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * **五境领主生命统一 300**（对齐原版凋零；原为守望者 1400 / 烬骨王 400 / 渊潮 600 / 巫后 320 / 末影 500），跨境战斗节奏一致化；血条沿用「64 格内玩家可见 + 实时 `health/maxHealth` + 死亡即移除」的原版 boss 逻辑
 * **五境领主刷怪蛋 ×5** 进创造模式物品栏（管理 / 测试用）：右键生成对应领主子类实例，`shouldBeSaved()=false` 不持久化
 
+#### 1.7.4 全量代码审计修复 (Code Audit & Hardening)
+
+全量代码审计（README + 106 个 Java 文件）产出的 30 项修复一次性落地：6 项致命、14 项严重、6 项平衡/性能、4 项体验。零新附魔 / 零新实体 / 零数据包结构变更，不改任何附魔数值表与 Mixin 注入点签名。
+
+##### 致命修复（P0）
+
+| 项 | 根因 | 修复 |
+| --- | --- | --- |
+| 领主每 tick 重复觉醒 | `advance()` 用 `elapsed >= crack` 判定且无幂等守卫，领主正常存活时每 tick 重跑 `awaken()`——每秒 20 只领主、TPS 秒崩、孤儿领主写进存档 | 分支加 `lordId == null` 前置 + `awaken()` 开头幂等断言（`EliteEncounterManager`） |
+| 雷鸣扣效果完全反向 | 注入点 `hurtServer` 的 `this` 是**受害者**，`accessoryOutgoing` 却把 `this` 当攻击者——雷雨天受到的伤害 +4%/级 | 改从 `source.getEntity()` 取攻击者（排除自伤），`AccessoryManager.outgoingDamage(ServerPlayer, …)` 签名同步收紧 |
+| 自然系静止判定失效 | 自然回血与熔岩骑行共用 `LAST_POS` 且互相清除/覆盖——`moved` 恒 false（扎根变无条件回血）、熔岩位移恒 0（**劫火余生不可达成**） | 拆分为 `LAST_POS_NATURE` / `LAST_POS_LAVA` 两张独立表（`FamilyResonanceManager`） |
+| 翠滴 / 萌芽晶不回血 | `merge` 的递减结果被下一行 `getOrDefault` 重读覆盖，`countdown <= 0` 永不成立；次生 `int` 溢出 | 改 `compute` 递减实现（`AccessoryManager`） |
+| 誓约配饰死亡后永久丢失 | 暂存于内存 Map `DEATH_KEPT`，死亡界面直接退出 / 被踢 / 重启则唯一副本消失 | DISCONNECT 时写回玩家 attachment（随存档落盘），任何退出路径不丢 |
+| 归一按最后一击者结算 | `succeed/remove` 用 killer 操作 `ACTIVE` 与维度锁——多人最后一击非发起人时状态残留，10 秒后 `ROUND_COLORS.get(5)` 越界转 `fail()`：**打赢判负 + 锁 30 分钟 + 维度锁泄漏** | `remove(convergence)` 一律用 `convergence.playerId`；掉落 / 进度归属发起人（离线兜底给 killer）（`ConvergenceManager`） |
+
+##### 严重修复（P1）
+
+* **1.7.0 原版附魔归族激活**：计分循环只查 `family.tag`，`Family.matches()`（`family_x` ∪ `vanilla_lineage/x`）零调用——原版附魔书归族支柱整体空转（水下呼吸 + 深海探索者等 11 级水系原版附魔计件为 0）。两处循环改用 `matches()`，**同步修复双归只计一族**（旧 `continue` 让霆霓只进风暴不进水；现命中全部匹配家族）。
+* **假象等级越界崩档**：`CONFIGS[level-1]` 只有下界守卫，`/give` 组件或数据包给出等级 ≥4 即服务端 tick 抛 `ArrayIndexOutOfBoundsException`。补上界守卫，与其余 12 处查表约定统一。
+* **浩劫 / 归一离线泄漏**：tick 里 `player == null` 仅 `continue`，状态永不清理——浩劫该玩家永久不可再挑战、全部挑战生物滞留世界；归一 `isRunning()` 恒真**卡死全服**。新增两处 `onDisconnect`（DISCONNECT 事件统一分派）：按失败路径清生物 / 锁 / bossEvent，归一印记保留、离线不记失败锁。
+* **归一维度锁被误回收**：锁清理只查 `EliteEncounterManager.ACTIVE`，归一的锁同 tick 被当孤儿回收——「每维度 ≤1」互斥与浩劫冻结失效。回收条件改为「不在遭遇 ACTIVE 且不在归一 ACTIVE」（`ConvergenceManager.isActiveOwner`）。
+* **辟邪破余烬免死**：`EMBERFALL` 注册为 HARMFUL，落入辟邪兜底分支被缩时最多 60%——锁血窗口（依赖效果剩余时长）归零，免死静默失效且金胸甲已扣耐久。兜底分支排除 `EMBERFALL` / `TINNITUS` 两个计时载体效果。
+* **配饰属性加成重登丢失**：属性缓存按 UUID 键控但写的是瞬态修改器——重登 / 重生后缓存命中导致加成静默丢失（直到数值变化）。`restoreFrom` 与 JOIN 时清缓存全量重写。
+* **冲阵远程 / 自伤触发**：补 `source.isDirect()`（疾跑射箭不再触发）与 `attacker == victim` 排除。
+* **马铠 / 狼铠活力失效**：快速路径漏查 `EquipmentSlot.BODY`——马 / 狼人形四槽恒空直接返回 0。补 BODY 判空，1.4.0 的标签扩展真正生效。
+* **切模式后遭遇卡死**：`canTrigger` 门禁先于活跃遭遇分支返回——玩家切旁观 / 冒险或服务器调和平后遭遇与维度锁永久残留。活跃遭遇推进提到门禁之前（死亡 / 超时 / 取消路径始终可达）。
+* **「离开维度」判定恒假**：取消判定比较的是常量维度而非玩家所在维度——下界遭遇跟随玩家回主世界不取消、跨维度 `distanceTo` 结果随机；归一「离开主世界失败」永不触发。遭遇与归一的 advance 均先比 `player.level() != encounter.level`。
+* **召唤物持久化残留**：幽匿幼体 / 烈焰人 / 守卫者 / 末影螨等写进存档且无清理路径，领主战每场永久加怪。取消 `setPersistenceRequired`，`LordRuntime` 登记 + `dispose()` 统一清散（cancel / onLordDeath / fail 全走此点）。
+* **刷怪蛋白嫖进度**：蛋生成的领主（无 Encounter）死亡仍授予击杀进度与「五境巡礼」。进度 / 冷却 / 觉醒掉落全部移入真实遭遇分支。
+* **静态状态全局治理**：20+ 张 `static Map<UUID,…>` 无回收、无 `SERVER_STOPPED` 钩子。引入集中治理——DISCONNECT 事件清理 13 个管理器、`FxHelper` 过期键惰性淘汰（20 分钟）、`SERVER_STOPPED` 全清 7 个管理器。
+
+##### 平衡与性能修复（P2）
+
+* **断罪**：boss 变体补共用 5 秒冷却 + 诅咒音 200 tick 节流（旧实现每次命中 ×1.75 且全功率轰鸣）；斩杀改 `Math.max(amount, 必死量)`——旧实现直接替换丢弃蚀命 / 冲阵 / 霆霓 / 藏锋的前序加成，超高伤害下反而降低伤害。
+* **余烬**：金胸甲路径补材质校验（旧实现下界合金也能免死）+ 60 秒每实体冷却（堵「经验修补补耐久反复免死」循环）+ 改 `hurtAndBreak` 走原版耐久结算 + 排除 `BYPASSES_INVULNERABILITY`（虚空死亡不再白扣胸甲）。
+* **壁垒**：排除即死与系统性伤害（`BYPASSES_INVULNERABILITY` / `generic_kill` / `fell_out_of_world` / `starve`）——旧实现可挡 `/kill` 与坠落虚空，与汲取组合成近战永动机。
+* **丰壤**：连锁重启写回 `count=1`（旧实现旧计数残留，「3 秒窗口」挑战可跨任意时长累计）；创造 / 旁观模式跳过 3×3 范围收获（旧实现照常破坏掉落）。
+* **庇护**：补视线检测（不再穿墙治疗敌方）+ 满血目标跳过（省耐久）。
+* **实体构造性能**：渊息的 catch-NPE 兜底改为构造 TAIL 置位标记（反编译确认 `equipment` 在 `LivingEntity` 构造体内赋值、早于 `<init>` TAIL）——世界生成期不再每秒数千次抛异常；跨 Mixin 查询走 duck 接口。
+* **视听性能**：`FxHelper.ring` / `ringAt` 批量锚点绘制（16 包 → 4 包）；霆霓雷声 60 tick 节流且音量 2.0 → 1.0。
+
+##### 体验打磨（P3）
+
+* **试炼可读化**：秘典试炼页显示进行中窗口的实时进度 `[x/y]`（`FamilyTrialsManager.progressText` 唯一口径，普通玩家可见——不再只有权限 2 的 debug 命令）；风暴·逐雷达标即完成（旧实现必须等满 120 秒截止）；「时间窗口到期」与「连续条件被打断」拆分为两条文案（新增 `trial.expired`）。
+* **配饰栏引导**：按钮悬停 tooltip（`tooltip.extra-enchantry.accessory_panel`）；离开世界时重置展开 / 动画状态（旧实现静态量跨世界残留，重进后物品画在偏移位置）。
+* **冷却反馈**：藏锋就绪动作栏提示（200 tick 节流）；壁垒反馈阈值加「减免 ≥20%」比例分支——VII+ 级（上限 ≤6 HP）的常驻小额减免也能被感知。
+* **HUD 一致性**：活力 HUD 改从服务端同步的 `MAX_HEALTH` 属性反推加成——旧实现共鸣 +1 级只在服务端生效，客户端心形行数与 `×n/N` 分母系统性偏小。
+
 ## 通用技术模式
 
 ### 项目结构
@@ -1545,6 +1594,10 @@ public static final ResourceKey\<Enchantment> REACH =
 - **客户端 tick 线程直接操作服务端世界 = 崩溃**（1.7.3 踩坑）：在 `ClientTickEvents` 里调 `ServerLevel#addFreshEntity` / `Entity#discard` 之类的服务端 API，会和正在跑的服务端线程撞车——`ChunkMap#tick` 遍历实体追踪表时抛 `NullPointerException: Cannot invoke "Int2ObjectOpenHashMap$MapIterator.nextEntry" because "this.wrapped" is null`（fastutil map 被并发修改），客户端报 `Exception ticking world` 直接崩档。**正确做法：`server.execute(() -> {...})` 投递到服务端线程执行**，所有跨端写操作都要走这一层
 - **客户端实体永远是原版类实例**（1.7.3，领主识别方案的设计前提）：复用原版 `EntityType` 生成自定义子类实例（`new OverwardenEntity(...)` + `addFreshEntity`）时，服务端拿到的是自定义子类，但**客户端收到 spawn 包后按 `EntityType` 的 factory 创建实例**——得到的是原版 `Warden`。因此渲染期 `entity instanceof 自定义类` **恒为 false**，任何"客户端按自定义类型分派"的渲染逻辑都不成立。若确实需要客户端区分，唯一可靠通道是随 spawn 包自动同步的 `SynchedEntityData`（且 `defineId` 必须作为 Mixin 的 `@Unique` 静态字段定义，随目标类 `<clinit>` 分配 id，不能放在独立工具类里延迟分配，否则会抢走父类树的 id 而报 `Duplicate id value`）
 - **26.2 进度无 font 字段、requirements 不支持跨树**（v1.7.0 javap 验证）：`DisplayInfo` 仅 icon/title/description/background/type/三布尔——**进度标题不能用自定义字体**（1.7.0 设计里的 P2 谱系字体项取消）；`AdvancementRequirements = List<List<String>>` 只绑定本节点 criteria，「多个既有进度都完成」类终局节点（如「谱系圆满」）一律代码授予——在依赖进度的 award 成功分支调判定函数（见 `LineageManager.checkLineageComplete`）
+- **`hurtServer` 的 `this` 永远是受害者**（v1.7.4 修复雷鸣扣）：「攻击者侧加伤」不能挂在 `hurtServer` 的 `this` 上——必须从 `source.getEntity()` 解析攻击者并排除自伤。同理「直接伤害限定」要 `source.isDirect()`（冲阵曾因漏判让疾跑射箭触发近战撞击）。
+- **维度锁 / 互斥表只能有单一权威**（v1.7.4 修复归一互斥失效）：多系统共写一张锁表时，回收条件若只查其中一个系统的 ACTIVE，另一系统的锁会被当孤儿同 tick 回收。回收判定必须枚举全部持有方（或锁表收敛到单一 Manager 的 API 后面，其他系统只经 `lock/unlock` 通道）。
+- **`equipment` 在 `LivingEntity` 自身构造体内赋值、早于其 `<init>` TAIL**（v1.7.4 javap 验证，字节码偏移 157~162 `createEquipment`）：`Entity#<init>` 的 defineSyncker 回调时 equipment 尚为 null，但 `LivingEntity#<init>` TAIL 时必已就绪——**构造期防护可在 `LivingEntity#<init>` TAIL 置位标记，不必靠 catch NPE**（每个实体构造抛异常带 `fillInStackTrace`，世界生成期开销显著）。跨 Mixin 读取标记用 duck 接口（`LivingEntityMixin.EquipmentReady`）+ `instanceof` cast，不要在 EntityMixin 里直接调另一 Mixin 的 `@Unique` 方法（编译期静态类型不可见）。
+- **运行时状态生命周期三件套**（v1.7.4 治理 20+ 张静态表）：① `DISCONNECT` 集中清理（所有按 UUID 键控的表）；② `SERVER_STOPPED` 全清（单 JVM 跨存档残留）；③ 高频写入的节流表按年龄惰性淘汰。审查要点：新增任何 `static Map<UUID,…>` 必须同时登记到这三处，否则长周期服务器内存单调增长且离线玩家状态污染逻辑。
 
 ## 记录规范
 

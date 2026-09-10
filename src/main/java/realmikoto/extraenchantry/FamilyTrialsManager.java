@@ -133,6 +133,16 @@ public final class FamilyTrialsManager {
 		}
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用）：即时移除试炼运行时计数（配合每 30 秒的兜底清扫） */
+	public static void onDisconnect(UUID playerId) {
+		STATES.remove(playerId);
+	}
+
+	/** 服务器停止全清（ServerLifecycleEvents.SERVER_STOPPED 调用） */
+	public static void onServerStopped() {
+		STATES.clear();
+	}
+
 	/** 秒级结算：风暴/守护/水/火焰四项窗口型试炼（自然走回调，锋刃/灵魂走击杀钩子） */
 	private static void tickSecondly(ServerPlayer player, long gameTime) {
 		TrialState s = state(player);
@@ -152,13 +162,13 @@ public final class FamilyTrialsManager {
 					s.stormDistance = 0.0D;
 				}
 				s.stormDistance += moved;
-				if (gameTime - s.stormStart >= rules.trialStormSeconds() * 20L) {
-					if (s.stormDistance >= rules.trialStormDistance()) {
-						complete(player, storm);
-					} else {
-						clearFamily(s, storm);
-						notifyReset(player, storm);
-					}
+				// 修复 #28：达标即完成——旧实现只在 120 秒截止时判定，
+				// 提前跑满 600 格也必须等满全程，体验上"完成了却没反应"
+				if (s.stormDistance >= rules.trialStormDistance()) {
+					complete(player, storm);
+				} else if (gameTime - s.stormStart >= rules.trialStormSeconds() * 20L) {
+					clearFamily(s, storm);
+					notifyExpired(player, storm);
 				}
 			} else if (s.stormStart >= 0L) {
 				// 天气中断或上了载具 → 窗口重置（提示一次）
@@ -230,7 +240,7 @@ public final class FamilyTrialsManager {
 						complete(player, fire);
 					} else {
 						clearFamily(s, fire);
-						notifyReset(player, fire);
+						notifyExpired(player, fire);
 					}
 				}
 			} else if (s.fireStart >= 0L) {
@@ -423,6 +433,12 @@ public final class FamilyTrialsManager {
 				Component.translatable("family.extra-enchantry." + family.name().toLowerCase(Locale.ROOT))));
 	}
 
+	/** 修复 #28：窗口自然到期的重置与"玩家行为打断"分离，避免无来由的重置提示 */
+	private static void notifyExpired(ServerPlayer player, FamilyResonanceManager.Family family) {
+		player.sendSystemMessage(Component.translatable("message.extra-enchantry.trial.expired",
+				Component.translatable("family.extra-enchantry." + family.name().toLowerCase(Locale.ROOT))));
+	}
+
 	// ============ 资格与辅助 ============
 
 	/** 试炼计数资格：对应家族 FULL 且为主调（收益暂停时不计数） */
@@ -456,6 +472,32 @@ public final class FamilyTrialsManager {
 				+ " dive=" + (s.waterDiveStart < 0 ? "-" : (s.waterReady ? "ready" : "counting"))
 				+ " wind=" + s.windMaxFall
 				+ " fire=" + (s.fireStart < 0 ? "-" : s.fireDistance + "g");
+	}
+
+	/**
+	 * 修复 #28：试炼页玩家可读的进度文本（秘典调用，普通玩家可见——不再只有权限 2 的 debug 命令才有）。
+	 * 返回 "" 表示该试炼当前无进行中的窗口（显示未开始）。
+	 */
+	public static String progressText(ServerPlayer player, FamilyResonanceManager.Family family) {
+		TrialState s = STATES.get(player.getUUID());
+		if (s == null) {
+			return "";
+		}
+		return switch (family) {
+			case SOUL -> s.soulKills > 0 ? s.soulKills + "/5" : "";
+			case BLADE -> s.bladeMaxSince >= 0L ? "ok" : "";
+			case STORM -> s.stormStart < 0L ? "" : String.format(java.util.Locale.ROOT, "%.0f/600",
+					Math.min(s.stormDistance, 600.0D));
+			case GUARD -> s.guardStart < 0L ? "" : String.format(java.util.Locale.ROOT, "%.0f/80",
+					Math.min(s.guardDamage, 80.0F));
+			case NATURE -> s.natureHeal > 0.0F ? String.format(java.util.Locale.ROOT, "%.0f/30",
+					Math.min(s.natureHeal, 30.0F)) : "";
+			case WATER -> !s.waterReady ? "" : "ok";
+			case WIND -> s.windMaxFall > 0.0D ? String.format(java.util.Locale.ROOT, "%.0f/80",
+					Math.min(s.windMaxFall, 80.0D)) : "";
+			case FIRE -> s.fireStart < 0L ? "" : String.format(java.util.Locale.ROOT, "%.0f/100",
+					Math.min(s.fireDistance, 100.0D));
+		};
 	}
 
 	/** 玩家所在服务器的主世界 gameTime（冷却/窗口计时唯一时钟；server 不可达时 0） */

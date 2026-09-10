@@ -43,6 +43,11 @@ public final class ShieldChargeManager {
 	private ShieldChargeManager() {
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(UUID playerId) {
+		COOLDOWNS.remove(playerId);
+	}
+
 	/**
 	 * 以彼之道（隐秘挑战）：被冲阵命中的劫掠兽，由同一玩家击杀时达成。
 	 * 挂 Fabric {@code ServerLivingEntityEvents.AFTER_DEATH}（ExtraEnchantry 注册）。
@@ -76,7 +81,12 @@ public final class ShieldChargeManager {
 		if (amount <= 0.0F || CleaveManager.isCleaving()) {
 			return amount;
 		}
-		if (!(source.getEntity() instanceof Player attacker) || !attacker.isSprinting()) {
+		// 修复：限定直接伤害（近战）——旧实现弓箭/三叉戟等投射物疾跑命中也触发；
+		// 排除自伤——自身溅射/反弹会给自己加伤
+		if (!source.isDirect()) {
+			return amount;
+		}
+		if (!(source.getEntity() instanceof Player attacker) || attacker == victim || !attacker.isSprinting()) {
 			return amount;
 		}
 		long now = System.currentTimeMillis();

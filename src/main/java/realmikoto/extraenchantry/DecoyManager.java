@@ -61,6 +61,27 @@ public final class DecoyManager {
 	private DecoyManager() {
 	}
 
+	/**
+	 * 玩家登出清理（DISCONNECT 调用）：移除玩家状态与其存活诱饵。
+	 * 修复：旧实现 STATES 无回收——残留诱饵引用 + lastJudgeMs/cooldownUntilMs 永久驻留。
+	 */
+	public static void onDisconnect(UUID playerId) {
+		PlayerState state = STATES.remove(playerId);
+		if (state != null) {
+			for (DecoyEntity decoy : state.decoys) {
+				if (decoy.isAlive()) {
+					decoy.discard();
+				}
+			}
+			state.decoys.clear();
+		}
+	}
+
+	/** 服务器停止全清（ServerLifecycleEvents.SERVER_STOPPED 调用） */
+	public static void onServerStopped() {
+		STATES.clear();
+	}
+
 	/** 读取玩家头盔上的假象附魔等级（无则 0） */
 	public static int getDecoyLevel(net.minecraft.world.entity.player.Player player) {
 		ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
@@ -87,7 +108,9 @@ public final class DecoyManager {
 			return false;
 		}
 		int level = getDecoyLevel(player);
-		if (level <= 0) {
+		// 修复：补上界守卫——外部来源（/give 组件、数据包 set_enchantments）可给出越界等级，
+		// 旧实现 CONFIGS[level-1] 会抛 ArrayIndexOutOfBoundsException 且在服务端主线程崩溃
+		if (level <= 0 || level > CONFIGS.length) {
 			return false;
 		}
 		state.lastJudgeMs = now;

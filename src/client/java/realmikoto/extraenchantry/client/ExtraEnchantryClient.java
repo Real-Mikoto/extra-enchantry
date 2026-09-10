@@ -16,6 +16,10 @@ public class ExtraEnchantryClient implements ClientModInitializer {
 		// （延迟等待进度同步包到达；进度未完成则静默，不重复打扰）
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) ->
 				extraenchantry$welcomeCountdown = 100);
+		// 修复 #29：离开世界时重置配饰栏动画/展开状态——旧实现静态量跨世界残留，
+		// 重进后物品画在偏移位置而 isActive 仍为 false
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
+				AccessoryHudState.reset());
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (extraenchantry$welcomeCountdown > 0 && --extraenchantry$welcomeCountdown == 0
 					&& client.player != null && GrandResonatorState.isGrandResonator()) {

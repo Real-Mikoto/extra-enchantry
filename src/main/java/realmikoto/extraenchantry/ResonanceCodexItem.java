@@ -37,6 +37,11 @@ public final class ResonanceCodexItem extends Item {
 
 	private static final int PAGE_COUNT = 3;
 
+	/** 玩家登出清理（DISCONNECT 调用）：页码状态不跨会话残留 */
+	public static void onDisconnect(UUID playerId) {
+		PAGES.remove(playerId);
+	}
+
 	public ResonanceCodexItem(Properties properties) {
 		super(properties);
 	}
@@ -123,7 +128,7 @@ public final class ResonanceCodexItem extends Item {
 		}
 	}
 
-	/** 页 2：试炼——八项试炼名与完成状态 */
+	/** 页 2：试炼——八项试炼名、完成状态与进行中窗口的实时进度（修复 #28） */
 	private static void appendTrials(ServerPlayer player, MutableComponent out) {
 		out.append(Component.translatable("codex.extra-enchantry.header.trials")
 				.withStyle(ChatFormatting.LIGHT_PURPLE)).append("\n");
@@ -135,8 +140,16 @@ public final class ResonanceCodexItem extends Item {
 					Component.translatable(done
 							? "codex.extra-enchantry.trial.done"
 							: "codex.extra-enchantry.trial.undone"))
-					.withStyle(done ? ChatFormatting.GREEN : ChatFormatting.GRAY))
-					.append("\n");
+					.withStyle(done ? ChatFormatting.GREEN : ChatFormatting.GRAY));
+			if (!done) {
+				// 修复 #28：进行中的窗口显示当前进度 / 目标（数值来自 FamilyTrialsManager 唯一口径）
+				String progress = FamilyTrialsManager.progressText(player, family);
+				if (!progress.isEmpty()) {
+					out.append(Component.literal("  [" + progress + "]")
+							.withStyle(ChatFormatting.AQUA));
+				}
+			}
+			out.append("\n");
 		}
 	}
 

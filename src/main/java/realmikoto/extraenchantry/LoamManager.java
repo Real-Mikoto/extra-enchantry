@@ -47,6 +47,12 @@ public final class LoamManager {
 	private LoamManager() {
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(UUID playerId) {
+		CHAIN_COUNTS.remove(playerId);
+		CHAIN_LAST_MS.remove(playerId);
+	}
+
 	/** 玩家破坏方块后调用（BlockMixin 注入点），仅处理成熟作物 + 丰壤锄头 */
 	public static void onCropHarvest(Level level, Player player, BlockPos pos, BlockState state,
 			BlockEntity blockEntity, ItemStack tool) {
@@ -62,8 +68,14 @@ public final class LoamManager {
 		if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
 			long now = System.currentTimeMillis();
 			long last = CHAIN_LAST_MS.getOrDefault(serverPlayer.getUUID(), 0L);
-			int count = (now - last <= CHAIN_WINDOW_MS)
-					? CHAIN_COUNTS.merge(serverPlayer.getUUID(), 1, Integer::sum) : 1;
+			// 修复：连锁重启时必须写回 1——旧实现 merge 在窗口过期分支不落盘，
+			// 旧计数残留导致"3 秒窗口"挑战可跨任意时长累计
+			if (now - last <= CHAIN_WINDOW_MS) {
+				CHAIN_COUNTS.merge(serverPlayer.getUUID(), 1, Integer::sum);
+			} else {
+				CHAIN_COUNTS.put(serverPlayer.getUUID(), 1);
+			}
+			int count = CHAIN_COUNTS.getOrDefault(serverPlayer.getUUID(), 1);
 			CHAIN_LAST_MS.put(serverPlayer.getUUID(), now);
 			FamilyResonanceManager.onLoamChainCrop(serverPlayer, count);
 			if (count >= CHAIN_CHALLENGE_COUNT) {
@@ -95,6 +107,10 @@ public final class LoamManager {
 	/** 3×3 范围收获：邻格走原版破坏流程（触发各自的双倍判定），每格消耗 1 点耐久 */
 	private static void harvestArea(ServerLevel level, Player player, BlockPos center,
 			CropBlock crop, ItemStack tool) {
+		// 修复：创造模式不破坏不掉落（旧实现 destroyBlock 无条件破坏并掉落物品）
+		if (player.isCreative() || player.isSpectator()) {
+			return;
+		}
 		AREA_HARVESTING.set(Boolean.TRUE);
 		try {
 			for (int dx = -1; dx <= 1; dx++) {
@@ -105,7 +121,7 @@ public final class LoamManager {
 					BlockPos neighbor = center.offset(dx, 0, dz);
 					BlockState neighborState = level.getBlockState(neighbor);
 					if (neighborState.getBlock() == crop && crop.isMaxAge(neighborState)
-							&& level.destroyBlock(neighbor, true, player) && !player.isCreative()) {
+							&& level.destroyBlock(neighbor, true, player)) {
 						tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
 					}
 				}

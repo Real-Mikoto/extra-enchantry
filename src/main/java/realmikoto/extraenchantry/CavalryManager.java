@@ -712,6 +712,37 @@ public final class CavalryManager {
 		}
 	}
 
+	/**
+	 * 玩家登出清理（DISCONNECT 调用）。
+	 * 修复：旧实现 tick 里 player == null 仅 continue，状态永久残留——
+	 * 该玩家再也无法重新挑战（onLimitBreakBookAchieved 判已进行中），全部挑战生物滞留世界，
+	 * CHALLENGE_LOCK 等表永不回收，bossEvent 挂在离线玩家身上。
+	 * 按超时失败路径结算：清生物、清注册表、移除 bossEvent 观众，**不销毁离线者的破限书**（无法也不应操作离线背包）。
+	 */
+	public static void onDisconnect(UUID playerId) {
+		Cataclysm state = CATACLYSMS.remove(playerId);
+		if (state == null) {
+			return;
+		}
+		clearChallengeMobs(state);
+		state.bossEvent.removeAllPlayers();
+		ExtraEnchantry.LOGGER.info("[extra-enchantry] 诸界浩劫因玩家离线中止（{}），挑战生物已消散",
+				playerId);
+	}
+
+	/** 服务器停止全清（ServerLifecycleEvents.SERVER_STOPPED 调用） */
+	public static void onServerStopped() {
+		CATACLYSMS.clear();
+		CHALLENGE_LOCK.clear();
+		NO_AGGRO_MEMBERS.clear();
+		CHALLENGE_MOUNTS.clear();
+		TRAP_SQUAD_MEMBERS.clear();
+		TRAP_MOUNTS.clear();
+		PROCESSED_TRAPS.clear();
+		TRAP_KILL_COUNTS.clear();
+		LAST_TRIGGER_TICKS.clear();
+	}
+
 	private static void registerChallengeMob(Cataclysm state, Mob mob, boolean noAggro) {
 		registerChallengeMob(state, mob, noAggro, true);
 	}

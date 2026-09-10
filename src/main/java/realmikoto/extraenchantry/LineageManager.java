@@ -83,6 +83,12 @@ public final class LineageManager {
 	private LineageManager() {
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用）：运行时缓存按 UUID 移除（进度本体在进度表，不受影响） */
+	public static void onDisconnect(UUID playerId) {
+		AWAKENED_REALMS_KILLED.remove(playerId);
+		SIGIL_COUNTS.remove(playerId);
+	}
+
 	// ============ 授予入口（各系统调用） ============
 
 	/** 家族升至 PARTIAL（首次）——FamilyResonanceManager 升档钩子调用 */

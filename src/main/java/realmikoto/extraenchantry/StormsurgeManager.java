@@ -98,7 +98,10 @@ public final class StormsurgeManager {
 		level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
 				victim.getX(), victim.getY(0.5D), victim.getZ(),
 				20, 0.4D, 0.5D, 0.4D, 0.08D);
-		level.playSound(null, victim.getX(), victim.getY(), victim.getZ(),
-				SoundEvents.TRIDENT_THUNDER, SoundSource.WEATHER, 2.0F, 1.4F);
+		// 性能修复：雷声节流（60 tick）——旧实现每次命中音量 2.0 全功率，雨天连掷三叉戟即音效轰炸
+		if (FxHelper.throttle(victim, "stormsurge_thunder", 60)) {
+			level.playSound(null, victim.getX(), victim.getY(), victim.getZ(),
+					SoundEvents.TRIDENT_THUNDER, SoundSource.WEATHER, 1.0F, 1.4F);
+		}
 	}
 }

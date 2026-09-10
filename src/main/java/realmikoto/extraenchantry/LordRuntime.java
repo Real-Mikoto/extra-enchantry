@@ -41,6 +41,12 @@ public final class LordRuntime {
 	/** boss 血条同步半径（格） */
 	private static final double BAR_RANGE = 64.0;
 
+	/** 全局召唤物登记 → 维度（跨维度查询用；修复：召唤物持久化且无清理） */
+	private static final java.util.Map<UUID, ServerLevel> MINION_LEVELS = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/** 全局召唤物登记（修复：召唤物不再持久化，统一登记以便遭遇结束时清散） */
+	private static final java.util.Set<UUID> MINIONS = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
 	private final EncounterDef def;
 	private final int[] cooldowns = new int[SKILL_SLOTS];
 	private ServerBossEvent bossEvent;
@@ -124,11 +130,30 @@ public final class LordRuntime {
 		}
 	}
 
-	/** 领主死亡 / 移除：拆除血条，避免玩家客户端残留 */
+	/** 领主死亡 / 移除：拆除血条 + 清散召唤物，避免玩家客户端与世界残留 */
 	public void dispose() {
 		if (bossEvent != null) {
 			bossEvent.removeAllPlayers();
 			bossEvent = null;
+		}
+		discardMinions();
+	}
+
+	/**
+	 * 清散全部已登记召唤物（dispose 调用；全局表——召唤物数量有限且随遭遇一对一清空）。
+	 * 修复：旧实现召唤物持久化且无清理，领主战每场向世界永久加怪。
+	 */
+	public static void discardMinions() {
+		for (java.util.Iterator<UUID> it = MINIONS.iterator(); it.hasNext(); ) {
+			UUID minionId = it.next();
+			ServerLevel sl = MINION_LEVELS.remove(minionId);
+			if (sl != null) {
+				Entity minion = sl.getEntity(minionId);
+				if (minion != null && minion.isAlive()) {
+					minion.discard();
+				}
+			}
+			it.remove();
 		}
 	}
 
@@ -252,7 +277,10 @@ public final class LordRuntime {
 			return null;
 		}
 		minion.snapTo(pos.x, pos.y, pos.z, level.getRandom().nextFloat() * 360.0F, 0.0F);
-		minion.setPersistenceRequired();
+		// 修复：召唤物不再 setPersistenceRequired（写存档且无清理路径，领主战每场永久加怪）。
+		// 登记到运行时，dispose / cancel / onLordDeath 时统一 discard；区块卸载自然消失。
+		MINIONS.add(minion.getUUID());
+		MINION_LEVELS.put(minion.getUUID(), level);
 		setTransient(minion, Attributes.SCALE, "lord_minion_scale", scale - 1.0D,
 				AttributeModifier.Operation.ADD_VALUE);
 		setTransient(minion, Attributes.MAX_HEALTH, "lord_minion_health",

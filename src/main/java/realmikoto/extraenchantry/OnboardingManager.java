@@ -42,6 +42,11 @@ public final class OnboardingManager {
 	/** 待处理的登录追发（UUID → 处理时刻 gameTime） */
 	private static final Map<UUID, Long> PENDING_RECONCILE = new ConcurrentHashMap<>();
 
+	/** 玩家登出清理（DISCONNECT 调用）：未处理的追发随下次登录重新登记，不残留 */
+	public static void onDisconnect(UUID playerId) {
+		PENDING_RECONCILE.remove(playerId);
+	}
+
 	/** 「无敌」（诸界浩劫全部完成）进度：残页追发依据 */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> ADVANCE_INVINCIBLE =
 			ResourceKey.create(net.minecraft.core.registries.Registries.ADVANCEMENT,

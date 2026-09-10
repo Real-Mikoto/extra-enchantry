@@ -125,7 +125,9 @@ public final class ConvergenceManager {
 			fail(convergence, player);
 			return;
 		}
-		if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
+		// 修复：先比较玩家所在维度——旧实现比较 encounter.level 自身的 dimension()（常量），
+		// "离开主世界 → 失败" 永远不会触发
+		if (player.level() != level || level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
 			fail(convergence, player); // 离开主世界
 			return;
 		}
@@ -252,26 +254,31 @@ public final class ConvergenceManager {
 	}
 
 	/** 成功结算：消耗印记 + 终局掉落（心核 + 同辉书 + 随机境材料）+ 进度 */
-	private static void succeed(Convergence convergence, ServerPlayer player) {
+	private static void succeed(Convergence convergence, ServerPlayer killer) {
 		ServerLevel level = convergence.level;
-		remove(convergence, player);
+		// 修复：掉落与进度归属发起人（killer 可能是协作者最后一击）
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(convergence.playerId);
+		if (owner == null) {
+			owner = killer; // 极端情况（owner 瞬间离线）：按最后一击者结算，避免物品丢失
+		}
+		remove(convergence);
 		// 掉落
-		player.spawnAtLocation(level, new ItemStack(WarArtifacts.CONVERGENCE_CORE));
-		player.spawnAtLocation(level, RealmTreasures.enchantedBook(level,
+		owner.spawnAtLocation(level, new ItemStack(WarArtifacts.CONVERGENCE_CORE));
+		owner.spawnAtLocation(level, RealmTreasures.enchantedBook(level,
 				ExtraEnchantry.REALMS_UNITY, 1));
 		String material = ROUND_REALMS.get(level.getRandom().nextInt(ROUND_REALMS.size()));
-		player.spawnAtLocation(level,
+		owner.spawnAtLocation(level,
 				new ItemStack(EncounterDef.byId(material).material()));
-		player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+		owner.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
 				"message.extra-enchantry.convergence.success"));
-		FxHelper.burstAt(level, player.getX(), player.getY(0.5D), player.getZ(),
+		FxHelper.burstAt(level, owner.getX(), owner.getY(0.5D), owner.getZ(),
 				ParticleTypes.TOTEM_OF_UNDYING, 48, 0.8D);
-		FxHelper.play(level, player, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
+		FxHelper.play(level, owner, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
 		// 1.7.0 谱系主线：归一节点（含谱系圆满判定链）
-		LineageManager.onConvergenceDone(player);
+		LineageManager.onConvergenceDone(owner);
 		// 1.6.0 隐藏进度：终局击杀瞬间生命 ≤5 并存活
-		LineageManager.onFinalAfterglow(player);
-		LOCKOUT_UNTIL.put(player.getUUID(),
+		LineageManager.onFinalAfterglow(owner);
+		LOCKOUT_UNTIL.put(convergence.playerId,
 				System.currentTimeMillis() + LOCKOUT_MINUTES * MINUTE_MS);
 	}
 
@@ -287,23 +294,65 @@ public final class ConvergenceManager {
 				lord.discard();
 			}
 		}
-		remove(convergence, player);
+		remove(convergence);
 		player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
 				"message.extra-enchantry.convergence.fail"));
 		FxHelper.play(level, player, SoundEvents.WITHER_DEATH, 2.0F, 0.6F);
-		LOCKOUT_UNTIL.put(player.getUUID(),
+		LOCKOUT_UNTIL.put(convergence.playerId,
 				System.currentTimeMillis() + LOCKOUT_MINUTES * MINUTE_MS);
 	}
 
-	private static void remove(Convergence convergence, ServerPlayer player) {
-		ACTIVE.remove(player.getUUID());
-		EliteEncounterManager.unlockDimension(convergence.level.dimension(), player.getUUID());
-		convergence.bossEvent.removePlayer(player);
+	/**
+	 * 修复：remove 一律以 convergence.playerId（发起人）为键——
+	 * 旧实现用传入的 player（可能是最后一击者），多人协作时 ACTIVE 残留 →
+	 * settle 后 ROUND_COLORS.get(5) 越界 → 误判失败 + 维度锁泄漏。
+	 */
+	private static void remove(Convergence convergence) {
+		ACTIVE.remove(convergence.playerId);
+		EliteEncounterManager.unlockDimension(convergence.level.dimension(), convergence.playerId);
+		convergence.bossEvent.removeAllPlayers();
+	}
+
+	/**
+	 * 玩家登出清理（DISCONNECT 调用）。
+	 * 修复：旧实现 tick 里 player == null 仅 continue，ACTIVE 永不清理——
+	 * isRunning() 恒为真 → 全服永久无法开启归一，维度锁同时压制该维度五境遭遇。
+	 * 走 fail 等效路径：回响消散、锁释放、bossEvent 清观众、印记保留、不加锁（离线非失败）。
+	 */
+	public static void onDisconnect(UUID playerId) {
+		Convergence convergence = ACTIVE.remove(playerId);
+		if (convergence == null) {
+			return;
+		}
+		if (convergence.lordId != null) {
+			Entity lord = convergence.level.getEntity(convergence.lordId);
+			if (lord != null) {
+				if (lord instanceof EliteLord eliteLord) {
+					eliteLord.lordRuntime().dispose();
+				}
+				lord.discard();
+			}
+		}
+		EliteEncounterManager.unlockDimension(convergence.level.dimension(), playerId);
+		convergence.bossEvent.removeAllPlayers();
+		ExtraEnchantry.LOGGER.info("[extra-enchantry] 归一之战因玩家离线中止（{}），回响已消散、印记保留",
+				playerId);
 	}
 
 	/** 是否进行中（供 EliteEncounterManager 的互斥判定与浩劫冻结） */
 	public static boolean isRunning() {
 		return !ACTIVE.isEmpty();
+	}
+
+	/** 指定玩家是否持有进行中的归一（供维度锁回收判定：归一的锁不得被当成孤儿锁回收） */
+	public static boolean isActiveOwner(UUID playerId) {
+		return ACTIVE.containsKey(playerId);
+	}
+
+	/** 服务器停止全清（ServerLifecycleEvents.SERVER_STOPPED 调用） */
+	public static void onServerStopped() {
+		ACTIVE.clear();
+		LOCKOUT_UNTIL.clear();
 	}
 
 	/**

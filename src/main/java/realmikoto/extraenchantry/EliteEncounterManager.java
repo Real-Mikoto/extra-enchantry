@@ -113,28 +113,36 @@ public final class EliteEncounterManager {
 			}
 		}
 		// 维度锁清理：该维度已无进行中的遭遇则释放
+		// 修复：归一之战（ConvergenceManager）的锁也放在本表，但其状态不在 ACTIVE——
+		// 旧实现把它当孤儿锁同 tick 回收，导致"每维度 ≤1"互斥与浩劫冻结失效。
 		DIMENSION_LOCK.entrySet().removeIf(entry -> {
 			Encounter encounter = ACTIVE.get(entry.getValue());
-			return encounter == null;
+			if (encounter != null) {
+				return false;
+			}
+			return !ConvergenceManager.isActiveOwner(entry.getValue());
 		});
 	}
 
 	private static void tickPlayer(ServerPlayer player, EliteEncounterConfig.Global global) {
-		if (!EncounterDef.canTrigger(player)) {
-			return;
-		}
-		ServerLevel level = (ServerLevel) player.level();
-		long nowTick = level.getGameTime();
-
+		// 修复：活跃遭遇必须始终推进——旧实现 canTrigger（生存/创造 + 非和平）先于
+		// 活跃分支返回，玩家切旁观/冒险或服务器调和平后遭遇永久卡死、维度锁泄漏。
 		Encounter active = ACTIVE.get(player.getUUID());
 		if (active != null) {
 			if (!player.isAlive()) {
 				cancel(active, player, true);
 				return;
 			}
-			advance(active, player, nowTick);
+			ServerLevel lvl = (ServerLevel) player.level();
+			advance(active, player, lvl.getGameTime());
 			return;
 		}
+		if (!EncounterDef.canTrigger(player)) {
+			return;
+		}
+		ServerLevel level = (ServerLevel) player.level();
+		long nowTick = level.getGameTime();
+
 		if (isCoolingDown(player)) {
 			return;
 		}
@@ -355,8 +363,9 @@ public final class EliteEncounterManager {
 		EliteEncounterConfig.Realm rules = EliteEncounterConfig.realm(def.id());
 		ServerLevel level = encounter.level;
 
-		// 取消路径：离开限定群系 / 距领主 64 格之外
-		if (!def.matches(level, player.blockPosition())) {
+		// 取消路径：离开遭遇所在维度（修复：旧实现只比群系过滤，玩家回主世界后
+		// NETHER_ANY 恒真、遭遇不取消，且后续跨维度 distanceTo 结果随机）
+		if (player.level() != level || !def.matches(level, player.blockPosition())) {
 			cancel(encounter, player, false);
 			return;
 		}
@@ -382,7 +391,7 @@ public final class EliteEncounterManager {
 			applyUnfold(encounter, player);
 		} else if (rules.crackTicks() > 0 && encounter.elapsed == unfold) {
 			crackFx(encounter, player);
-		} else if (encounter.elapsed >= crack) {
+		} else if (encounter.lordId == null && encounter.elapsed >= crack) {
 			awaken(encounter, player);
 		}
 	}
@@ -468,6 +477,9 @@ public final class EliteEncounterManager {
 
 	/** 觉醒：生成领主 + 锁定仇恨 10 秒 + 登场效果 */
 	private static void awaken(Encounter encounter, ServerPlayer player) {
+		if (encounter.lordId != null) {
+			return; // 幂等守卫：阶段机每 tick 调用，已觉醒则不再生成
+		}
 		ServerLevel level = encounter.level;
 		Mob lord = encounter.def.factory().create(level);
 		if (lord == null) {
@@ -594,8 +606,13 @@ public final class EliteEncounterManager {
 		if (killer == null) {
 			return;
 		}
+		// 修复：击杀进度 / 隐藏进度 / 冷却 / 掉落只在真实遭遇中授予——
+		// 旧实现刷怪蛋生成的领主（无 Encounter）也能拿满五境击杀与「五境巡礼」
+		if (encounter == null) {
+			return;
+		}
 		Advancements.award(killer, def.killAdv());
-		if (encounter != null && qualifiesHidden(def, encounter, killer)) {
+		if (qualifiesHidden(def, encounter, killer)) {
 			Advancements.award(killer, def.hiddenAdv());
 		}
 		long minutes = EliteEncounterConfig.global().cooldownMinutes();
@@ -604,7 +621,7 @@ public final class EliteEncounterManager {
 			Advancements.award(killer, GRAND_TOUR);
 		}
 		// 1.6.0 觉醒掉落分支（§1.5）：材料 ×2 + 器魂书 II–III 100% + 觉醒徽记 100% + 进度
-		if (encounter != null && encounter.awakened) {
+		if (encounter.awakened) {
 			// 1.7.0 谱系主线：首杀觉醒 + 五境觉醒击杀记录（隐藏进度「五境全胜」）
 			LineageManager.onFirstAwakenedSlain(killer);
 			LineageManager.noteAwakenedRealmKill(killer, def.id());
@@ -686,6 +703,22 @@ public final class EliteEncounterManager {
 	}
 
 	/** 该维度是否有进行中的精英遭遇（诸界浩劫在此期间冻结，设计 §6.2） */
+	/** 服务器停止全清（ServerLifecycleEvents.SERVER_STOPPED 调用） */
+	public static void onServerStopped() {
+		ACTIVE.clear();
+		DIMENSION_LOCK.clear();
+		COOLDOWN_UNTIL.clear();
+		LOCKS.clear();
+		WITHER_TICKS.clear();
+		SOAK_TICKS.clear();
+		LASER_HITS.clear();
+		POTION_HITS.clear();
+		WITCH_KILLS.clear();
+		PEARL_USES.clear();
+		WARDEN_ANGER.clear();
+		TOTEM_COOLDOWN_UNTIL.clear();
+	}
+
 	public static boolean isActiveIn(ResourceKey<Level> dimension) {
 		return DIMENSION_LOCK.containsKey(dimension);
 	}

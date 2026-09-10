@@ -497,8 +497,11 @@ public class ExtraEnchantry implements ModInitializer {
 		AfterglowTrim.register();
 
 		// 归一之战重启打断提示（上线检查）
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
-				ConvergenceManager.onJoin(handler.player));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			ConvergenceManager.onJoin(handler.player);
+			// 修复 #13：重登是新实体（瞬态修改器已丢），清缓存强制下一 tick 全量重写属性
+			AccessoryManager.onPlayerRestore(handler.player);
+		});
 
 		// 精英遭遇规则数据化：elite_encounter/<境>.json + elite_encounter_global/global.json
 		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
@@ -520,7 +523,38 @@ public class ExtraEnchantry implements ModInitializer {
 
 		// 玩家离线清理（避免计数与维度锁残留）
 		net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.DISCONNECT.register(
-				(handler, server) -> EliteEncounterManager.onPlayerLeave(handler.player));
+				(handler, server) -> {
+					var player = handler.player;
+					java.util.UUID pid = player.getUUID();
+					EliteEncounterManager.onPlayerLeave(player);
+					CavalryManager.onDisconnect(pid);
+					ConvergenceManager.onDisconnect(pid);
+					FamilyResonanceManager.onDisconnect(pid);
+					FamilyTrialsManager.onDisconnect(pid);
+					AccessoryManager.onDisconnect(player);
+					DecoyManager.onDisconnect(pid);
+					VoidblinkManager.onDisconnect(pid);
+					SanctuaryManager.onDisconnect(pid);
+					LoamManager.onDisconnect(pid);
+					OnboardingManager.onDisconnect(pid);
+					LineageManager.onDisconnect(pid);
+					ResonanceCodexItem.onDisconnect(pid);
+					JudgementManager.onDisconnect(pid);
+					SheathedEdgeManager.onDisconnect(pid);
+					ShieldChargeManager.onDisconnect(pid);
+				});
+
+		// 服务器停止全清（修复：单 JVM 内跨存档残留全部静态运行时状态）
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(
+				server -> {
+					EliteEncounterManager.onServerStopped();
+					CavalryManager.onServerStopped();
+					ConvergenceManager.onServerStopped();
+					FamilyResonanceManager.onServerStopped();
+					FamilyTrialsManager.onServerStopped();
+					DecoyManager.onServerStopped();
+					FxHelper.clearThrottle();
+				});
 
 		// 破限腿甲跨部位解锁：可附魔原版摔落保护（经 fabric-item-api 的官方事件，
 		// 避免 Mixin Redirect 与其 AnvilMenuMixin 冲突）
@@ -598,11 +632,22 @@ public class ExtraEnchantry implements ModInitializer {
 	 * 钳制发生在护甲/魔抗减免之后、吸收盾结算之前——约束的是实际承伤（吸收+掉血合计），
 	 * 不会被护甲二次削减（若钳在 hurtServer 入口，30 伤害先钳 2 再被护甲减 80% 只剩 0.4，出现过强 bug）。
 	 *
+	 * 修复 #23：排除即死 / 系统性伤害源——旧实现可挡下 /kill、坠落虚空、饥饿等，
+	 * 与汲取组合形成近战永动机的"绝对免死"。
+	 *
 	 * 两个调用点共用本方法：`LivingEntity#actuallyHurt`（非玩家生物）与 `Player#actuallyHurt`
 	 * （玩家专用，Player 重写了 actuallyHurt 且不调 super，必须单独拦截）。
 	 */
-	public static float applyBulwarkCap(LivingEntity entity, float reduced) {
+	public static float applyBulwarkCap(LivingEntity entity, net.minecraft.world.damagesource.DamageSource source,
+			float reduced) {
 		if (reduced <= 0.0F) {
+			return reduced;
+		}
+		// 修复 #23：即死与系统性伤害不受壁垒保护
+		if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)
+				|| source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)
+				|| source.is(net.minecraft.world.damagesource.DamageTypes.FELL_OUT_OF_WORLD)
+				|| source.is(net.minecraft.world.damagesource.DamageTypes.STARVE)) {
 			return reduced;
 		}
 		// 玩家看胸甲（BODY 槽恒空）；马匹看 BODY 槽的马铠（CHEST 槽恒空），二者取其一
@@ -613,20 +658,22 @@ public class ExtraEnchantry implements ModInitializer {
 			return reduced;
 		}
 		float capped = Math.min(reduced, BULWARK_CAP[level - 1]);
-		// 壁垒格挡确认（DESIGN_aesthetics P0）：实际钳制 ≥4 点时给反馈——
-		// 低沉盾音 + 附魔打击粒子 + 动作栏提示（壁垒的价值建立在"玩家意识到被救了"上）
+		// 壁垒格挡确认（DESIGN_aesthetics P0）：实际钳制 ≥4 点或减免 ≥20% 时给反馈——
+		// 修复 #30：旧阈值 4 点让 VII+ 级（上限 ≤6 HP）几乎永不触发反馈，设计目标落空
 		float blocked = reduced - capped;
-		if (blocked >= 4.0F && entity instanceof net.minecraft.server.level.ServerPlayer player
-				&& entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-			FxHelper.burst(serverLevel, entity, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT,
-					6, 0.3D);
-			FxHelper.play(serverLevel, entity, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, 1.0F, 0.6F);
-			player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
-					"message.extra-enchantry.bulwark_blocked",
-					String.format(java.util.Locale.ROOT, "%.1f", blocked)).withStyle(
-					net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
-			// 实战成就「铜墙铁壁」：壁垒挡下 ≥4 点伤害
-			Advancements.award(player, Advancements.BULWARK_SAVE);
+		if (blocked >= 4.0F || blocked >= reduced * 0.2F) {
+			if (blocked >= 4.0F && entity instanceof net.minecraft.server.level.ServerPlayer player
+					&& entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+				FxHelper.burst(serverLevel, entity, net.minecraft.core.particles.ParticleTypes.ENCHANTED_HIT,
+						6, 0.3D);
+				FxHelper.play(serverLevel, entity, net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, 1.0F, 0.6F);
+				player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(
+						"message.extra-enchantry.bulwark_blocked",
+						String.format(java.util.Locale.ROOT, "%.1f", blocked)).withStyle(
+						net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+				// 实战成就「铜墙铁壁」：壁垒挡下 ≥4 点伤害
+				Advancements.award(player, Advancements.BULWARK_SAVE);
+			}
 		}
 		return capped;
 	}
@@ -762,7 +809,10 @@ public class ExtraEnchantry implements ModInitializer {
 		if (entity.getItemBySlot(EquipmentSlot.HEAD).isEmpty()
 				&& entity.getItemBySlot(EquipmentSlot.CHEST).isEmpty()
 				&& entity.getItemBySlot(EquipmentSlot.LEGS).isEmpty()
-				&& entity.getItemBySlot(EquipmentSlot.FEET).isEmpty()) {
+				&& entity.getItemBySlot(EquipmentSlot.FEET).isEmpty()
+				// 修复：BODY 槽（马铠/狼铠）也要查——isArmor() 覆盖 BODY，
+				// 旧快速路径让马/狼直接返回 0，马铠与狼铠活力完全失效
+				&& entity.getItemBySlot(EquipmentSlot.BODY).isEmpty()) {
 			return 0;
 		}
 		int totalLevels = 0;
@@ -770,7 +820,8 @@ public class ExtraEnchantry implements ModInitializer {
 			if (slot.isArmor()) {
 				ItemStack stack = entity.getItemBySlot(slot);
 				int level = getVitalityLevel(stack);
-				// 家族共鸣小加成：自然族 ≥PARTIAL 时活力按 +1 级结算
+				// 家族共鸣小加成：自然族 ≥PARTIAL 时活力按 +1 级结算（仅服务端有共鸣快照；
+				// 客户端 HUD 的一致性由 HudMixin 的 syncedVitalityBonus 反推保证——修复 #30）
 				if (level > 0 && entity instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
 					level = effectiveLevel(serverPlayer, stack, VITALITY, level);
 				}

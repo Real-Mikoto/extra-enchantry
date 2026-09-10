@@ -70,6 +70,35 @@ public abstract class LivingEntityMixin {
 	private double extraenchantry$galeBonus = -1.0D;
 
 	/**
+	 * 装备就绪标记（性能修复，每实例）。
+	 * 反编译确认（26.2）：{@code equipment} 在 {@code LivingEntity} 自身构造体内
+	 * 赋值（createEquipment，字节码偏移 157~162），而 {@code Entity#<init>} 的
+	 * defineSyncker 回调 getMaxAirSupply 时该字段尚未赋值。
+	 * 因此 {@code LivingEntity#<init>} TAIL 时 equipment 必已就绪——此处置位标记，
+	 * {@code EntityMixin} 据此替代旧的 catch-NPE 兜底（每个实体构造抛一次异常）。
+	 */
+	@Unique
+	private boolean extraenchantry$equipmentReady;
+
+	/**
+	 * LivingEntity 构造 TAIL：equipment 已赋值，装备读取安全。
+	 */
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void extraenchantry$onConstructed(CallbackInfo ci) {
+		this.extraenchantry$equipmentReady = true;
+	}
+
+	/** 供 EntityMixin 查询装备是否可安全读取（Entity 构造期 = false）；duck 接口供跨 Mixin cast */
+	public interface EquipmentReady {
+		boolean extraenchantry$isEquipmentReady();
+	}
+
+	@Unique
+	public boolean extraenchantry$isEquipmentReady() {
+		return this.extraenchantry$equipmentReady;
+	}
+
+	/**
 	 * tick 统一分发器（性能优化 1.7.4）。
 	 *
 	 * <p>改动前：本 Mixin 对 {@code LivingEntity#tick} 挂了**六个**独立
@@ -293,14 +322,21 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
-	 * 配饰造成伤害加成（雷鸣扣：雷雨天气全伤害 +4%/级）：attacker 侧 ModifyVariable。
+	 * 配饰造成伤害加成（雷鸣扣：雷雨天气全伤害 +4%/级）：
+	 * hurtServer 的 this 是受害者，攻击者必须从 source.getEntity() 取——
+	 * 修复：旧实现把受害者当攻击者，导致雷雨天"受到的伤害"+4%/级（效果完全反向）。
 	 */
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float extraenchantry$accessoryOutgoing(float amount, ServerLevel level, DamageSource source) {
 		if (amount <= 0.0F) {
 			return amount;
 		}
-		return realmikoto.extraenchantry.AccessoryManager.outgoingDamage((LivingEntity) (Object) this, amount, source);
+		// 攻击者必须是玩家且不是自己（自伤不加成）
+		if (!(source.getEntity() instanceof net.minecraft.server.level.ServerPlayer attacker)
+				|| source.getEntity() == (Object) this) {
+			return amount;
+		}
+		return realmikoto.extraenchantry.AccessoryManager.outgoingDamage(attacker, amount, source);
 	}
 
 	/**
@@ -513,7 +549,7 @@ public abstract class LivingEntityMixin {
 	private void extraenchantry$bulwarkCapDamage(DamageSource source, float amount,
 			CallbackInfoReturnable<Float> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		cir.setReturnValue(ExtraEnchantry.applyBulwarkCap(self, cir.getReturnValueF()));
+		cir.setReturnValue(ExtraEnchantry.applyBulwarkCap(self, source, cir.getReturnValueF()));
 	}
 
 	/**
@@ -641,7 +677,11 @@ public abstract class LivingEntityMixin {
 		}
 
 		// 分支 5：其余有害 → 辟邪（护腿，每级 −20%，上限 60%）
-		if (!effect.getEffect().value().isBeneficial()) {
+		// 修复：排除本模自定义的"计时载体"效果——EMBERFALL 是余烬锁血窗口的计时器
+		//（isLocked 依赖剩余时长），被缩时会让免死静默失效；TINNITUS 同理是守望者的机制计时
+		if (!effect.getEffect().value().isBeneficial()
+				&& !effect.is(realmikoto.extraenchantry.ExtraEnchantryEffects.EMBERFALL)
+				&& !effect.is(realmikoto.extraenchantry.ExtraEnchantryEffects.TINNITUS)) {
 			int hexbreak = armorLevels(self, ExtraEnchantry.HEXBREAK, EquipmentSlot.LEGS);
 			return scaleDuration(self, effect, Math.min(0.6F, hexbreak * 0.20F), "hexbreak");
 		}
@@ -763,9 +803,13 @@ public abstract class LivingEntityMixin {
 	 * 余烬（Emberfall）免死：仅当不死图腾未能救命时尝试（图腾优先）。
 	 * 26.2 链路：hurtServer 在 isDeadOrDying() 后调 checkTotemDeathProtection，
 	 * 返回 true 即跳过 die()——本注入在 RETURN 处把 false 改写为 true。
+	 * 修复：排除虚空/即死类伤害——旧实现虚空死亡也白扣胸甲且无法真正救回（下一 tick 仍死）。
 	 */
 	@Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), cancellable = true)
 	private void extraenchantry$emberfallDeathSave(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+		if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			return;
+		}
 		if (!cir.getReturnValueZ() && EmberfallManager.trySave((LivingEntity) (Object) this)) {
 			cir.setReturnValue(true);
 		}

@@ -88,14 +88,9 @@ public final class CleaveManager {
 					target.getX(), target.getY(0.5D), target.getZ(),
 					1, 0.0D, 0.0D, 0.0D, 0.0D);
 		}
-		double ringY = victim.getY(0.2D);
-		for (int i = 0; i < RING_PARTICLES; i++) {
-			double angle = (Math.PI * 2.0D * i) / RING_PARTICLES;
-			level.sendParticles(ParticleTypes.CRIT,
-					victim.getX() + Math.cos(angle) * SPLASH_RANGE, ringY,
-					victim.getZ() + Math.sin(angle) * SPLASH_RANGE,
-					1, 0.0D, 0.0D, 0.0D, 0.0D);
-		}
+		// 性能修复：改用 FxHelper.ring 的批量锚点绘制（16 包 → 4 包）
+		FxHelper.ringAt(level, victim.getX(), victim.getY(0.2D), victim.getZ(),
+				SPLASH_RANGE, ParticleTypes.CRIT, RING_PARTICLES);
 	}
 
 	/** 以主目标为中心选取溅射目标：按距离排序，排除主目标/攻击者/旁观者/友方/死者 */

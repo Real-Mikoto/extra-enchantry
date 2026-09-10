@@ -40,6 +40,11 @@ public final class SanctuaryManager {
 	private SanctuaryManager() {
 	}
 
+	/** 玩家登出清理（DISCONNECT 调用） */
+	public static void onDisconnect(UUID playerId) {
+		NEXT_PULSE.remove(playerId);
+	}
+
 	/** 每 tick 判定（仅服务端玩家），到点执行治疗脉冲 */
 	public static void tick(ServerPlayer player) {
 		if (player.isDeadOrDying() || !player.isBlocking()) {
@@ -71,6 +76,15 @@ public final class SanctuaryManager {
 		for (ServerPlayer target : serverLevel.players()) {
 			if (!target.isAlive() || target.isSpectator()
 					|| target.distanceToSqr(player) > AURA_RADIUS_SQR) {
+				continue;
+			}
+			// 修复：视线检测——旧实现穿墙治疗（含 PvP 中隔着墙给敌方回血）
+			if (target != player
+					&& !target.hasLineOfSight(player)) {
+				continue;
+			}
+			// 仅治疗实际受损的目标（避免无意义耐久消耗）
+			if (target.getHealth() >= target.getMaxHealth()) {
 				continue;
 			}
 			target.heal(heal);

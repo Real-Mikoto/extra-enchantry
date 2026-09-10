@@ -36,15 +36,21 @@ public final class FxHelper {
 		level.sendParticles(particle, x, y, z, count, spread, spread, spread, 0.02D);
 	}
 
-	/** 以实体脚下为中心的水平圆环（沿圆周均布） */
+	/** 以实体脚下为中心的水平圆环（沿圆周均布，单次 sendParticles 用 spread 近似） */
 	public static void ring(ServerLevel level, Entity center, double radius, ParticleOptions particle, int count) {
-		double ringY = center.getY(0.2D);
-		for (int i = 0; i < count; i++) {
-			double angle = (Math.PI * 2.0D * i) / count;
+		ringAt(level, center.getX(), center.getY(0.2D), center.getZ(), radius, particle, count);
+	}
+
+	/** 定点水平圆环（批量锚点绘制，性能修复：每粒子一个包 → 每 4 粒子一个包） */
+	public static void ringAt(ServerLevel level, double cx, double y, double cz,
+			double radius, ParticleOptions particle, int count) {
+		int anchors = Math.max(1, count / 4);
+		for (int i = 0; i < anchors; i++) {
+			double angle = (Math.PI * 2.0D * i) / anchors;
 			level.sendParticles(particle,
-					center.getX() + Math.cos(angle) * radius, ringY,
-					center.getZ() + Math.sin(angle) * radius,
-					1, 0.0D, 0.0D, 0.0D, 0.0D);
+					cx + Math.cos(angle) * radius, y,
+					cz + Math.sin(angle) * radius,
+					4, radius * 0.08D, 0.05D, radius * 0.08D, 0.0D);
 		}
 	}
 
@@ -78,7 +84,11 @@ public final class FxHelper {
 
 	// ============ 表现层节流（同玩家同效果 N tick 内只放行一次，防群战刷屏） ============
 
-	private static final Map<String, Long> LAST_FX_GAME_TIME = new HashMap<>();
+	/** ConcurrentHashMap 修复：混用双端调用线程；定期按年龄淘汰修复内存无界增长 */
+	private static final Map<String, Long> LAST_FX_GAME_TIME = new java.util.concurrent.ConcurrentHashMap<>();
+
+	/** 节流表淘汰阈值（tick）：超过 20 分钟无命中的键直接清除 */
+	private static final long THROTTLE_STALE_TICKS = 24_000L;
 
 	/**
 	 * 节流判定：距上次同键表现不足 minIntervalTicks 返回 false。
@@ -89,6 +99,10 @@ public final class FxHelper {
 		Long last = LAST_FX_GAME_TIME.get(mapKey);
 		if (last != null && gameTime - last < minIntervalTicks) {
 			return false;
+		}
+		// 修复：顺手清除过期键（该键自上次命中起已无意义），防止按"被打过的每个实体"无界增长
+		if (last != null && gameTime - last > THROTTLE_STALE_TICKS) {
+			LAST_FX_GAME_TIME.remove(mapKey, last);
 		}
 		LAST_FX_GAME_TIME.put(mapKey, gameTime);
 		return true;
@@ -101,5 +115,10 @@ public final class FxHelper {
 		}
 		return throttle(entity.getUUID(), key, minIntervalTicks,
 				serverLevel.getServer().overworld().getGameTime());
+	}
+
+	/** 服务器停止时全清（ServerLifecycleEvents.SERVER_STOPPED 调用，防止单 JVM 跨存档残留） */
+	public static void clearThrottle() {
+		LAST_FX_GAME_TIME.clear();
 	}
 }

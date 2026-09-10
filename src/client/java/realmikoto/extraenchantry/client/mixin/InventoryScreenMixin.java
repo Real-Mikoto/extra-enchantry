@@ -51,5 +51,10 @@ public abstract class InventoryScreenMixin extends AbstractContainerScreen<Inven
 		// 参数 26~75），纯色衬底左缘若 <76 会压进纸娃娃 1~2px——且纯色与面板纹理
 		// 存在色阶差，四面边缘都会显出色缝）
 		AccessoryColumnRenderer.drawButton(extractor, this.leftPos, this.topPos, 77, 8);
+		// 修复 #29：按钮悬停提示——旧实现无 tooltip、无按键、无引导，配饰槽位难以被发现
+		if (AccessoryColumnRenderer.buttonHit(this.leftPos, this.topPos, mouseX, mouseY, 77, 8)) {
+			extractor.setTooltipForNextFrame(net.minecraft.network.chat.Component.translatable(
+					"tooltip.extra-enchantry.accessory_panel"), mouseX, mouseY);
+		}
 	}
 }

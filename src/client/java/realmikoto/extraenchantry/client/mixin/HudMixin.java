@@ -39,6 +39,22 @@ public abstract class HudMixin {
 	}
 
 	/**
+	 * 修复 #30：客户端活力加成与服务端一致——共鸣 +1 级是服务端快照数据，客户端
+	 * getVitalityBonus 算不出，导致心形行数与 ×n/N 分母偏小。
+	 * 改为从服务端同步的 MAX_HEALTH 属性反推加成：bonus = ceil(syncedMax) - ceil(本地计算的基础+加成前值)。
+	 * 服务端瞬态修改器经属性同步到达客户端，本地 getAttributeValue 已含真实加成；
+	 * getVitalityBonus 本地值只包含附魔基础部分，差值即为漏掉的共鸣加成。
+	 */
+	@Unique
+	private static int extraenchantry$syncedVitalityBonus(Player player) {
+		int local = ExtraEnchantry.getVitalityBonus(player);
+		float syncedMax = (float) player.getAttributeValue(Attributes.MAX_HEALTH);
+		float baseMax = syncedMax - local;
+		int extra = Mth.ceil(syncedMax) - Mth.ceil(baseMax);
+		return Math.max(local, Math.max(0, local + extra));
+	}
+
+	/**
 	 * 计算心形行数时从 MAX_HEALTH 中扣除活力加成，
 	 * 使血条保持原版单行（10 颗心），额外生命由下方 TAIL 注入单独显示。
 	 */
@@ -52,7 +68,7 @@ public abstract class HudMixin {
 	private double extraenchantry$hideVitalityFromHeartBar(Player player, Holder<Attribute> attribute) {
 		double value = player.getAttributeValue(attribute);
 		if (Attributes.MAX_HEALTH.equals(attribute)) {
-			value -= ExtraEnchantry.getVitalityBonus(player);
+			value -= extraenchantry$syncedVitalityBonus(player);
 		}
 		return value;
 	}
@@ -72,7 +88,7 @@ public abstract class HudMixin {
 	)
 	private float extraenchantry$clampHealthForHeartBar(Player player) {
 		float health = player.getHealth();
-		float baseMax = player.getMaxHealth() - ExtraEnchantry.getVitalityBonus(player);
+		float baseMax = player.getMaxHealth() - extraenchantry$syncedVitalityBonus(player);
 		return Math.min(health, baseMax);
 	}
 
@@ -100,7 +116,7 @@ public abstract class HudMixin {
 		if (player == null) {
 			return;
 		}
-		int bonus = ExtraEnchantry.getVitalityBonus(player);
+		int bonus = extraenchantry$syncedVitalityBonus(player);
 		if (bonus <= 0 || extraenchantry$armorIconY == Integer.MIN_VALUE) {
 			return;
 		}

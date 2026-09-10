@@ -82,13 +82,14 @@ public abstract class EntityMixin {
 	 */
 	@Inject(method = "getMaxAirSupply", at = @At("HEAD"), cancellable = true)
 	private void extraenchantry$tideheartMaxAir(CallbackInfoReturnable<Integer> cir) {
-		if ((Object) this instanceof LivingEntity living) {
-			int level;
-			try {
-				level = ExtraEnchantry.getTideheartLevel(living.getItemBySlot(EquipmentSlot.HEAD));
-			} catch (NullPointerException e) {
-				return;
-			}
+		if ((Object) this instanceof LivingEntity living
+				&& living instanceof realmikoto.extraenchantry.mixin.LivingEntityMixin.EquipmentReady ready
+				&& ready.extraenchantry$isEquipmentReady()) {
+			// 性能修复：改用构造 TAIL 置位的实例标记——旧实现靠 catch NullPointerException
+			// 兜底，每个实体构造都抛一次带 fillInStackTrace 的异常，世界生成期每秒数千次。
+			// LivingEntity 的 equipment 在其自身构造体内赋值（早于 <init> TAIL），
+			// 因此标记为 true 即可安全读取。
+			int level = ExtraEnchantry.getTideheartLevel(living.getItemBySlot(EquipmentSlot.HEAD));
 			if (level > 0) {
 				cir.setReturnValue(TideheartAir.airCap(level));
 			}
