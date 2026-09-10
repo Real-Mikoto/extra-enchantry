@@ -47,10 +47,10 @@ public final class OnboardingManager {
 			ResourceKey.create(net.minecraft.core.registries.Registries.ADVANCEMENT,
 					ExtraEnchantry.id("hidden_challenges/defeat_limit_break_cavalry"));
 
-	/** 「大共鸣者」进度：编年史卷轴追发依据 */
+	/** 「大共鸣者」进度：编年史卷轴追发依据（1.7.0 重定向至 lineage 树节点） */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> ADVANCE_GRAND_RESONATOR =
 			ResourceKey.create(net.minecraft.core.registries.Registries.ADVANCEMENT,
-					ExtraEnchantry.id("family_trials/grand_resonator"));
+					ExtraEnchantry.id("lineage/grand_resonator"));
 
 	/** 家族试炼进度：家族铭文追发依据（试炼完成 ⇒ 该家族必然达成过 FULL） */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> trialKey(

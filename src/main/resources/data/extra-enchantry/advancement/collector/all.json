@@ -145,7 +145,7 @@
     },
     "frame": "challenge",
     "icon": {
-      "id": "minecraft:nether_star"
+      "id": "extra-enchantry:chronicle_scroll"
     },
     "show_toast": true,
     "title": {

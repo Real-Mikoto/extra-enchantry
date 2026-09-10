@@ -461,6 +461,8 @@ public class ExtraEnchantry implements ModInitializer {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) ->
 				FamilyTrialsManager.onLivingDeath(entity, source));
 
+		// 1.7.3 谱系器魂检测：已并入 FamilyResonanceManager 秒级扫描（事件驱动 + 签名缓存）
+
 		// 死而不僵（隐秘挑战）：劫后余辉锁血期间击杀攻击者
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer killer
@@ -476,6 +478,9 @@ public class ExtraEnchantry implements ModInitializer {
 
 		// 五境材料与宝匣（5 材料 + 5 宝匣）
 		RealmTreasures.register();
+
+		// 五境领主刷怪蛋（1.7.3）：管理/测试便捷入口，生成领主子类实例
+		LordSpawnEggs.register();
 
 		// ============ 1.6.0「宣战与归一」注册 ============
 
@@ -750,6 +755,16 @@ public class ExtraEnchantry implements ModInitializer {
 	 * 客户端 HUD 同样调用此方法计算显示值。
 	 */
 	public static int getVitalityBonus(LivingEntity entity) {
+		// 性能（1.7.3）：本方法在 LivingEntity#tick HEAD 对所有生物每 tick 调用；
+		// 无附魔时四槽 stack.getEnchantments() 是空组件解引用，仍 worth 短路——
+		// 用"任一护甲槽为空即跳过该槽"已有的 isEmpty 检查 + 首槽快速失败即可，
+		// 这里补一个廉价的"全槽为空"快速路径（绝大多数生物命中）。
+		if (entity.getItemBySlot(EquipmentSlot.HEAD).isEmpty()
+				&& entity.getItemBySlot(EquipmentSlot.CHEST).isEmpty()
+				&& entity.getItemBySlot(EquipmentSlot.LEGS).isEmpty()
+				&& entity.getItemBySlot(EquipmentSlot.FEET).isEmpty()) {
+			return 0;
+		}
 		int totalLevels = 0;
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.isArmor()) {

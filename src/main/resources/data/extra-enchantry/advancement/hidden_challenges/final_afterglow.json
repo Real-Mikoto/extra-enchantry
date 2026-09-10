@@ -2,7 +2,7 @@
   "parent": "extra-enchantry:hidden_challenges/root",
   "display": {
     "icon": {
-      "id": "minecraft:dragon_egg"
+      "id": "extra-enchantry:family_sigil"
     },
     "title": {
       "translate": "advancement.extra-enchantry.hidden.final_afterglow"

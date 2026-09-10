@@ -188,6 +188,7 @@
   "family.extra-enchantry.storm": "风暴",
   "family.extra-enchantry.water": "水",
   "family.extra-enchantry.wind": "风",
+  "family.extra-enchantry.aether": "无相",
   "item.extra-enchantry.blade_shard": "刃晶",
   "item.extra-enchantry.chronicle_scroll": "编年史卷轴",
   "item.extra-enchantry.copper_bracelet": "铜手镯",
@@ -482,5 +483,10 @@
   "command.extra-enchantry.status.trials": "试炼：%d / 8",
   "command.extra-enchantry.status.convergence": "归一：%s",
   "command.extra-enchantry.status.ready": "印记在手，随时可战",
-  "command.extra-enchantry.status.not_ready": "尚未集齐觉醒徽记"
+  "command.extra-enchantry.status.not_ready": "尚未集齐觉醒徽记",
+  "item.extra-enchantry.overwarden_spawn_egg": "守望者刷怪蛋",
+  "item.extra-enchantry.emberbone_spawn_egg": "烬骨王刷怪蛋",
+  "item.extra-enchantry.tidal_spawn_egg": "渊潮之主刷怪蛋",
+  "item.extra-enchantry.hag_spawn_egg": "巫后刷怪蛋",
+  "item.extra-enchantry.ender_spawn_egg": "末影领主刷怪蛋"
 }

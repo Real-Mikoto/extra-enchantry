@@ -35,6 +35,14 @@ import realmikoto.extraenchantry.client.SlotReposition;
 @Mixin(CreativeModeInventoryScreen.class)
 public abstract class CreativeModeInventoryScreenMixin extends AbstractContainerScreen<AbstractContainerMenu> {
 
+	/**
+	 * 配饰 2×2 槽位坐标（性能：extractBackground 每帧调用，
+	 * 原先每帧 new 两个 int[]；坐标恒定故提升为常量，并与重定位共用。
+	 * 两处均只读遍历，不写入，共享安全）。
+	 */
+	private static final int[] EXTRAENCHANTRY$ACC_X = {16, 35, 16, 35};
+	private static final int[] EXTRAENCHANTRY$ACC_Y = {6, 6, 33, 33};
+
 	protected CreativeModeInventoryScreenMixin(AbstractContainerMenu menu,
 			net.minecraft.world.entity.player.Inventory inventory, net.minecraft.network.chat.Component title) {
 		super(menu, inventory, title);   // mixin 构造器不参与合并
@@ -71,8 +79,8 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 		AccessoryColumnRenderer.drawSlotBg(extractor, this.leftPos, this.topPos, slideX, 33);
 		// 4) 配饰 2×2（装备栏左侧，与装备 2×2 同风格同尺寸；绘制晚于衬底，槽框压在其上）
 		AccessoryColumnRenderer.drawColumn(extractor, this.leftPos, this.topPos, this.getMenu(),
-				new int[]{16, 35, 16, 35},
-				new int[]{6, 6, 33, 33},
+				EXTRAENCHANTRY$ACC_X,
+				EXTRAENCHANTRY$ACC_Y,
 				0, 0, 0, 0);
 		// 5) 配饰按钮（头盔左侧头盔行）
 		AccessoryColumnRenderer.drawButton(extractor, this.leftPos, this.topPos, slideX, 6);
@@ -107,10 +115,9 @@ public abstract class CreativeModeInventoryScreenMixin extends AbstractContainer
 		int offhandX = AccessoryHudState.expanded() ? -3 : 35;
 		((SlotReposition) (Object) menu.slots.get(45)).extraenchantry$reposition(offhandX, 33);
 
-		int[] xs = {16, 35, 16, 35};
-		int[] ys = {6, 6, 33, 33};
-		for (int i = 0; i < xs.length; i++) {
-			((SlotReposition) (Object) menu.slots.get(46 + i)).extraenchantry$reposition(xs[i], ys[i]);
+		for (int i = 0; i < EXTRAENCHANTRY$ACC_X.length; i++) {
+			((SlotReposition) (Object) menu.slots.get(46 + i))
+					.extraenchantry$reposition(EXTRAENCHANTRY$ACC_X[i], EXTRAENCHANTRY$ACC_Y[i]);
 		}
 	}
 }

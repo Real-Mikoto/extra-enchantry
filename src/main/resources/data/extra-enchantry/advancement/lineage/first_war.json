@@ -15,13 +15,13 @@
     "hidden": false
   },
   "criteria": {
-    "tick": {
-      "trigger": "minecraft:tick"
+    "triggered": {
+      "trigger": "minecraft:impossible"
     }
   },
   "requirements": [
     [
-      "tick"
+      "triggered"
     ]
   ],
   "parent": "extra-enchantry:lineage/first_realm"

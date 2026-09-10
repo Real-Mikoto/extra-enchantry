@@ -70,15 +70,52 @@ public abstract class LivingEntityMixin {
 	private double extraenchantry$galeBonus = -1.0D;
 
 	/**
+	 * tick 统一分发器（性能优化 1.7.4）。
+	 *
+	 * <p>改动前：本 Mixin 对 {@code LivingEntity#tick} 挂了**六个**独立
+	 * {@code @Inject(HEAD)}——世界内每个生物每 tick 都要触发 6 次 Mixin 回调，
+	 * 且其中四个各自重复做 {@code instanceof} 类型判定。tick 在双端运行，
+	 * 客户端同样要为渲染范围内的每个实体付这笔开销，实体密集场景下直接抬高
+	 * 客户端 tick 耗时（挤占同线程的渲染帧预算）。</p>
+	 *
+	 * <p>改动后：收敛为单一注入点，一次性完成类型判定后按序分发。
+	 * 分发顺序与原六个独立注入完全一致，各子逻辑内部实现零改动——
+	 * 六个 tick 逻辑彼此不依赖对方的副作用（活力/庇护/粒子/疾风/渊息/狼铠
+	 * 各写各自的属性修改器与视觉），故合并对行为无影响。</p>
+	 *
+	 * <p>顺序：1) 活力（所有生物，含无甲快路径）→ 2) 庇护（仅服务端玩家）
+	 * → 3) 足下氛围粒子（仅服务端，15 tick 节流）→ 4) 疾风 / 5) 渊息
+	 * （仅玩家，{@code instanceof Player} 只判一次，供两者共用）
+	 * → 6) 狼铠（内部 {@code instanceof Wolf}）。</p>
+	 */
+	@Inject(method = "tick", at = @At("HEAD"))
+	private void extraenchantry$onLivingTick(CallbackInfo ci) {
+		LivingEntity self = (LivingEntity) (Object) this;
+		// 1) 活力：所有生物（含马铠 BODY 槽），内部有"四槽全空"快路径
+		extraenchantry$tickVitality(self);
+		// 2) 庇护：仅服务端玩家的格挡光环
+		if (self instanceof ServerPlayer sanctuaryPlayer) {
+			SanctuaryManager.tick(sanctuaryPlayer);
+		}
+		// 3) 足下氛围粒子：仅服务端，内部 15 tick 节流
+		extraenchantry$tickAmbientFootFx(self);
+		// 4+5) 玩家专属：疾风移速 + 渊息水下挖掘（类型判定合并为一次）
+		if (self instanceof Player) {
+			extraenchantry$tickGaleSpeed(self);
+			extraenchantry$tickTideheart(self);
+		}
+		// 6) 狼铠：内部按 instanceof Wolf 分支
+		realmikoto.extraenchantry.WolfArmorManager.tick(self);
+	}
+
+	/**
 	 * 活力（Vitality）：每 tick 校验护甲上的活力总等级，向 MAX_HEALTH
 	 * 属性写入/更新瞬态修改器（+4/级，多件叠加上限 +50，破限可突破上限）。
 	 * 26.2 的 isArmor() 同时覆盖人形四件套与动物 BODY 槽——马铠上的活力
 	 * 直接对马生效；骑兵等持械生物的下界合金套同样照常结算。
 	 * tick 在双端运行，客户端同步获得正确的最大生命值供 HUD 使用。
 	 */
-	@Inject(method = "tick", at = @At("HEAD"))
-	private void extraenchantry$applyVitalityHealth(CallbackInfo ci) {
-		LivingEntity self = (LivingEntity) (Object) this;
+	private void extraenchantry$tickVitality(LivingEntity self) {
 		int bonus = ExtraEnchantry.getVitalityBonus(self);
 		if (bonus == extraenchantry$vitalityBonus) {
 			return;
@@ -108,24 +145,11 @@ public abstract class LivingEntityMixin {
 	}
 
 	/**
-	 * 庇护（Sanctuary）：格挡时 8 格内所有玩家每 2 秒回复 1/2/4 HP（团队光环），
-	 * 每次脉冲消耗盾牌耐久并伴随心形/光点粒子；仅服务端执行,细节在 SanctuaryManager。
-	 */
-	@Inject(method = "tick", at = @At("HEAD"))
-	private void extraenchantry$sanctuaryAura(CallbackInfo ci) {
-		if ((Object) this instanceof ServerPlayer player) {
-			SanctuaryManager.tick(player);
-		}
-	}
-
-	/**
 	 * 疾风 / 炽焰行者的足下氛围粒子（P2，L1 常驻级，15 tick 节流）：
 	 * - 疾风：移速加成生效且地面移动中 → 脚下云雾（III 级升级为 POOF 烟缕，"足下生风"）；
 	 * - 炽焰行者：站在岩浆块 / 岩浆上 → 脚下火苗 + 偶发熔岩滴（"每一步都有火迹"）。
 	 */
-	@Inject(method = "tick", at = @At("HEAD"))
-	private void extraenchantry$ambientFootFx(CallbackInfo ci) {
-		LivingEntity self = (LivingEntity) (Object) this;
+	private void extraenchantry$tickAmbientFootFx(LivingEntity self) {
 		if (!(self.level() instanceof ServerLevel serverLevel)
 				|| serverLevel.getGameTime() % 15L != 0L) {
 			return;
@@ -159,12 +183,8 @@ public abstract class LivingEntityMixin {
 	 * 潜行时不生效（getGaleSpeedBonus 返回 0，修改器被移除）。
 	 * 疾风 III 级仅能由两个 II 级在带破限的铁砧上融合得到（见 AnvilMenuMixin）。
 	 */
-	@Inject(method = "tick", at = @At("HEAD"))
-	private void extraenchantry$applyGaleSpeed(CallbackInfo ci) {
-		LivingEntity self = (LivingEntity) (Object) this;
-		if (!(self instanceof Player)) {
-			return;
-		}
+	private void extraenchantry$tickGaleSpeed(LivingEntity self) {
+		// 类型判定已在分发器 extraenchantry$onLivingTick 中完成（self instanceof Player）
 		double bonus = ExtraEnchantry.getGaleSpeedBonus(self);
 		if (bonus == extraenchantry$galeBonus) {
 			return;
@@ -199,12 +219,8 @@ public abstract class LivingEntityMixin {
 	 *
 	 * 附带入水反馈（P1）：佩戴渊息头盔首次没入水中时气泡柱 + 水下环境音。
 	 */
-	@Inject(method = "tick", at = @At("HEAD"))
-	private void extraenchantry$applyTideheartMining(CallbackInfo ci) {
-		LivingEntity self = (LivingEntity) (Object) this;
-		if (!(self instanceof Player)) {
-			return;
-		}
+	private void extraenchantry$tickTideheart(LivingEntity self) {
+		// 类型判定已在分发器 extraenchantry$onLivingTick 中完成（self instanceof Player）
 		int tideheartLevel = ExtraEnchantry.getTideheartLevel(self.getItemBySlot(EquipmentSlot.HEAD));
 		// 入水沿反馈：眼部从无水→有水且佩戴渊息
 		boolean eyeInWater = self.isEyeInFluid(net.minecraft.tags.FluidTags.WATER);
@@ -285,15 +301,6 @@ public abstract class LivingEntityMixin {
 			return amount;
 		}
 		return realmikoto.extraenchantry.AccessoryManager.outgoingDamage((LivingEntity) (Object) this, amount, source);
-	}
-
-	/**
-	 * 狼铠附魔（锐牙/哨戒/回春）：Wolf 实例 tick 分支，
-	 * 活力同款属性修改器模式（详见 WolfArmorManager）。
-	 */
-	@Inject(method = "tick", at = @At("HEAD"))
-	private void extraenchantry$wolfArmorTick(CallbackInfo ci) {
-		realmikoto.extraenchantry.WolfArmorManager.tick((LivingEntity) (Object) this);
 	}
 
 	/**

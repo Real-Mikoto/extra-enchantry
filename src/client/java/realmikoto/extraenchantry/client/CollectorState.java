@@ -18,8 +18,24 @@ public final class CollectorState {
 	private CollectorState() {
 	}
 
-	/** 本地玩家是否拥有臻藏资格 */
+	/** 缓存有效期（毫秒）：热路径（每字形 accept）调用，进度同步频率极低，1 秒缓存无感知 */
+	private static final long CACHE_MS = 1000;
+
+	private static boolean cached;
+	private static long cachedAt;
+
+	/** 本地玩家是否拥有臻藏资格（1 秒缓存：热路径每字形调用，避免 Map 查找放大） */
 	public static boolean isCollector() {
+		long now = System.currentTimeMillis();
+		if (now - cachedAt < CACHE_MS) {
+			return cached;
+		}
+		cached = query();
+		cachedAt = now;
+		return cached;
+	}
+
+	private static boolean query() {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.player == null || minecraft.getConnection() == null) {
 			return false;

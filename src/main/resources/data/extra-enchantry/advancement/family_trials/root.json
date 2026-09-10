@@ -11,7 +11,7 @@
       "translate": "advancement.extra-enchantry.family_trials.root.description"
     },
     "icon": {
-      "id": "minecraft:nether_star"
+      "id": "extra-enchantry:resonance_codex"
     },
     "show_toast": true,
     "title": {

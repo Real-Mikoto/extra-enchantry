@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -113,6 +114,10 @@ public final class ExtraEnchantryCreativeTab {
 					output.accept(new ItemStack(WarArtifacts.CONVERGENCE_MARK));
 					output.accept(new ItemStack(WarArtifacts.CONVERGENCE_CORE));
 					output.accept(new ItemStack(WarArtifacts.CONVERGENCE_CASKET));
+					// 1.7.3：五境领主刷怪蛋（管理/测试用，生成领主子类实例）
+					for (Item egg : LordSpawnEggs.ALL) {
+						output.accept(LordSpawnEggs.stack(egg, 1));
+					}
 					// 1.7.0「谱系与传承」：谱系回响匣 + 遗辉纹饰模板
 					output.accept(new ItemStack(LineageEchoItem.LINEAGE_ECHO));
 					output.accept(new ItemStack(AfterglowTrim.TEMPLATE));

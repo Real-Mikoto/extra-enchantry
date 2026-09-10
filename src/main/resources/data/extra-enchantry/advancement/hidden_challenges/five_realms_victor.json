@@ -2,7 +2,7 @@
   "parent": "extra-enchantry:hidden_challenges/root",
   "display": {
     "icon": {
-      "id": "minecraft:dragon_egg"
+      "id": "extra-enchantry:realm_sigil"
     },
     "title": {
       "translate": "advancement.extra-enchantry.hidden.five_realms_victor"

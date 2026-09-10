@@ -51,14 +51,28 @@ public final class LineageManager {
 	private static final ResourceKey<net.minecraft.advancements.Advancement> GRAND_RESONATOR = key("grand_resonator");
 	private static final ResourceKey<net.minecraft.advancements.Advancement> LINEAGE_COMPLETE = key("lineage_complete");
 
+	/** 大共鸣者进度（lineage 树）——对外公开以便 FamilySigils 等检测首次达成 */
+	public static final ResourceKey<net.minecraft.advancements.Advancement> GRAND_RESONATOR_KEY = GRAND_RESONATOR;
+
 	/** 大共鸣者进度（family_trials 树既有节点）——谱系圆满的组件之一 */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> TRIALS_GRAND =
 			ResourceKey.create(Registries.ADVANCEMENT,
-					ExtraEnchantry.id("family_trials/grand_resonator"));
+					ExtraEnchantry.id("lineage/grand_resonator"));
 
-	/** 归一之战 usage 进度（1.6.0 既有）——谱系圆满的组件之一 */
+	/** 归一之战进度节点（1.7.0 重定向至 lineage 树，避免与 family_trials/grand_resonator 重复） */
 	private static final ResourceKey<net.minecraft.advancements.Advancement> CONVERGENCE_DONE =
-			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("usage/convergence_done"));
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("lineage/convergence"));
+
+	/** 1.6.0+ 隐藏进度（hidden_challenges 树） */
+	private static final ResourceKey<net.minecraft.advancements.Advancement> FIVE_REALMS_VICTOR =
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/five_realms_victor"));
+	private static final ResourceKey<net.minecraft.advancements.Advancement> FINAL_AFTERGLOW =
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/final_afterglow"));
+	private static final ResourceKey<net.minecraft.advancements.Advancement> SOUL_COLLECTOR =
+			ResourceKey.create(Registries.ADVANCEMENT, ExtraEnchantry.id("hidden_challenges/soul_collector"));
+
+	/** 五境觉醒击杀记录（per-player，达成五个不同境 → 授予五境全胜） */
+	private static final Map<UUID, Set<String>> AWAKENED_REALMS_KILLED = new ConcurrentHashMap<>();
 
 	/** 试炼完成进度（family_trials/ 单系节点，与 FamilySigils 同路径） */
 	private static final String TRIAL_ADV_SUFFIX = "";
@@ -174,4 +188,85 @@ public final class LineageManager {
 					"message.extra-enchantry.lineage.complete"));
 		}
 	}
+
+	// ============ 1.6.0+ 隐藏进度授予入口 ============
+
+	/** 觉醒境主击杀记录（per-player 集合）。EliteEncounterManager.onLordDeath 觉醒分支调用。
+	 *  集齐五个不同境即授予「五境全胜」隐藏进度。 */
+	public static void noteAwakenedRealmKill(ServerPlayer player, String realmId) {
+		Set<String> killed = AWAKENED_REALMS_KILLED.computeIfAbsent(player.getUUID(),
+				key -> ConcurrentHashMap.newKeySet());
+		killed.add(realmId);
+		if (killed.size() >= EncounterDef.ALL.size()) {
+			Advancements.award(player, FIVE_REALMS_VICTOR);
+		}
+	}
+
+	/** 归一之战终局击杀瞬间生命 ≤5 并存活（ConvergenceManager.succeed 调用）。 */
+	public static void onFinalAfterglow(ServerPlayer player) {
+		if (player.isAlive() && player.getHealth() <= 5.0F) {
+			Advancements.award(player, FINAL_AFTERGLOW);
+		}
+	}
+
+	/** 五魂俱全：持有 41–45 器魂附魔（任意等级，附魔书或装备形态均可）。
+	 *  RealmTreasures.dropAwakenedLoot 与 on-tick 都会调用：附魔书落入背包立即触发，
+	 *  玩家把书附到装备后由 on-tick 兜底扫描。 */
+	public static void checkSoulCollector(ServerPlayer player) {
+		MinecraftServer server = player.level().getServer();
+		if (server == null) {
+			return;
+		}
+		boolean have = hasAnyLevel(player, ExtraEnchantry.CLEARSIGHT)
+				&& hasAnyLevel(player, ExtraEnchantry.WITHERBLADE)
+				&& hasAnyLevel(player, ExtraEnchantry.TIDESURGE)
+				&& hasAnyLevel(player, ExtraEnchantry.HEXBREAK)
+				&& hasAnyLevel(player, ExtraEnchantry.VOIDBLINK);
+		if (have) {
+			Advancements.award(player, SOUL_COLLECTOR);
+		}
+	}
+
+	/** 玩家是否在任何物品（背包/装备）上持有指定附魔（任意等级） */
+	private static boolean hasAnyLevel(ServerPlayer player, ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key) {
+		// 遍历 Container 接口覆盖全部槽位（26.2 Inventory.items 为私有，装备槽经映射同样可达）
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (has(player.getInventory().getItem(i), key)) {
+				return true;
+			}
+		}
+		for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+			if (has(player.getItemBySlot(slot), key)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean has(net.minecraft.world.item.ItemStack stack,
+			ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key) {
+		if (stack == null || stack.isEmpty()) {
+			return false;
+		}
+		var stored = stack.get(net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS);
+		if (stored != null) {
+			for (var holder : stored.keySet()) {
+				if (holder.is(key)) {
+					return true;
+				}
+			}
+		}
+		var ench = stack.getEnchantments();
+		for (var holder : ench.keySet()) {
+			if (holder.is(key)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// 1.7.3 性能：取消每 2 秒的全背包+装备轮询扫描（checkSoulCollector 含
+	// 4 个附魔 × 40+ 槽位组件遍历）；改为纯事件驱动——
+	//   附魔书入包：RealmTreasures.dropAwakenedLoot / dropLordLoot 掉落时机即时触发；
+	//   装备形态：LivingEntityMixin#tick 的活力注入点旁路（仅 ServerPlayer、1 秒节流）。
 }

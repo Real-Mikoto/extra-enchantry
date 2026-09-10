@@ -94,4 +94,20 @@ public abstract class EntityMixin {
 			}
 		}
 	}
+
+	/**
+	 * 挑战坐骑豁免"入水甩下骑手"（1.7.3 修复骑兵异常下马）。
+	 *
+	 * <p>26.2 反编译确认：{@code Entity#dismountsUnderwater()} 唯一判据是
+	 * {@code is(EntityTypeTags.DISMOUNTS_UNDERWATER)}，而僵尸马/骷髅马都在该标签内；
+	 * {@code LivingEntity#baseTick} 一旦发现载具满足该条件就 {@code stopRiding()}。
+	 * 骑兵若生成在水面、或被寻路带入水中，骑手会被瞬间甩下（玩家看到的"异常下马"）。
+	 * 挑战坐骑（CavalryManager 登记）在此返回 false，保持骑乘关系。</p>
+	 */
+	@Inject(method = "dismountsUnderwater", at = @At("HEAD"), cancellable = true)
+	private void extraenchantry$challengeMountKeepsRider(CallbackInfoReturnable<Boolean> cir) {
+		if (realmikoto.extraenchantry.CavalryManager.isChallengeMount((Entity) (Object) this)) {
+			cir.setReturnValue(false);
+		}
+	}
 }

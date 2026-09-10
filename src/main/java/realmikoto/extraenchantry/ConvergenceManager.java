@@ -267,9 +267,10 @@ public final class ConvergenceManager {
 		FxHelper.burstAt(level, player.getX(), player.getY(0.5D), player.getZ(),
 				ParticleTypes.TOTEM_OF_UNDYING, 48, 0.8D);
 		FxHelper.play(level, player, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.0F);
-		Advancements.award(player, Advancements.CONVERGENCE_DONE);
 		// 1.7.0 谱系主线：归一节点（含谱系圆满判定链）
 		LineageManager.onConvergenceDone(player);
+		// 1.6.0 隐藏进度：终局击杀瞬间生命 ≤5 并存活
+		LineageManager.onFinalAfterglow(player);
 		LOCKOUT_UNTIL.put(player.getUUID(),
 				System.currentTimeMillis() + LOCKOUT_MINUTES * MINUTE_MS);
 	}

@@ -1,27 +1,27 @@
 {
-	"parent": "extra-enchantry:hidden_challenges/root",
-	"criteria": {
-		"extra-enchantry:triggered": {
-			"trigger": "minecraft:impossible"
-		}
-	},
-	"display": {
-		"announce_to_chat": true,
-		"frame": "challenge",
-		"show_toast": true,
-		"icon": {
-			"id": "minecraft:ravager_spawn_egg"
-		},
-		"title": {
-			"translate": "advancement.extra-enchantry.hidden_challenges.like_for_like.title"
-		},
-		"description": {
-			"translate": "advancement.extra-enchantry.hidden_challenges.like_for_like.description"
-		}
-	},
-	"requirements": [
-		[
-			"extra-enchantry:triggered"
-		]
-	]
+  "parent": "extra-enchantry:hidden_challenges/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "frame": "challenge",
+    "show_toast": true,
+    "icon": {
+      "id": "minecraft:ravager_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hidden_challenges.like_for_like.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hidden_challenges.like_for_like.description"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
 }

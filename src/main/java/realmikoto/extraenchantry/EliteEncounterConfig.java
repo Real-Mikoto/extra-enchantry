@@ -132,25 +132,25 @@ public final class EliteEncounterConfig {
 
 	private static Map<String, Realm> buildDefaults() {
 		Map<String, Realm> map = new HashMap<>();
-		// 深暗境：愤怒持续 30 s、阶段 30/90/60，生命 1400、音波 24（melee 45 走属性表）
+		// 深暗境：愤怒持续 30 s、阶段 30/90/60，生命 300（对齐凋零，1.7.3）、音波 24（melee 45 走属性表）
 		map.put("overwarden", new Realm(true, 30, 90, 60,
-				new Realm.Stats(1400.0F, 45.0F, 1.4F, 24.0D, 100),
+				new Realm.Stats(300.0F, 45.0F, 1.4F, 24.0D, 100),
 				new Realm.Thresholds(600, 32.0D, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
 		// 下界境：凋零累计 60 s / 120 s 窗口，阶段 30/120/0（凝聚直接觉醒）
 		map.put("emberbone", new Realm(true, 30, 120, 0,
-				new Realm.Stats(400.0F, 24.0F, 1.6F, 24.0D, 80),
+				new Realm.Stats(300.0F, 24.0F, 1.6F, 24.0D, 80),
 				new Realm.Thresholds(0, 0.0D, 1200, 2400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
 		// 海洋境：浸泡 180 s / 300 s 窗口，激光 5 次 / 120 s 窗口
 		map.put("tidal", new Realm(true, 30, 120, 0,
-				new Realm.Stats(600.0F, 20.0F, 1.7F, 32.0D, 100),
+				new Realm.Stats(300.0F, 20.0F, 1.7F, 32.0D, 100),
 				new Realm.Thresholds(0, 0.0D, 0, 0, 3600, 6000, 5, 2400, 0, 0, 0, 0, 0, 0, 0)));
 		// 沼泽境：药水命中 3 或 击杀女巫 5（60 s 窗口），夜限 13000–23000
 		map.put("hag", new Realm(true, 30, 120, 0,
-				new Realm.Stats(320.0F, 15.0F, 1.35F, 24.0D, 80),
+				new Realm.Stats(300.0F, 15.0F, 1.35F, 24.0D, 80),
 				new Realm.Thresholds(0, 0.0D, 0, 0, 0, 0, 0, 0, 3, 5, 1200, 13000, 23000, 0, 0)));
 		// 末地境：末影珍珠 10 次 / 120 s 窗口
 		map.put("ender", new Realm(true, 30, 120, 0,
-				new Realm.Stats(500.0F, 20.0F, 1.5F, 32.0D, 100),
+				new Realm.Stats(300.0F, 20.0F, 1.5F, 32.0D, 100),
 				new Realm.Thresholds(0, 0.0D, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2400)));
 		return Map.copyOf(map);
 	}

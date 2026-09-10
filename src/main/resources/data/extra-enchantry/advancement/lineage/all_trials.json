@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "id": "minecraft:nether_star"
+      "id": "extra-enchantry:chronicle_scroll"
     },
     "title": {
       "translate": "advancement.extra-enchantry.lineage.all_trials.title"
@@ -15,13 +15,13 @@
     "hidden": false
   },
   "criteria": {
-    "tick": {
-      "trigger": "minecraft:tick"
+    "triggered": {
+      "trigger": "minecraft:impossible"
     }
   },
   "requirements": [
     [
-      "tick"
+      "triggered"
     ]
   ],
   "parent": "extra-enchantry:lineage/four_trials"

@@ -76,16 +76,9 @@ public final class Advancements {
 	/** 獠牙礼赞：首次在铁砧产出带本模附魔的狼铠 */
 	public static final ResourceKey<net.minecraft.advancements.Advancement> WOLF_ARMOR = key("wolf_armor");
 
-	// ========== 1.6.0 宣战与归一 ==========
-
-	/** 宣战者：首次使用任意宣战图腾 */
-	public static final ResourceKey<net.minecraft.advancements.Advancement> WAR_TOTEM_USED = key("war_totem_used");
-
-	/** 唤醒之敌：首次击杀任意觉醒境主 */
-	public static final ResourceKey<net.minecraft.advancements.Advancement> AWAKENED_SLAIN = key("awakened_slain");
-
-	/** 归一：完成归一之战 */
-	public static final ResourceKey<net.minecraft.advancements.Advancement> CONVERGENCE_DONE = key("convergence_done");
+	// 1.6.0 宣战 / 唤醒 / 归一 三个 usage 进度已于 1.7.0 重定向至 lineage 树同名节点
+	// （lineage/first_war 宣战者 / lineage/first_awakened 唤醒之敌 / lineage/convergence 归一），
+	// 原 usage/* JSON 与 Advancements 常量一并下线。
 
 	private Advancements() {
 	}

@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import realmikoto.extraenchantry.EliteLord;
 import net.minecraft.world.phys.Vec3;
 import realmikoto.extraenchantry.EliteEncounterConfig;
 import realmikoto.extraenchantry.EncounterDef;
@@ -35,7 +36,7 @@ import java.util.List;
  *   4 幽匿召唤：16 格内 3 处生成幽匿幼体，召唤期间站立 3 s。
  * 另：24 格内持续黑暗 II 光环（原版监守者触发式黑暗的强化）。
  */
-public class OverwardenEntity extends Warden {
+public class OverwardenEntity extends Warden implements EliteLord {
 
 	/** 技能槽：0 双音波 / 1 幽匿地刺 / 2 愤怒咆哮 / 3 幽匿召唤 */
 	private static final int SLOT_TWIN_BOOM = 0;

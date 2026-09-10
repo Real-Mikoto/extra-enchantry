@@ -1,18 +1,19 @@
 {
 	"providers": [
 		{
-			"type": "ttf",
-			"file": "extra-enchantry:uncial_antiqua.ttf",
-			"size": 11,
-			"oversample": 2,
-			"shift": [0, 0]
+			"type": "reference",
+			"id": "minecraft:include/space"
 		},
 		{
-			"type": "ttf",
-			"file": "extra-enchantry:zcool_xiaowei.ttf",
-			"size": 12,
-			"oversample": 2,
-			"shift": [0, 0]
+			"type": "reference",
+			"id": "minecraft:include/default",
+			"filter": {
+				"uniform": false
+			}
+		},
+		{
+			"type": "reference",
+			"id": "minecraft:include/unifont"
 		}
 	]
 }

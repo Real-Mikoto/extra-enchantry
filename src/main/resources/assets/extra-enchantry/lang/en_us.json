@@ -188,6 +188,7 @@
   "family.extra-enchantry.storm": "Storm",
   "family.extra-enchantry.water": "Water",
   "family.extra-enchantry.wind": "Wind",
+  "family.extra-enchantry.aether": "Aether",
   "item.extra-enchantry.blade_shard": "Blade Shard",
   "item.extra-enchantry.chronicle_scroll": "Chronicle Scroll",
   "item.extra-enchantry.copper_bracelet": "Copper Bracelet",
@@ -482,5 +483,10 @@
   "command.extra-enchantry.status.trials": "Trials: %d / 8",
   "command.extra-enchantry.status.convergence": "Convergence: %s",
   "command.extra-enchantry.status.ready": "mark in hand, ready to battle",
-  "command.extra-enchantry.status.not_ready": "awakened sigils not yet gathered"
+  "command.extra-enchantry.status.not_ready": "awakened sigils not yet gathered",
+  "item.extra-enchantry.overwarden_spawn_egg": "Overwarden Spawn Egg",
+  "item.extra-enchantry.emberbone_spawn_egg": "Emberbone King Spawn Egg",
+  "item.extra-enchantry.tidal_spawn_egg": "Tidal Sovereign Spawn Egg",
+  "item.extra-enchantry.hag_spawn_egg": "Hag Sovereign Spawn Egg",
+  "item.extra-enchantry.ender_spawn_egg": "Ender Lord Spawn Egg"
 }

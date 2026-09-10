@@ -30,6 +30,12 @@ public abstract class ItemStackFoilMixin {
 		if (cir.getReturnValueZ()) {
 			return;
 		}
+		// 性能（1.7.3）：无臻藏/大共鸣者资格时整体短路——这是 99% 玩家的常态路径，
+		// 免掉下面每物品的组件解引用与附魔遍历（GUI 每物品每帧调用）。
+		// 两个状态类各自带 1 秒缓存，本短路成本 ≈ 两次毫秒比较。
+		if (!CollectorState.isCollector() && !GrandResonatorState.isGrandResonator()) {
+			return;
+		}
 		ItemStack self = (ItemStack) (Object) this;
 		// 棱彩臻藏：共鸣秘典（大共鸣者专属光效）
 		if (self.is(ExtraEnchantry.RESONANCE_CODEX)) {

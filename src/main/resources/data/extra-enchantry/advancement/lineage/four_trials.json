@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "id": "minecraft:experience_bottle"
+      "id": "extra-enchantry:resonance_codex"
     },
     "title": {
       "translate": "advancement.extra-enchantry.lineage.four_trials.title"
@@ -15,13 +15,13 @@
     "hidden": false
   },
   "criteria": {
-    "tick": {
-      "trigger": "minecraft:tick"
+    "triggered": {
+      "trigger": "minecraft:impossible"
     }
   },
   "requirements": [
     [
-      "tick"
+      "triggered"
     ]
   ],
   "parent": "extra-enchantry:lineage/first_trial"

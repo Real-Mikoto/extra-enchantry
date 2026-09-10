@@ -170,6 +170,8 @@ public final class RealmTreasures {
 		}
 		FxHelper.burstAt(level, lord.getX(), lord.getY(0.5D), lord.getZ(),
 				net.minecraft.core.particles.ParticleTypes.END_ROD, 24, 0.6D);
+		// 1.6.0+ 隐藏进度：器魂入包即触发「五魂俱全」扫描（装备形态由 LineageManager.tick 兜底）
+		LineageManager.checkSoulCollector(killer);
 	}
 
 	/** 普通领主的器魂小概率掉落（20%，I–II 级）——并入 dropLordLoot 调用链 */

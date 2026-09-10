@@ -1,27 +1,27 @@
 {
-	"parent": "extra-enchantry:hidden_challenges/root",
-	"criteria": {
-		"extra-enchantry:triggered": {
-			"trigger": "minecraft:impossible"
-		}
-	},
-	"display": {
-		"announce_to_chat": true,
-		"frame": "challenge",
-		"show_toast": true,
-		"icon": {
-			"id": "minecraft:totem_of_undying"
-		},
-		"title": {
-			"translate": "advancement.extra-enchantry.hidden_challenges.afterglow_revenge.title"
-		},
-		"description": {
-			"translate": "advancement.extra-enchantry.hidden_challenges.afterglow_revenge.description"
-		}
-	},
-	"requirements": [
-		[
-			"extra-enchantry:triggered"
-		]
-	]
+  "parent": "extra-enchantry:hidden_challenges/root",
+  "criteria": {
+    "triggered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "frame": "challenge",
+    "show_toast": true,
+    "icon": {
+      "id": "minecraft:totem_of_undying"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hidden_challenges.afterglow_revenge.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hidden_challenges.afterglow_revenge.description"
+    }
+  },
+  "requirements": [
+    [
+      "triggered"
+    ]
+  ]
 }

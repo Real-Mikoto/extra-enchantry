@@ -20,6 +20,11 @@ import realmikoto.extraenchantry.client.LimitBreakLockState;
  *   · 未完成「无敌」进度：锁定态渲染，暗灰色平色（无闪光），
  *     与相邻金色附魔名形成"这本书还锁着"的直观视觉对比；
  *   · 完成后：与拓阶同款金色波浪闪光（服务器触发挑战即认可，解锁即变色）。
+ * - T1 主题族（fancy_soul 等）：族色波浪。
+ *
+ * 字体标记说明：族字体 JSON 已改为 reference 引用原版 default——
+ * 字形与原版一致（特殊字体已移除），但字体 ID 仍是波浪动效的识别标记；
+ * fancy / fancy_lb 保留专属 TTF（特殊字体仅对破限体系保留）。
  */
 @Mixin(targets = "net.minecraft.client.gui.Font$PreparedTextBuilder")
 public abstract class FontPreparedTextBuilderMixin {

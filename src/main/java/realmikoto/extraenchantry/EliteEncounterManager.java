@@ -70,6 +70,9 @@ public final class EliteEncounterManager {
 	/** 环境异变方块上限（设计 §6.4 性能） */
 	private static final int MAX_UNFOLD_BLOCKS = 125;
 
+	/** 深暗境愤怒扫描间隔（tick）：64³ 实体搜索降频，5 tick 采样精度足够（1.7.3） */
+	private static final int WARDEN_SCAN_INTERVAL_TICKS = 5;
+
 	private static final long MINUTE_MS = 60_000L;
 
 	// ============ 运行时状态 ============
@@ -135,9 +138,14 @@ public final class EliteEncounterManager {
 		if (isCoolingDown(player)) {
 			return;
 		}
-		// 连续型触发的每 tick 采样（深暗境愤怒持续 / 海洋境浸泡累积）
+		// 连续型触发采样（深暗境愤怒持续 / 海洋境浸泡累积）
 		if (EncounterDef.byId("overwarden").matches(level, player.blockPosition())) {
-			scanWardenAnger(player, level);
+			// 性能（1.7.3）：扫描含 64³ AABB 实体搜索，每 tick 跑会持续吃满一个采样槽；
+			// 愤怒判定窗口是 600 tick，5 tick 采样（=600±5）精度足够。清零分支仍每 tick
+			// 保持响应（玩家跑出 32 格立即断连）。
+			if (nowTick % WARDEN_SCAN_INTERVAL_TICKS == 0L) {
+				scanWardenAnger(player, level);
+			}
 		} else {
 			WARDEN_ANGER.remove(player.getUUID());
 		}
@@ -232,7 +240,6 @@ public final class EliteEncounterManager {
 				"message.extra-enchantry.elite.prelude." + def.id()));
 		Advancements.award(player, LORDS_ROOT);
 		Advancements.award(player, def.triggerAdv());
-		Advancements.award(player, Advancements.WAR_TOTEM_USED);
 		// 1.7.0 谱系主线：触遇五境 + 首次宣战（图腾路径）
 		LineageManager.onRealmEncounter(player);
 		LineageManager.onFirstWar(player);
@@ -598,9 +605,9 @@ public final class EliteEncounterManager {
 		}
 		// 1.6.0 觉醒掉落分支（§1.5）：材料 ×2 + 器魂书 II–III 100% + 觉醒徽记 100% + 进度
 		if (encounter != null && encounter.awakened) {
-			Advancements.award(killer, Advancements.AWAKENED_SLAIN);
-			// 1.7.0 谱系主线：首杀觉醒
+			// 1.7.0 谱系主线：首杀觉醒 + 五境觉醒击杀记录（隐藏进度「五境全胜」）
 			LineageManager.onFirstAwakenedSlain(killer);
+			LineageManager.noteAwakenedRealmKill(killer, def.id());
 			RealmTreasures.dropAwakenedLoot(lord, def, encounter.level, killer);
 		}
 	}
@@ -644,6 +651,12 @@ public final class EliteEncounterManager {
 	/** 是否为五境领主（觉醒后进入 boss 判定：断罪不斩杀改 ×2、曳钩不可拉拽） */
 	public static boolean isLord(Entity entity) {
 		return entity instanceof EliteLord;
+	}
+
+	/** 刷怪蛋生成领主（LordSpawnEggs 调用）：按境 ID 构造领主子类实例（不登记遭遇） */
+	public static Mob createLordForEgg(ServerLevel level, String realmId) {
+		EncounterDef def = EncounterDef.byId(realmId);
+		return def != null ? def.factory().create(level) : null;
 	}
 
 	/**

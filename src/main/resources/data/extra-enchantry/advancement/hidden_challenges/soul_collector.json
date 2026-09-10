@@ -2,7 +2,7 @@
   "parent": "extra-enchantry:hidden_challenges/root",
   "display": {
     "icon": {
-      "id": "minecraft:dragon_egg"
+      "id": "extra-enchantry:convergence_core"
     },
     "title": {
       "translate": "advancement.extra-enchantry.hidden.soul_collector"

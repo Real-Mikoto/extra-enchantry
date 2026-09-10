@@ -16,11 +16,12 @@ import realmikoto.extraenchantry.ExtraEnchantry;
 import java.util.Map;
 
 /**
- * 附魔名称的特殊渲染体系（DESIGN_aesthetics 字体章）：
+ * 附魔名称的着色体系（DESIGN_aesthetics 字体章；特殊字体已移除，仅保留颜色 + 波浪动效）：
  *
- * T0 传说级 —— fancy / fancy_lb 字体 + 金色 (#FFD700)：
+ * T0 传说级 —— fancy / fancy_lb 字体标记 + 金色 (#FFD700)：
  *   破限 / 拓阶；客户端渲染为金色波浪闪光，破限另有锁定态（灰）。
- * T1 史诗级 —— 主题族字体 + 族色波浪（客户端 FontPreparedTextBuilderMixin 逐帧演算）：
+ *   （fancy / fancy_lb 仍保留专属 TTF 字体——特殊字体仅对破限体系保留。）
+ * T1 史诗级 —— 族字体标记 + 族色波浪（客户端 FontPreparedTextBuilderMixin 逐帧演算）：
  *   灵魂族：断罪 / 蚀命 / 余烬 / 劫后余辉 / 无踪
  *   雷光族：坠星 / 假象
  *   锋刃族：藏锋 / 触及
@@ -29,13 +30,15 @@ import java.util.Map;
  *   风族：御风 / 疾风
  *   守护族：壁垒 / 坚壁 / 不屈 / 誓约
  *   火焰族：炽焰行者
+ *   注：族字体 JSON（fancy_soul 等）已改为 reference 引用原版 default 字体——
+ *   字形与原版完全一致，但字体 ID 保留作为客户端波浪动效的识别标记。
  * T2 普通级（uncommon/common：凋零保护 / 活力 / 破阵 / 冲阵 / 霆霓 / 丰壤 / 空跃）保持原版样式，
  *   维持"稀有度视觉阶梯"——附魔列表里一眼分出高下。
  */
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin {
 
-	/** T1 族字体与基础色（客户端波浪以此字体 ID 为标记匹配色相） */
+	/** T1 族字体标记与基础色（客户端波浪以此字体 ID 为标记匹配色相；字体字形=原版 default） */
 	private record FamilyStyle(String fontPath, int baseColor) {
 	}
 

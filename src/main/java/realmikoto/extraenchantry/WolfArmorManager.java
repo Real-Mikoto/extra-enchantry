@@ -34,7 +34,10 @@ public final class WolfArmorManager {
 		}
 		ItemStack armor = wolf.getItemBySlot(EquipmentSlot.BODY);
 		if (armor.isEmpty()) {
-			removeAllModifiers(wolf);
+			// 无甲快路径：仅在仍有残留修改器时才清理（避免每狼每 tick 空转三连getAttribute）
+			if (extraenchantry$hasWolfModifiers(wolf)) {
+				removeAllModifiers(wolf);
+			}
 			return;
 		}
 		int sharpFang = ExtraEnchantry.getEnchantmentLevelPublic(armor, ExtraEnchantry.SHARP_FANG);
@@ -51,6 +54,14 @@ public final class WolfArmorManager {
 				&& wolf.level().getGameTime() % RENEWAL_INTERVAL_TICKS == 0L) {
 			wolf.heal(renewal);
 		}
+	}
+
+	/** 无甲快路径：任一槽仍有本模修改器才值得清理 */
+	private static boolean extraenchantry$hasWolfModifiers(Wolf wolf) {
+		AttributeInstance fang = wolf.getAttribute(Attributes.ATTACK_DAMAGE);
+		AttributeInstance vigil = wolf.getAttribute(Attributes.FOLLOW_RANGE);
+		return (fang != null && fang.getModifier(ExtraEnchantry.id("wolf_sharp_fang")) != null)
+				|| (vigil != null && vigil.getModifier(ExtraEnchantry.id("wolf_vigil")) != null);
 	}
 
 	private static void applyModifier(LivingEntity entity,

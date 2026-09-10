@@ -1,8 +1,13 @@
 {
   "replace": false,
   "values": [
+    "minecraft:infinity",
+    "minecraft:lunge",
+    "minecraft:multishot",
+    "minecraft:piercing",
     "minecraft:power",
     "minecraft:punch",
-    "minecraft:infinity"
+    "minecraft:quick_charge",
+    "minecraft:wind_burst"
   ]
 }

@@ -94,12 +94,14 @@ public final class FamilySigils {
 				return;
 			}
 		}
-		AdvancementHolder grand = server.getAdvancements().get(ExtraEnchantry.id("family_trials/grand_resonator"));
-		if (grand != null && player.getAdvancements().award(grand, "triggered")) {
+		// 1.7.0 谱系重定向：大共鸣者节点从 family_trials/ 迁至 lineage/ 树（去重）
+		AdvancementHolder grand = server.getAdvancements().get(
+				LineageManager.GRAND_RESONATOR_KEY.identifier());
+		boolean wasDone = grand != null && advancements.getOrStartProgress(grand).isDone();
+		LineageManager.onGrandResonator(player);
+		if (!wasDone && grand != null) {
 			// 首次达成大共鸣者 → 派发编年史卷轴（1.3.1「铭文纪元」）
 			OnboardingManager.onGrandResonator(player);
-			// 1.7.0 谱系主线：大共鸣者节点 + 谱系圆满判定
-			LineageManager.onGrandResonator(player);
 		}
 	}
 

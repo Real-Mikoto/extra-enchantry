@@ -1,7 +1,9 @@
 {
   "replace": false,
   "values": [
+    "minecraft:breach",
     "minecraft:channeling",
+    "minecraft:density",
     "minecraft:impaling",
     "minecraft:loyalty",
     "minecraft:riptide"

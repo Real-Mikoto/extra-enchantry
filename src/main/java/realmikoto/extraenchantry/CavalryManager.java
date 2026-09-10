@@ -134,8 +134,8 @@ public final class CavalryManager {
 	/** 闪电苦力怕生成间隔（tick）＝ 10 秒 */
 	private static final int CREEPER_BEAT_TICKS = 200;
 
-	/** 每次生成的闪电苦力怕数量 */
-	private static final int CREEPERS_PER_BEAT = 10;
+	/** 每次生成的闪电苦力怕数量（1.7.3：10 → 3，降低持续压迫） */
+	private static final int CREEPERS_PER_BEAT = 3;
 
 	/** 闪电苦力怕引信（tick）：原版 30 减少 3/4 → 8 */
 	private static final int CHARGED_CREEPER_FUSE = 8;
@@ -167,6 +167,9 @@ public final class CavalryManager {
 	/** 挑战生物生成时相对玩家的最大水平距离（格） */
 	private static final double MOB_SPAWN_RADIUS = 20.0;
 
+	/** 诸界浩劫血条可见半径（格）：对齐原版劫掠——事件附近玩家可见 */
+	private static final double CATACLYSM_BAR_RANGE = 128.0;
+
 	// ============ 26.2 原版袭击波次表（反编译 Raid.RaiderType，下标 = 波数） ============
 
 	private static final int[] RAID_BASE_VINDICATOR = {0, 0, 2, 0, 1, 4, 2, 5};
@@ -185,6 +188,24 @@ public final class CavalryManager {
 
 	/** 陷阱混编队成员（骑手）UUID，供「全歼」击败计数（运行时跟踪，重启丢失） */
 	private static final Set<UUID> TRAP_SQUAD_MEMBERS = ConcurrentHashMap.newKeySet();
+
+	/** 陷阱骑手 → 其坐骑（骑手阵亡后坐骑一并消散，避免无主马滞留） */
+	private static final Map<UUID, UUID> TRAP_MOUNTS = new ConcurrentHashMap<>();
+
+	/**
+	 * 挑战坐骑 UUID（精英骑兵 + 陷阱混编队的马）。
+	 *
+	 * <p>用途：马匹原版在 {@code #minecraft:dismounts_underwater} 标签内，
+	 * {@code LivingEntity#baseTick} 会因 {@code getVehicle().dismountsUnderwater()} 为真而
+	 * {@code stopRiding()} —— 骑兵一旦生成在水面或被寻路带入水中，骑手会被立刻甩下，
+	 * 表现为"异常下马"。挑战坐骑经此登记后由 {@code EntityMixin} 豁免该规则。</p>
+	 */
+	private static final Set<UUID> CHALLENGE_MOUNTS = ConcurrentHashMap.newKeySet();
+
+	/** 是否为挑战坐骑（EntityMixin#dismountsUnderwater 查询） */
+	public static boolean isChallengeMount(Entity entity) {
+		return entity != null && CHALLENGE_MOUNTS.contains(entity.getUUID());
+	}
 
 	/** 各玩家对陷阱混编队的累计击杀数 */
 	private static final Map<UUID, Integer> TRAP_KILL_COUNTS = new ConcurrentHashMap<>();
@@ -268,6 +289,10 @@ public final class CavalryManager {
 				state.nextWaveTick = -1;
 				spawnWave(state, player);
 			}
+			// 血条可见范围同步（原版劫掠逻辑：事件附近玩家可见；每秒一次）
+			if (now % 20 == 0L) {
+				syncBossBarViewers(state, player);
+			}
 			// 当前波清空检测（每秒扫一次）
 			if (state.nextWaveTick < 0 && now % 20 == 0 && isWaveCleared(state)) {
 				if (state.wave >= CATACLYSM_WAVES) {
@@ -331,11 +356,16 @@ public final class CavalryManager {
 	/** 开启诸界浩劫：创建 boss 血条（诸界浩劫）并进入第 1 波 */
 	private static void startCataclysm(ServerPlayer player) {
 		ServerLevel level = (ServerLevel) player.level();
+		// 对齐原版劫掠（Raid）血条：26.2 Raid 构造即固定 RED + PROGRESS，
+		// 不遮屏 / 不放 boss 音乐 / 不生成世界迷雾（与游戏内袭击观感一致）。
 		ServerBossEvent bossEvent = new ServerBossEvent(
 				UUID.randomUUID(),
 				Component.translatable("event.extra-enchantry.cataclysm"),
 				BossEvent.BossBarColor.RED,
 				BossEvent.BossBarOverlay.PROGRESS);
+		bossEvent.setDarkenScreen(false);
+		bossEvent.setPlayBossMusic(false);
+		bossEvent.setCreateWorldFog(false);
 		Cataclysm state = new Cataclysm(level, player.getUUID(), bossEvent,
 				level.getGameTime() + CATACLYSM_TIMEOUT_TICKS);
 		CATACLYSMS.put(player.getUUID(), state);
@@ -343,6 +373,25 @@ public final class CavalryManager {
 		player.sendSystemMessage(Component.translatable("message.extra-enchantry.cataclysm.started"));
 		playCataclysmStartFx(level, player);
 		spawnWave(state, player);
+	}
+
+	/**
+	 * 血条可见范围同步（对齐原版劫掠：血条随事件推进，对事件附近玩家可见）。
+	 * 每秒调用一次，避免每 tick 遍历玩家列表。
+	 */
+	private static void syncBossBarViewers(Cataclysm state, ServerPlayer owner) {
+		for (ServerPlayer viewer : state.level.players()) {
+			boolean nearby = viewer.isAlive()
+					&& viewer.level().dimension().equals(state.level.dimension())
+					&& viewer.distanceTo(owner) <= CATACLYSM_BAR_RANGE;
+			if (nearby) {
+				if (!state.bossEvent.getPlayers().contains(viewer)) {
+					state.bossEvent.addPlayer(viewer);
+				}
+			} else if (state.bossEvent.getPlayers().contains(viewer)) {
+				state.bossEvent.removePlayer(viewer);
+			}
+		}
 	}
 
 	/** 开始第 wave 波（每波开始：公告 + 幻翼/恼鬼侧翼；各波编成见类注释） */
@@ -593,7 +642,10 @@ public final class CavalryManager {
 		}
 	}
 
-	/** 挑战结束清扫：消散该挑战的全部挑战生物（成员+苦力怕+幻翼恼鬼；坐骑保留=马铠战利品） */
+	/**
+	 * 挑战结束清扫：消散该挑战的全部挑战生物（成员 + 苦力怕 + 幻翼恼鬼 + 坐骑）。
+	 * 1.7.3：坐骑不再保留（原"马铠战利品"设计会在存档里堆积无主马，实测一场后有 40+ 匹）。
+	 */
 	private static void clearChallengeMobs(Cataclysm state) {
 		for (Map.Entry<UUID, UUID> entry : List.copyOf(CHALLENGE_LOCK.entrySet())) {
 			if (entry.getValue().equals(state.playerId)) {
@@ -605,6 +657,15 @@ public final class CavalryManager {
 				CHALLENGE_LOCK.remove(entry.getKey());
 			}
 		}
+		// 坐骑一并消散（含 exempt 入水规则的登记清理）
+		for (UUID mountId : List.copyOf(state.mounts)) {
+			Entity mount = state.level.getEntity(mountId);
+			if (mount != null && mount.isAlive()) {
+				mount.discard();
+			}
+			CHALLENGE_MOUNTS.remove(mountId);
+		}
+		state.mounts.clear();
 		state.waveMembers.clear();
 		state.wardenIds.clear();
 	}
@@ -718,7 +779,7 @@ public final class CavalryManager {
 		horse.finalizeSpawn(state.level, difficulty, EntitySpawnReason.TRIGGERED, null);
 		double y = findSpawnY(state.level, pos.x, pos.y, pos.z);
 		horse.snapTo(pos.x, y, pos.z, state.level.getRandom().nextFloat() * 360.0F, 0.0F);
-		prepareEliteMount(horse);
+		prepareEliteMount(state, horse);
 		horse.setItemSlot(EquipmentSlot.BODY, rollHorseArmor(state.level));
 		horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
 
@@ -742,7 +803,7 @@ public final class CavalryManager {
 		horse.finalizeSpawn(state.level, difficulty, EntitySpawnReason.TRIGGERED, null);
 		double y = findSpawnY(state.level, pos.x, pos.y, pos.z);
 		horse.snapTo(pos.x, y, pos.z, state.level.getRandom().nextFloat() * 360.0F, 0.0F);
-		prepareEliteMount(horse);
+		prepareEliteMount(state, horse);
 		horse.setItemSlot(EquipmentSlot.BODY, rollHorseArmor(state.level));
 		horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
 
@@ -756,12 +817,16 @@ public final class CavalryManager {
 		return true;
 	}
 
-	/** 精英坐骑共性：驯服、持久化、生成保护、满自然移速 */
-	private static void prepareEliteMount(AbstractHorse horse) {
+	/** 精英坐骑共性：驯服、持久化、生成保护、满自然移速；登记到本场挑战以便结束清扫 */
+	private static void prepareEliteMount(Cataclysm state, AbstractHorse horse) {
 		horse.setTamed(true);
 		horse.setPersistenceRequired();
 		horse.invulnerableTime = 60;
 		horse.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(MAX_NATURAL_ZOMBIE_HORSE_SPEED);
+		// 豁免原版"入水甩下骑手"（#dismounts_underwater），否则骑兵涉水即散架；
+		// 同时登记为本场挑战坐骑（挑战结束时随骑手一并消散）
+		CHALLENGE_MOUNTS.add(horse.getUUID());
+		state.mounts.add(horse.getUUID());
 	}
 
 	private static Zombie buildZombieRider(ServerLevel level, DifficultyInstance difficulty) {
@@ -873,6 +938,7 @@ public final class CavalryManager {
 		}
 		rider.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), 0.0F);
 		rider.startRiding(horse, false, false);
+		TRAP_MOUNTS.put(rider.getUUID(), horse.getUUID());
 		level.addFreshEntityWithPassengers(rider);
 	}
 
@@ -898,6 +964,7 @@ public final class CavalryManager {
 		if (rider != null) {
 			rider.snapTo(x, y != null ? y : center.y, z, horse.getYRot(), 0.0F);
 			rider.startRiding(horse, false, false);
+			TRAP_MOUNTS.put(rider.getUUID(), horse.getUUID());
 		}
 		level.addFreshEntityWithPassengers(horse);
 	}
@@ -955,6 +1022,8 @@ public final class CavalryManager {
 		horse.invulnerableTime = 60;
 		horse.setItemSlot(EquipmentSlot.BODY, new ItemStack(Items.IRON_HORSE_ARMOR));
 		horse.setItemSlot(EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+		// 同精英坐骑：豁免入水甩下骑手
+		CHALLENGE_MOUNTS.add(horse.getUUID());
 	}
 
 	// ============ 击败判定与进度 ============
@@ -966,6 +1035,17 @@ public final class CavalryManager {
 	public static void onTrapRiderDeath(LivingEntity entity, DamageSource source) {
 		if (!TRAP_SQUAD_MEMBERS.remove(entity.getUUID())) {
 			return;
+		}
+		// 骑手阵亡 → 坐骑一并消散（玩家已骑上则保留，避免把人甩下来）
+		UUID mountId = TRAP_MOUNTS.remove(entity.getUUID());
+		if (mountId != null && entity.level() instanceof ServerLevel sl) {
+			Entity mount = sl.getEntity(mountId);
+			if (mount != null && mount.isAlive()
+					&& mount.getPassengers().stream()
+							.noneMatch(p -> p instanceof net.minecraft.world.entity.player.Player)) {
+				mount.discard();
+			}
+			CHALLENGE_MOUNTS.remove(mountId);
 		}
 		if (source.getEntity() instanceof ServerPlayer player
 				&& increment(TRAP_KILL_COUNTS, player.getUUID()) >= TRAP_SQUAD_SIZE) {
@@ -1188,6 +1268,8 @@ public final class CavalryManager {
 		final Set<UUID> waveMembers = ConcurrentHashMap.newKeySet();
 		/** 第 1 波监守者（供定期补怒） */
 		final Set<UUID> wardenIds = ConcurrentHashMap.newKeySet();
+		/** 本场挑战的坐骑（挑战结束随骑手一并消散，避免存档堆积无主马） */
+		final Set<UUID> mounts = ConcurrentHashMap.newKeySet();
 
 		private Cataclysm(ServerLevel level, UUID playerId, ServerBossEvent bossEvent, long deadlineTick) {
 			this.level = level;

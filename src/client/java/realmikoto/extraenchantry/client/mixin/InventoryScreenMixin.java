@@ -24,6 +24,14 @@ import realmikoto.extraenchantry.client.AccessoryColumnRenderer;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends AbstractContainerScreen<InventoryMenu> {
 
+	/**
+	 * 配饰列槽位坐标（性能：extractBackground 是每帧路径，
+	 * 原先每帧 new 两个 int[] 造成无谓的 GC 压力；坐标恒定故提升为常量。
+	 * drawColumn 只读遍历这两个数组，不做写入，共享安全）。
+	 */
+	private static final int[] EXTRAENCHANTRY$SLOT_X = {-10, -10, -10, -10};
+	private static final int[] EXTRAENCHANTRY$SLOT_Y = {8, 26, 44, 62};
+
 	protected InventoryScreenMixin(InventoryMenu menu, net.minecraft.world.entity.player.Inventory inventory,
 			net.minecraft.network.chat.Component title) {
 		super(menu, inventory, title);   // mixin 构造器不参与合并
@@ -35,8 +43,8 @@ public abstract class InventoryScreenMixin extends AbstractContainerScreen<Inven
 		AccessoryColumnRenderer.tickAnimation(partialTick);
 		// 配饰列（x=-11 列；衬底外扩 2px，右侧止于护甲框 x=7 之前）
 		AccessoryColumnRenderer.drawColumn(extractor, this.leftPos, this.topPos, this.getMenu(),
-				new int[]{-10, -10, -10, -10},
-				new int[]{8, 26, 44, 62},
+				EXTRAENCHANTRY$SLOT_X,
+				EXTRAENCHANTRY$SLOT_Y,
 				-13, 5, 20, 76);
 		// 配饰按钮（盾牌列头盔行；贴图 18×18 全不透明自带槽框底，直接绘制即可。
 		// 不得加 panel_fill 衬底：原版纸娃娃渲染区右缘在 x=75（extractEntityInInventory

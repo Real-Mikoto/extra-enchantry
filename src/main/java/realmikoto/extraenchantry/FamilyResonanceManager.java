@@ -151,6 +151,9 @@ public final class FamilyResonanceManager {
 			}
 			scanPlayer(player, gameTime);
 			tickPassives(player, gameTime);
+			// 1.7.3：器魂齐全检测搭车秒级扫描（仅玩家、装备签名变化后才会真扫，
+			// 替代 LineageManager 曾有的独立 40-tick 全背包轮询）
+			LineageManager.checkSoulCollector(player);
 		}
 	}
 

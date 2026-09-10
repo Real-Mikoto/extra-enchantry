@@ -100,6 +100,9 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
   - [1.5.0「五境领主」 (Lords of Five Realms)](#150五境领主-lords-of-five-realms)
   - [1.6.0「宣战与归一」 (Bannerfall & Convergence)](#160宣战与归一-bannerfall--convergence)
   - [1.7.0「谱系与传承」 (Lineage & Legacy)](#170谱系与传承-lineage--legacy)
+    - [1.7.1 物品贴图补全 (Art Completion)](#171-物品贴图补全-art-completion)
+    - [1.7.2 谱系树重构与纹饰贴图 (Advancement Tree & Trim)](#172-谱系树重构与纹饰贴图-advancement-tree--trim)
+    - [1.7.3 领主外观回退与浩劫调优 (Visual Rollback & Cataclysm Tuning)](#173-领主外观回退与浩劫调优-visual-rollback--cataclysm-tuning)
 - [通用技术模式](#通用技术模式)
 - [记录规范](#记录规范)
   - [附魔记录规范](#附魔记录规范)
@@ -1233,14 +1236,21 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 | 家族 | 原版附魔 |
 | --- | --- |
-| 守护 | 保护系全体、摔落保护、水下呼吸、水下速掘、潜行、灵魂疾行、迅捷潜行 |
-| 锋刃 | 锋利、亡灵/节肢杀手、击退、火焰附加、抢夺、横扫之刃 |
-| 灵魂 | 绑定诅咒（**消失诅咒不计等级**——诅咒非荣耀） |
-| 风暴 | 引雷、激流、忠诚、穿刺 |
+| 守护 | 保护系全体、摔落保护、潜行、灵魂疾行、迅捷潜行、荆棘 |
+| 锋刃 | 锋利、亡灵/节肢杀手、击退、抢夺、横扫之刃 |
+| 灵魂 | 绑定诅咒、**消失诅咒**（诅咒归灵魂——诅咒非荣耀，两诅咒同族） |
+| 风暴 | 引雷、激流、忠诚、穿刺、**致密、破甲**（重锤系） |
 | 自然 | 效率、精准采集、时运、耐久 |
-| 水渊 | 饵钓、海之眷顾 |
-| 风 | 力量、冲击、无限 |
-| 火焰 | 火矢、冰霜行者、经验修补 |
+| 水渊 | 饵钓、海之眷顾、**水下呼吸、水下速掘、深海探索者**（水下效果归水） |
+| 风 | 力量、冲击、无限、**风爆、突进、多重射击、快速装填、穿透**（风元素 + 弩系弹道位） |
+| 火焰 | 火矢、冰霜行者、经验修补、**火焰附加**（点燃语义直给） |
+| 无相（aether，2026-09 新建） | ——（原版附魔无归属；本模五境同辉，见下） |
+
+**无相（aether）族**：2026-09 归族整理时新建，成员为 `realms_unity`（五境同辉）。
+该附魔是八系共鸣阈值修正器，不属于任何单一元素，归入任一八系族都会在计件上偏袒该族——
+"无相不入八相"即其归属语义。aether 只做标签层归属（`family_aether`），**不进 `Family` 枚举、
+不参与共鸣计件/铭印/试炼**（`families.json` 总标签亦未纳入——总标签仅用于引导检测，
+五境同辉由宝匣合成、无附魔书形态）。
 
 **计件合并**：`Family` 枚举增 `vanillaTag`，扫描用 `family.matches(holder)`（本模 `family_xxx` ∪ `vanilla_lineage/xxx`）；图鉴树补 8 个原版谱系节点。**原版书只计件、不吃家族加成**（`effectiveLevel` 仍走单标签——设计上的克制）。
 
@@ -1252,6 +1262,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 手札 / 铭文 / 残页 / 卷轴 / 破限书 | 引导与进度授予 / 监守者掉落 | ✅ |
 | **家族铭印 ×8** | 试炼完成授予 + **谱系回响匣补齐**（1.7.0 新增） | ✅ |
 | **遗辉纹饰模板** | 心核 + 境材料 ×2（5 条分境配方，1.7.0 补齐） | ✅ |
+| **五境领主刷怪蛋 ×5** | 创造模式物品栏（1.7.3，管理/测试用：右键生成领主子类实例，`shouldBeSaved=false` 不持久化） | ✅ |
 
 **谱系回响匣**（`LineageEchoItem`）：铭文 + 钻石 ×2 合成；右键从**已 FULL 家族**中随机返还一枚铭印（30 s 冷却，无 FULL 家族不消耗）。收集向玩家的补齐渠道，不稀释试炼铭印的荣誉属性。
 
@@ -1260,6 +1271,45 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 - `/extraenchantry status`：一站式总览（主调 / 试炼 n-of-8 / 归一资格 + 共鸣总览页）
 - 归一重启提示：上线时若背包持有印记且不在冷却 → 动作栏「归一之辉被打断，印记仍在」（挑战状态本身不持久化，按打断计）
 - 总览表补齐 41–46（1.6.0 遗漏的记录规范项）
+
+#### 1.7.1 物品贴图补全 (Art Completion)
+
+1.7.0 新增的 16 件物品此前只有模型、没有贴图（游戏内显示紫黑 missing），本版一次性补齐：
+
+| 类别 | 贴图 |
+| --- | --- |
+| 战图腾 ×6 | `war_totem_overwarden` / `emberbone` / `tidal` / `hag` / `ender` / `invalid` |
+| 境徽记 ×6 | `realm_sigil_overwarden` / `emberbone` / `tidal` / `hag` / `ender` / `invalid` |
+| 归一与谱系 ×4 | `convergence_core`（归一心核）/ `convergence_mark`（归一印记）/ `lineage_echo`（谱系回响匣）/ `afterglow_trim`（遗辉纹饰模板） |
+
+#### 1.7.2 谱系树重构与纹饰贴图 (Advancement Tree & Trim)
+
+* **谱系进度由单链改为五分支树**：1.7.0 初版把 `lineage/` 写成一条线性链，任一节点未完成都会卡住后续；1.7.2 改为 root 下五条支线并行（共鸣 / 铭刻 / 试炼 / 归一 / 终局），各支线首节点只依赖 `lineage/root`，玩家可按任意顺序推进
+* **遗辉纹饰模板贴图**：补 `textures/trims/entity/humanoid/afterglow.png` 与 `humanoid_leggings/afterglow.png`（64×32 掩码），纹饰在盔甲与护腿上正确显示
+
+#### 1.7.3 领主外观回退与浩劫调优 (Visual Rollback & Cataclysm Tuning)
+
+五境领主外观方案回退 + 诸界浩劫实机问题修复 + 领主数值对齐。
+
+##### 领主外观回退
+
+* **回退内容**：1.5.0 起尝试的「王者之相」外观方案（渲染器贴图替换、模型层挂件、五组 Blockbench 挂件几何、领主专属皮肤贴图）经实机验证**效果不达预期**，本版全部移除，领主回归原版实体外观
+* **移除清单**：`client/render/` 全部渲染类、`EntityRendererMixin` / `LivingEntityTextureMixin`、`textures/entity/lord/` 贴图目录、领主 ID 同步槽（`LordMarkers` + `LivingEntityDataMixin` + `LordMarkAccess`）、`DESIGN/blockbench/` 挂件模型与生成脚本
+* **保留**：领主系统本体（遭遇战触发、觉醒变体、掉落、经验、刷怪蛋）完全不受影响；`OverwardenEntity implements EliteLord` 予以保留——它是服务端领主识别（断罪不斩杀 / 曳钩不可拉拽 / 经验结算）的依据，属功能项而非外观项
+
+##### 诸界浩劫修复
+
+| 项 | 结论 |
+| --- | --- |
+| 血条对齐原版劫掠 | 反编译确认 26.2 `Raid` 构造即固定 `BossBarColor.RED` + `PROGRESS`，玩家可见性走私有 `updatePlayers(ServerLevel)`（`raidEvent.getPlayers()` 与 `level.getPlayers(validPlayer())` 双向差集后增删）。已按同款实现 `syncBossBarViewers`（每秒同步 128 格内玩家），并关掉遮屏 / boss 音乐 / 世界迷雾 |
+| 闪电苦力怕密度 | 每 10 秒 10 只 → **3 只**（`CREEPERS_PER_BEAT`） |
+| 骑兵异常下马 | 根因见「踩坑记录」：僵尸马 / 骷髅马属 `#minecraft:dismounts_underwater` 标签，涉水即被 `LivingEntity#baseTick` 的 `stopRiding()` 甩下骑手。挑战坐骑经 `CHALLENGE_MOUNTS` 登记后由 `EntityMixin` 豁免该规则 |
+| 坐骑残留 | 挑战结束清扫改为**连同坐骑一并消散**（原设计保留坐骑作马铠战利品，实测一场后周边堆积 40+ 匹无主马）；陷阱混编队走 `TRAP_MOUNTS`（骑手阵亡即清其坐骑，若已有玩家骑乘则保留，避免把人甩下来） |
+
+##### 领主数值与刷怪蛋
+
+* **五境领主生命统一 300**（对齐原版凋零；原为守望者 1400 / 烬骨王 400 / 渊潮 600 / 巫后 320 / 末影 500），跨境战斗节奏一致化；血条沿用「64 格内玩家可见 + 实时 `health/maxHealth` + 死亡即移除」的原版 boss 逻辑
+* **五境领主刷怪蛋 ×5** 进创造模式物品栏（管理 / 测试用）：右键生成对应领主子类实例，`shouldBeSaved()=false` 不持久化
 
 ## 通用技术模式
 
@@ -1398,7 +1448,7 @@ public static final ResourceKey\<Enchantment> REACH =
 | DeathProtectionMixin         | `DeathProtection`         | 劫后余辉：不死图腾生效时读取图腾栈副本的附魔并触发余辉                                                                                                                                                                                                  |
 | PlayerMixin                  | `Player`                  | 锁血（余辉 / 余烬）期间取消 `actuallyHurt`（必须挂 Player，它不调 super）；誓约：死亡掉落前提取 / 掉落后回插带誓约物品；破限：`addItem` 检测破限附魔书授予隐藏进度并触发守护骑兵队                                                                                                              |
 | ServerPlayerMixin            | `ServerPlayer`            | 誓约：重生 restoreFrom 时搬运誓约物品（四件套连带经验与分数，部分誓约仅背包）；诸界浩劫：die HEAD 死亡瞬间结算失败（背包掉落前销毁破限书）                                                                                                                                             |
-| EntityMixin                  | `Entity`                  | 无踪 I：屏蔽脚步声与 STEP 震动（vibrationAndSoundEffectsFromBlock）+ 屏蔽落地 HIT_GROUND 震动（checkFallDamage 内 gameEvent Redirect）                                                                                                             |
+| EntityMixin                  | `Entity`                  | 无踪 I：屏蔽脚步声与 STEP 震动（vibrationAndSoundEffectsFromBlock）+ 屏蔽落地 HIT_GROUND 震动（checkFallDamage 内 gameEvent Redirect）；挑战坐骑豁免入水甩下骑手（`dismountsUnderwater` HEAD 返回 false，1.7.3）                                                                                                             |
 | SkeletonTrapGoalMixin        | `SkeletonTrapGoal`        | 僵尸马骑兵队：原版骷髅马陷阱触发时 HEAD 取消原版生成，替换为较弱的骷髅马 / 僵尸马混编骑兵队（保留视觉闪电）                                                                                                                                                                   |
 | InventoryMixin               | `Inventory`               | 破限书检测兜底：/give 直调 Inventory#add 不经 Player#addItem（反编译 GiveCommand 确认），补挂同一入口                                                                                                                                                  |
 | ItemCombinerMenuAccessor     | `ItemCombinerMenu`        | 访问器：暴露 protected 的 `player` 字段（声明于父类，AnvilMenuMixin 无法 @Shadow）供破限门禁取玩家                                                                                                                                                      |
@@ -1491,6 +1541,9 @@ public static final ResourceKey\<Enchantment> REACH =
 - **附魔 JSON 的 supported_items 与物品标签 / 附魔标签分层**（v1.6.0 踩坑）：`supported_items: #ns:xxx` 引用的是**物品标签**（tags/item/）——想组合多个原版物品标签需建中间物品标签（本模 `tags/item/witherblade_supported.json` 引 `#minecraft:enchantable/melee_weapon` + `mining`）；而 `tags/enchantment/` 下的家族标签 values 写**注册 ID**（`"extra-enchantry:xxx"`，非 `#` 引用——同命名空间 `#` 引用自身不解析且报 missing references）。两层标签同名不冲突但职责严格分置
 - **进度 JSON 必须带 requirements**（v1.6.0 踩坑）：`criteria` 之外缺 `requirements: [["triggered"]]` 会整文件解析失败（26.2 advancements 解析器强制）；parent 指向不存在的 ID 同样整树丢弃且只在日志报 `Couldn't load advancements`——usage 树的既有 parent 是 `collector/root`（无独立 usage/root），新增子节点时先 ls 既有目录再写 parent
 - **requirements 必须是「数组的数组」**（v1.7.0 踩坑）：写成 `"requirements": ["book"]`（少一层）报 `Not a json array: "book"; Missing: [book]`——每个 requirement 是一**组** criterion（组内 AND、组间 OR），单个也要 `[["book"]]`。脚本批量生成进度 JSON 时按 `[[key...]]` 模板输出
+- **马匹「入水甩下骑手」的判定是标签不是代码**（1.7.3，骑兵异常下马的根因）：`Entity#dismountsUnderwater()` 的唯一实现是 `this.is(EntityTypeTags.DISMOUNTS_UNDERWATER)`，而僵尸马 / 骷髅马都在该标签内；`LivingEntity#baseTick` 每 tick 检查 `isPassenger() && getVehicle() != null && getVehicle().dismountsUnderwater()` 就直接 `stopRiding()`。所以骑兵只要生成在水面、或被寻路带进水里，骑手会被瞬间甩下（表现为"骑士异常下马"）。要让特定坐骑免疫，只能 Mixin `Entity#dismountsUnderwater` 对目标实体返回 false —— 改 AI、改寻路都没用
+- **客户端 tick 线程直接操作服务端世界 = 崩溃**（1.7.3 踩坑）：在 `ClientTickEvents` 里调 `ServerLevel#addFreshEntity` / `Entity#discard` 之类的服务端 API，会和正在跑的服务端线程撞车——`ChunkMap#tick` 遍历实体追踪表时抛 `NullPointerException: Cannot invoke "Int2ObjectOpenHashMap$MapIterator.nextEntry" because "this.wrapped" is null`（fastutil map 被并发修改），客户端报 `Exception ticking world` 直接崩档。**正确做法：`server.execute(() -> {...})` 投递到服务端线程执行**，所有跨端写操作都要走这一层
+- **客户端实体永远是原版类实例**（1.7.3，领主识别方案的设计前提）：复用原版 `EntityType` 生成自定义子类实例（`new OverwardenEntity(...)` + `addFreshEntity`）时，服务端拿到的是自定义子类，但**客户端收到 spawn 包后按 `EntityType` 的 factory 创建实例**——得到的是原版 `Warden`。因此渲染期 `entity instanceof 自定义类` **恒为 false**，任何"客户端按自定义类型分派"的渲染逻辑都不成立。若确实需要客户端区分，唯一可靠通道是随 spawn 包自动同步的 `SynchedEntityData`（且 `defineId` 必须作为 Mixin 的 `@Unique` 静态字段定义，随目标类 `<clinit>` 分配 id，不能放在独立工具类里延迟分配，否则会抢走父类树的 id 而报 `Duplicate id value`）
 - **26.2 进度无 font 字段、requirements 不支持跨树**（v1.7.0 javap 验证）：`DisplayInfo` 仅 icon/title/description/background/type/三布尔——**进度标题不能用自定义字体**（1.7.0 设计里的 P2 谱系字体项取消）；`AdvancementRequirements = List<List<String>>` 只绑定本节点 criteria，「多个既有进度都完成」类终局节点（如「谱系圆满」）一律代码授予——在依赖进度的 award 成功分支调判定函数（见 `LineageManager.checkLineageComplete`）
 
 ## 记录规范

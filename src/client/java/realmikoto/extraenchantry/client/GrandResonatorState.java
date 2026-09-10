@@ -21,18 +21,44 @@ public final class GrandResonatorState {
 	private GrandResonatorState() {
 	}
 
-	/** 本地玩家是否拥有大共鸣者资格 */
+	/** 缓存有效期（毫秒）：热路径（hasFoil 每物品每帧）调用，1 秒缓存无感知 */
+	private static final long CACHE_MS = 1000;
+
+	private static boolean cached;
+	private static long cachedAt;
+
+	/** 本地玩家是否拥有大共鸣者资格（1 秒缓存；兼容新旧两棵树的节点） */
 	public static boolean isGrandResonator() {
+		long now = System.currentTimeMillis();
+		if (now - cachedAt < CACHE_MS) {
+			return cached;
+		}
+		cached = query();
+		cachedAt = now;
+		return cached;
+	}
+
+	private static boolean query() {
 		Minecraft minecraft = Minecraft.getInstance();
 		if (minecraft.player == null || minecraft.getConnection() == null) {
 			return false;
 		}
 		ClientAdvancements advancements = minecraft.getConnection().getAdvancements();
-		AdvancementHolder holder = advancements.get(ExtraEnchantry.id("family_trials/grand_resonator"));
-		if (holder == null) {
+		// 1.7.0 重定向后正式节点在 lineage 树；family_trials 节点保留兼容旧存档已完成的进度
+		AdvancementHolder holder = advancements.get(ExtraEnchantry.id("lineage/grand_resonator"));
+		if (holder != null) {
+			AdvancementProgress progress = ((ClientAdvancementsAccessor) advancements)
+					.extraenchantry$progress().get(holder);
+			if (progress != null && progress.isDone()) {
+				return true;
+			}
+		}
+		AdvancementHolder legacy = advancements.get(ExtraEnchantry.id("family_trials/grand_resonator"));
+		if (legacy == null) {
 			return false;
 		}
-		AdvancementProgress progress = ((ClientAdvancementsAccessor) advancements).extraenchantry$progress().get(holder);
-		return progress != null && progress.isDone();
+		AdvancementProgress legacyProgress = ((ClientAdvancementsAccessor) advancements)
+				.extraenchantry$progress().get(legacy);
+		return legacyProgress != null && legacyProgress.isDone();
 	}
 }
