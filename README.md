@@ -2,10 +2,48 @@
 
 Minecraft 26.2 (Fabric) 自定义附魔模组。
 
+## 功能介绍
+
+Extra Enchantry 为 Minecraft 26.2 (Fabric) 增加 **46 个自定义附魔**，并以「八元素家族」为骨架，串起共鸣、试炼、领主与终局四条成长线。全部内容数据驱动，可用数据包覆盖。
+
+* **46 附魔**：八系家族附魔 + 盾牌四附魔 + 配饰八附魔 + 狼铠三附魔 + 五境器魂附魔（编号 41–46）
+* **八家族共鸣**：装备（含主副手与配饰）累计附魔等级达阈值 → PARTIAL / FULL 档位，FULL 解锁家族被动；共鸣秘典查看八系进度
+* **主调铭刻与八试炼**：FULL 家族可铭刻唯一主调（强化该族被动）；每族一条试炼，完成授予对应家族铭印
+* **诸界浩劫（破限挑战）**：拾取破限附魔书触发四波挑战，清波收集破限残页，通关解锁破限附魔
+* **五境领主**：深暗 / 下界 / 海洋 / 沼泽 / 末地五境遭遇战——环境触发或战图腾主动宣战，觉醒变体强化掉落
+* **归一之战**：五觉醒徽记合成归一印记，五回合链式讨伐五境领主，终局掉落「五境同辉」（T0 无相附魔）
+* **谱系主线**：`lineage` 进度树串起共鸣 / 铭刻 / 试炼 / 归一 / 终局五条支线，终点「谱系圆满」
+* **配饰与宝石**：耳环 / 项链 / 戒指 / 手镯四槽位（集成原版背包）+ 八家族宝石被动 + 狼铠附魔
+* **叙事 lore**：来者手札 / 家族铭文 / 破限残页 / 编年史卷轴四类物品，随进度派发
+* **数据驱动**：`resonance/families/`、`elite_encounter/`、`lore/` 全部 JSON 可被数据包编辑，`/reload` 生效
+
 ## 环境
 
 - Minecraft 26.2 / Fabric Loader 0.19.3 / Fabric API 0.158.0+26.2 / Java 25
 - 26.2 的关键 API 变化：`ResourceLocation` → `Identifier`；镐 / 斧等工具由**数据驱动**（Tool 组件规则）；附魔全部走 JSON 数据包定义
+
+## 安装与使用
+
+### 安装
+
+* **前置**：Fabric Loader `0.19.3+`、Fabric API `0.158.0+26.2`、Java 25
+* **客户端 / 服务端**：均需安装（附魔结算、进度与叙事物品派发在服务端；渲染与 HUD 在客户端）
+* **步骤**：安装 Fabric Loader → 将 `fabric-api` 与本 mod 的 jar 放入 `.minecraft/mods/` → 启动
+
+### 使用
+
+* **获取附魔**：按[附魔总览](#附魔总览)表，经附魔台 / 铁砧 / 图书管理员 / 宝箱 / 钓鱼 / 领主掉落获得
+* **共鸣秘典**：紫水晶碎片 + 书 + 青金石合成；右键看总览，潜行右键循环切换「总览 → 家族详情 → 试炼」
+* **命令**：`/extraenchantry status`（一站式总览）、`/extraenchantry resonance [player]`（八系共鸣）、`/extraenchantry attune`（铭刻主调）、`/extraenchantry debug resonance <player>`（权限 2）
+* **叙事物品**：来者手札首次进入世界自动入包，右键按进度翻页；家族铭文 / 破限残页 / 编年史卷轴随进度派发
+* **静默开关**：数据包 `lore/onboarding.json` 的 `silence_onboarding: true` 关闭全部 chat 提示（物品照发）
+
+### 数据包自定义
+
+* `data/extra-enchantry/lore/`：家族铭文 / 破限残页 / 浩劫幕格言 / 首刻格言 / 来者手札页
+* `data/extra-enchantry/resonance/families/`：八系共鸣阈值与被动数值
+* `data/extra-enchantry/elite_encounter/`：五境遭遇规则
+* 单文件解析失败仅该条目回退内置默认；`/reload` 后 1 秒内全量重算
 
 
 ## 附魔总览
@@ -60,6 +98,8 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 46 | 五境同辉 Realms in Unity   | I   | 任意护甲                               | 归一之战最终回合 100%（T0 传说，不归八系不计计件）                       |
 ## 目录
 
+- [功能介绍](#功能介绍)
+- [安装与使用](#安装与使用)
 - [附魔](#附魔)
   - [1. 凋零保护 (Wither Protection)](#1-凋零保护-wither-protection)
   - [2. 炽焰行者 (Blazing Walker)](#2-炽焰行者-blazing-walker)
@@ -104,6 +144,8 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
     - [1.7.2 谱系树重构与纹饰贴图 (Advancement Tree & Trim)](#172-谱系树重构与纹饰贴图-advancement-tree--trim)
     - [1.7.3 领主外观回退与浩劫调优 (Visual Rollback & Cataclysm Tuning)](#173-领主外观回退与浩劫调优-visual-rollback--cataclysm-tuning)
     - [1.7.4 全量代码审计修复 (Code Audit & Hardening)](#174-全量代码审计修复-code-audit--hardening)
+    - [1.7.5「铭文纪元 · 定稿」 (Lore Canon & Narrative Polish)](#175铭文纪元--定稿-lore-canon--narrative-polish)
+- [更新日志](#更新日志)
 - [通用技术模式](#通用技术模式)
 - [记录规范](#记录规范)
   - [附魔记录规范](#附魔记录规范)
@@ -571,7 +613,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 - 武器取 `source.getWeaponItem()`（同汲取 / 蚀命）；阈值判定用 `getHealth() + getAbsorptionAmount()`（吸收心不绕过斩杀）
 - 斩杀实现为把伤害放大到 `maxHealth × 4 + 100`（足以穿透吸收与护甲减免）；冷却按攻击者 UUID 记录毫秒时间戳（Map）
 - 防滚雪球：`CleaveManager.isCleaving()` 期间不触发（避免一次挥砍连环斩杀）
-- **boss 判定**：26.2 无统一的 `isBoss()`、也无 boss 实体标签（`EntityTypeTags` 只有 RAIDERS/UNDEAD/ARTHROPOD/SENSITIVE_TO\_*），故按带 boss 血条的三个原版 boss 显式 `instanceof`（`ExtraEnchantry.isBossLike`：EnderDragon/WitherBoss/Warden）
+- **boss 判定**：26.2 无统一的 `isBoss()`、也无 boss 实体标签（`EntityTypeTags` 只有 RAIDERS/UNDEAD/ARTHROPOD/SENSITIVE_TO_*），故按带 boss 血条的三个原版 boss 显式 `instanceof`（`ExtraEnchantry.isBossLike`：EnderDragon/WitherBoss/Warden）
 
 **与壁垒的克制关系**：斩杀仍会经过壁垒在 `getDamageAfterMagicAbsorb` 的上限钳制 —— 即壁垒可以挡下断罪（有意的攻防克制，非 bug）。
 
@@ -801,7 +843,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 受到的**火焰伤害**（`#minecraft:is_fire`）**-10%/级**（多件线性叠加）。
 
-#### 37. 潮镯 Tide Bracelet（II，手镯，水渊族）
+#### 37. 潮镯 Tide Bracelet（II，手镯，渊族）
 
 游泳效率 **+8%/级**（`WATER_MOVEMENT_EFFICIENCY` 瞬态修改器）。
 
@@ -987,7 +1029,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 
 ##### 世界观「铭文纪元」编年
 
-- 八家族首次获得叙事身份：灵魂「生者暂居，死者长眠」/ 风暴「天不仁而怒」/ 锋刃「一刃既出，万念归尘」/ 自然「根深者不惧风」/ 水渊「行于无形」/ 风「无翅亦可凌云」/ 守护「盾碎之时，魂已无伤」/ 火焰「烬中余温，未灭之心」。
+- 八家族首次获得叙事身份：灵魂「生者暂居，死者长眠」/ 风暴「天不仁而怒」/ 锋刃「一刃既出，万念归尘」/ 自然「根深者不惧风」/ 渊「静水流深，渊息不竭」/ 风「无翅亦可凌云」/ 守护「盾碎之时，魂已无伤」/ 火焰「烬中余温，未灭之心」（格言以落地 `family_inscriptions/*.json` 为准）。
 - 浩劫四幕对应四波挑战：深渊苏醒（第 1 波）→ 风暴失序（第 2 波）→ 火焰焚烧（第 3 波）→ 魂灵迷航（第 4 波）；4 张破限残页拼合「极限之器」铭刻图样——揭示破限书需先历浩劫方能启用的叙事原因。
 - 「臻藏」补完叙事身份：被铭文承认的标志（金渐变字体 + 光晕即铭文回响重亮，1.2.0 既有视觉）。
 
@@ -1119,6 +1161,18 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 > 「环境触发 → 三段式生成 → 强化怪物 → 高回报」体系化（设计稿 `DESIGN/1.5.0-design.md`）。
 >   
 > 五境触发机制互不相同：愤怒持续 / 状态累积 / 浸泡或激光 / 夜晚双路径 / 物品使用计数。
+>
+> **叙事定位（回响纪元）**：五境领主并非八族化身，而是浩劫残念在五处地脉的凝结——封印后沉寂纪元的漫长岁月里，未竟之念循着「极限之器」碎片的裂痕外溢，附着于深暗 / 下界 / 海洋 / 沼泽 / 末地五处脉络；风暴、风、火焰三族之念已随铭文彻底散尽，故仅五境有主。碎片重新共鸣之日，即是领主苏醒之时。
+
+#### 五境领主身世（ realm lore ）
+
+| 领主 | 身世 |
+|------|------|
+| 守望者 Overwarden | 初民纪元守护家的哨戒之魂，八柱倾颓时被留在最深的黑暗里，把「警戒」执念成了「守望」，在幽匿深处等待换岗的同伴，等成了深渊的形状 |
+| 烬骨王 Emberbone King | 初民锋刃家的匠魂，殁于浩劫第三幕的下界火海，锻打之怨凝骨为烬——火焚其身，刃志未折，故归锋刃族 |
+| 渊潮之主 Tidal Sovereign | 浩劫第一幕被搅浑的渊流之念，渊家退入光到不了的地方后，留下看守潮汐的低语，年深日久凝成巨潮之形 |
+| 巫后 Hag Sovereign | 自然家的药圃守护者，浩劫中亲眼见同族铭文沉入土壤，把「复苏万灵」的执念扭曲成了「以毒攻毒」的巫术 |
+| 末影领主 Ender Lord | 浩劫第四幕「魂灵迷航」中迷航最深的亡魂，在黑曜之柱间与另一道龙影结伴而行，最终自己也成了虚空的一部分 |
 
 #### 统一框架
 
@@ -1194,7 +1248,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | -- | -------------------- | --- | ---- | ---- | ------- |
 | 41 | 明目 Clearsight        | III | 头盔   | 守望者  | 守护      |
 | 42 | 枯刃 Witherblade       | II  | 近战武器 | 烬骨王  | 锋刃      |
-| 43 | 潮涌 Tidesurge         | III | 胸甲   | 渊潮之主 | 水渊      |
+| 43 | 潮涌 Tidesurge         | III | 胸甲   | 渊潮之主 | 渊        |
 | 44 | 辟邪 Hexbreak          | III | 护腿   | 巫后   | 自然      |
 | 45 | 虚闪 Voidblink         | II  | 胸甲   | 末影领主 | 灵魂      |
 | 46 | 五境同辉 Realms in Unity | I   | 任意护甲 | 归一之战 | T0（不计件） |
@@ -1242,7 +1296,7 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 | 灵魂 | 绑定诅咒、**消失诅咒**（诅咒归灵魂——诅咒非荣耀，两诅咒同族） |
 | 风暴 | 引雷、激流、忠诚、穿刺、**致密、破甲**（重锤系） |
 | 自然 | 效率、精准采集、时运、耐久 |
-| 水渊 | 饵钓、海之眷顾、**水下呼吸、水下速掘、深海探索者**（水下效果归水） |
+| 渊 | 饵钓、海之眷顾、**水下呼吸、水下速掘、深海探索者**（水下效果归渊） |
 | 风 | 力量、冲击、无限、**风爆、突进、多重射击、快速装填、穿透**（风元素 + 弩系弹道位） |
 | 火焰 | 火矢、冰霜行者、经验修补、**火焰附加**（点燃语义直给） |
 | 无相（aether，2026-09 新建） | ——（原版附魔无归属；本模五境同辉，见下） |
@@ -1360,6 +1414,48 @@ Minecraft 26.2 (Fabric) 自定义附魔模组。
 * **冷却反馈**：藏锋就绪动作栏提示（200 tick 节流）；壁垒反馈阈值加「减免 ≥20%」比例分支——VII+ 级（上限 ≤6 HP）的常驻小额减免也能被感知。
 * **HUD 一致性**：活力 HUD 改从服务端同步的 `MAX_HEALTH` 属性反推加成——旧实现共鸣 +1 级只在服务端生效，客户端心形行数与 `×n/N` 分母系统性偏小。
 
+#### 1.7.5「铭文纪元 · 定稿」 (Lore Canon & Narrative Polish)
+
+叙事一致性与文档完善版本：零附魔 / 零机制改动，把散落的命名与设定收敛为单一权威口径（`DESIGN/LORE_CANON.md`），并补齐 README 的功能介绍、安装使用与更新日志。
+
+##### 叙事修订（10 项）
+
+* **第八族定名「渊」**：canonical 中文名统一为「渊」（英文 Abyss），替换旧混称「水渊 / 水家族 / 深渊行于无形」；`family_id` / `Family.WATER` / 标签等技术标识保持 `water` 不变。涉及家族铭文《渊铭文》、`family.water`、试炼名「渊 · 深潜」、collector 成就、宝石 tooltip 与 README 全部「水渊」表述
+* **四纪元桥接**：来者手札三页与编年史卷轴写入「铭文纪元 → 封印纪元 → 沉寂纪元 → 回响纪元」因果链——碎片重新共鸣（因）→ 封存地脉苏醒（果）→ 五境领主现世（果）
+* **八柱自洽**：守护铭文与编年史改为「四主柱当场崩断、四辅柱随沉寂纪元风化」，消解「八柱倾颓」与「四幕浩劫」的数字矛盾
+* **五境领主身世**：README 新增叙事定位（领主 = 浩劫残念凝结，非八族化身；风暴 / 风 / 火焰三族之念已散尽，故仅五境有主）+ 五境身世表；五境 omen 进度描述扩写（中英双语）
+* **极限之器兑现**：「谱系圆满」系统消息扩写为「八印归位、五境同辉、碎裂图样重新咬合、极限之器回响认主」，收束「重铸极限之器」的核心承诺
+* **无相叙事**：编年史写入「八相之争，止于无相」；「五境同辉」附魔更名「五境同辉·无相 / Realms in Unity · Aether」
+* **双龙伏笔**：破限残页·肆补「第一道龙影陨落于封印之夜；另一道被封入沉寂，至今未醒」，并回收至末影领主身世
+* **八族具名先祖**：八族铭文各加先祖与家训（引魂·烛阴 / 霄聋 / 烬锋 / 禾汐 / 汐 / 青隼 / 磐 / 烛骸）
+* **跨族厘清**：灵魂铭文明示余烬 / 劫后余辉「本属火族、灵魂家视为自火中归来的证物」；锋刃铭文明示冲阵「其位仍在守护谱系」
+* **设定圣经**：新建 `DESIGN/LORE_CANON.md`（四纪元 / 八族 / 领主 / 极限之器 / 无相 / 跨族借用全表 + 变更记录）；`DESIGN/1.3.1-design.md` 顶部加「口径已被取代」提示
+
+##### 文档与工程
+
+* **README 补齐**：新增「功能介绍」「安装与使用」「更新日志」三个 H2 章节，目录同步
+* **版本号**：`gradle.properties` `1.7.4 → 1.7.5`；`fabric.mod.json` 描述更新为 46 附魔 + 五境领主 / 归一之战 / 配饰体系
+* **数据一致性**：全部 lore JSON 与 `LoreLoader` 内置默认逐字一致；zh / en 语言键数一致（493 = 493）；`gradlew test` 全绿
+
+## 更新日志
+
+完整版本主题（含设计动机与实现细节）见[版本主题](#版本主题)。
+
+| 版本    | 主题          | 摘要                                       |
+| ----- | ----------- | ---------------------------------------- |
+| 1.7.5 | 铭文纪元 · 定稿   | 叙事一致性收敛（八族定名「渊」/ 四纪元 / 领主身世 / 无相）+ README 补齐 + 设定圣经 |
+| 1.7.4 | 全量代码审计修复    | 30 项修复（6 P0 / 14 P1 / 6 P2 / 4 UX）        |
+| 1.7.3 | 领主外观回退与浩劫调优 | 领主回归原版外观；浩劫修复；五境生命统一 300                 |
+| 1.7.2 | 谱系树重构与纹饰贴图  | lineage 由单链改五分支树；遗辉纹饰掩码                  |
+| 1.7.1 | 物品贴图补全      | 16 件物品贴图（图腾 / 徽记 / 心核 / 印记 / 回响匣 / 纹饰）    |
+| 1.7.0 | 谱系与传承       | 谱系主线树 / 原版附魔归族 / 获取闭环 / status 命令        |
+| 1.6.0 | 宣战与归一       | 战图腾 / 器魂附魔 41–46 / 归一之战                  |
+| 1.5.0 | 五境领主        | 五境遭遇框架 + 五位境主                            |
+| 1.4.0 | 环佩与獠牙       | 配饰栏 / 宝石 / 狼铠附魔 / 火焰家族防火                 |
+| 1.3.0 | 铭刻与试炼       | 共鸣秘典 / 主调铭刻 / 八试炼 / 家族铭印                 |
+| 1.2.0 | 共鸣与臻藏       | 家族共鸣 / 臻藏奖励 / 隐秘挑战                       |
+| 1.0.0 | 诸界浩劫        | 破限书守护挑战（四波）                              |
+
 ## 通用技术模式
 
 ### 项目结构
@@ -1443,7 +1539,7 @@ public static final ResourceKey\<Enchantment> REACH =
 所有粒子/音效必须经过 `FxHelper.java`，不在业务代码里裸写 `sendParticles`/`playSound`：
 
 - 封装：`burst`（实体中心爆发）/ `burstAt`（定点）/ `ring`（环）/ `trail`（两点间排点）/ `play`（音效）/ `pitchForLevel`（等级变调）/ `throttle`（按 UUID+key 节流）
-- `play` 有 `SoundEvent` 与 `Holder<SoundEvent>` 两个重载——26.2 的 `SoundEvents` 常量两种类型并存（如 NOTE_BLOCK\_*、SHIELD_BLOCK、SOUL_ESCAPE 是 Holder），调用前 `javap` 确认字段类型
+- `play` 有 `SoundEvent` 与 `Holder<SoundEvent>` 两个重载——26.2 的 `SoundEvents` 常量两种类型并存（如 NOTE_BLOCK_*、SHIELD_BLOCK、SOUL_ESCAPE 是 Holder），调用前 `javap` 确认字段类型
 - **分级约定（详见 DESIGN_aesthetics.md）**：L1 触发确认（每次生效都给，短促）/ L2 持续氛围（必须 `throttle`，10–20 tick）/ L3 高光时刻（免死、处决等稀有事件才允许大场面）。常态生效的效果（如触及）只给粒子不配音效，防吵
 - 客户端独占反馈（如空跃振翅音）放 client source set 的 Mixin，服务端不可见的实体状态别往服务端发
 - 新增纹理 / 效果图标 / 专属音效走「美术/音效资源生成」脚本化管线（见下节），产物目录镜像 `src/main/resources/assets/extra-enchantry/`，复制即用
@@ -1560,7 +1656,7 @@ public static final ResourceKey\<Enchantment> REACH =
 - **烟花推进（御风的实现依据）**：`FireworkRocketEntity#tick` 中 `isAttachedToEntity() && attachedToEntity.isFallFlying()` 分支对滑翔者做朝视线方向的插值加速（常量 1.5/0.1/0.5）后调 `LivingEntity#setDeltaMovement`；Redirect 该调用后用 “新速度 - 旧速度” 取出推进增量再按倍率写回，可不动原版公式（旧速度在调用时尚未写入，`getDeltaMovement()` 读到的就是它）
 - **索敌距离的唯一系数是** `LivingEntity#getVisibilityPercent(Entity)`（原版潜行 ×0.8、隐身按护甲覆盖率再乘），`TargetingConditions` 用它缩放 follow range—— 改 “怪物更难发现你” 类效果在 RETURN 乘系数即可，无需改 Mob 索敌逻辑
 - **自定义免死效果挂在** `checkTotemDeathProtection` **的 RETURN**（而非 HEAD）：`hurtServer` 的判定是 `if (isDeadOrDying()) { if (!checkTotemDeathProtection(source)) die(source); }`，返回 true 即跳过死亡；选 RETURN + `!cir.getReturnValueZ()` 可天然让**不死图腾优先**，图腾没救命才轮到自定义免死（余烬）。锁血则复用 `actuallyHurt` HEAD 取消（玩家挂 Player、非玩家挂 LivingEntity，两处都要）；锁血时长可用 “效果剩余时长> 总时长 - 窗口” 判定，无需独立计时器
-- **26.2 没有统一的 boss 判定**：`Entity`/`LivingEntity`/`Mob` 均无 `isBoss()`，`EntityTypeTags` 也只有 RAIDERS/UNDEAD/ARTHROPOD/SENSITIVE_TO\_*，没有 boss 标签 —— 需要区分 boss 时只能显式 `instanceof`（EnderDragon / WitherBoss / Warden）
+- **26.2 没有统一的 boss 判定**：`Entity`/`LivingEntity`/`Mob` 均无 `isBoss()`，`EntityTypeTags` 也只有 RAIDERS/UNDEAD/ARTHROPOD/SENSITIVE_TO_*，没有 boss 标签 —— 需要区分 boss 时只能显式 `instanceof`（EnderDragon / WitherBoss / Warden）
 - **铁砧限制附魔等级上限的可行做法**：附魔本身的 `max_level` 不能条件化（静态数据），故把 `max_level` 写到真实上限（如疾风 3），再用三路封锁限制获取：cost 曲线（附魔台 / 钓鱼）+ `enchant_randomly` 钳制（宝箱书 / 交易）+ `AnvilMenu.createResult` TAIL 检查产出、不满足条件时用 `ItemEnchantments.Mutable` 降级并 `stack.set(DataComponents.ENCHANTMENTS, ...)` 重写（产出槽持的是同一 ItemStack 实例，原地改组件即生效）
 - **限级 cost 曲线不能只盯附魔台的 30**：加入 `non_treasure` 的附魔会经 `#non_treasure` 流入 `on_random_loot` 与 `tradeable`（反编译两个原版标签确认都引用 `#non_treasure`），而原版宝箱装备的 `enchant_with_levels` 给到 **cost 50**（远古城市 / 末地城 30-50）—— 所以 “最高只能随机到 N 级” 的阈值必须按 50 算（疾风 III 级 min_cost 定在 55），否则高级附魔会从宝箱装备里泄出
 - **26.2 箭矢分包**：`AbstractArrow` 已从 `projectile` 移至 `projectile.arrow` 分包（`ThrownTrident`/`Arrow`/`SpectralArrow` 同移）；其 `onHitEntity`/`onHitBlock`/`tickDespawn`/`getPickupItem`（protected）结构不变，`pickup` 为 public 字段（`AbstractArrow$Pickup`：DISALLOWED/ALLOWED/CREATIVE_ONLY）
