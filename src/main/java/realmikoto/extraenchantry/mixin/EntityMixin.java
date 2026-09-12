@@ -83,7 +83,7 @@ public abstract class EntityMixin {
 	@Inject(method = "getMaxAirSupply", at = @At("HEAD"), cancellable = true)
 	private void extraenchantry$tideheartMaxAir(CallbackInfoReturnable<Integer> cir) {
 		if ((Object) this instanceof LivingEntity living
-				&& living instanceof realmikoto.extraenchantry.mixin.LivingEntityMixin.EquipmentReady ready
+				&& living instanceof realmikoto.extraenchantry.EquipmentReady ready
 				&& ready.extraenchantry$isEquipmentReady()) {
 			// 性能修复：改用构造 TAIL 置位的实例标记——旧实现靠 catch NullPointerException
 			// 兜底，每个实体构造都抛一次带 fillInStackTrace 的异常，世界生成期每秒数千次。

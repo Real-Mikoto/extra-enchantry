@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.voidblink"
+    "translate": "enchantment.extra-enchantry.voidblink",
+    "color": "light_purple",
+    "italic": false
   },
   "effects": {},
   "max_cost": {

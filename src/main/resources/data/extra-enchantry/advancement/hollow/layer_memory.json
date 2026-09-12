@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:bone_block"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.layer_memory.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.layer_memory.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "extra-enchantry:hollow/layer_echo",
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ]
+}

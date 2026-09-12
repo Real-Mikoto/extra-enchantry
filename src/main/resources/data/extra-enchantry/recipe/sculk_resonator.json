@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " S ",
+    "SCS",
+    " A "
+  ],
+  "key": {
+    "S": "minecraft:sculk",
+    "C": "extra-enchantry:echo_crystal",
+    "A": "minecraft:amethyst_shard"
+  },
+  "result": {
+    "id": "extra-enchantry:sculk_resonator",
+    "count": 1
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "extra-enchantry:block/resonance_pillar_side",
+    "end": "extra-enchantry:block/resonance_pillar_top"
+  }
+}

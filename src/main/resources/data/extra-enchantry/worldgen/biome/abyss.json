@@ -1,0 +1,84 @@
+{
+  "attributes": {
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "block_search_extent": 8,
+        "offset": 2.0,
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000
+      }
+    },
+    "minecraft:audio/background_music": {
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "replace_current_music": true,
+        "sound": "minecraft:ambient.cave"
+      }
+    },
+    "minecraft:visual/fog_color": "#020408",
+    "minecraft:visual/sky_color": "#000000",
+    "minecraft:visual/water_fog_color": "#06141e"
+  },
+  "carvers": [],
+  "downfall": 0.0,
+  "effects": {
+    "water_color": "#0b2536"
+  },
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "minecraft:ore_diamond",
+      "minecraft:ore_diamond_medium",
+      "minecraft:ore_diamond_large",
+      "minecraft:ore_diamond_buried",
+      "minecraft:ore_redstone",
+      "minecraft:ore_redstone_lower",
+      "minecraft:ore_gold_lower",
+      "minecraft:ore_lapis_buried",
+      "minecraft:ore_iron_upper",
+      "minecraft:ore_iron_middle",
+      "minecraft:ore_iron_small"
+    ],
+    [
+      "extra-enchantry:sculk_spire",
+      "extra-enchantry:echo_lake",
+      "extra-enchantry:breathing_chasm",
+      "extra-enchantry:echo_crystal_ore"
+    ],
+    [],
+    [
+      "extra-enchantry:silence_stone_patch",
+      "extra-enchantry:aether_dust_ore",
+      "extra-enchantry:folding_stone_patch",
+      "extra-enchantry:memory_gate",
+      "extra-enchantry:echo_forest",
+      "extra-enchantry:echo_liquid_lake",
+      "extra-enchantry:tidal_lake",
+      "extra-enchantry:aether_platform"
+    ],
+    [
+      "minecraft:sculk_patch_ancient_city",
+      "extra-enchantry:bone_spire",
+      "extra-enchantry:inverted_city"
+    ],
+    []
+  ],
+  "has_precipitation": false,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [],
+    "misc": [],
+    "monster": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": 0.5
+}

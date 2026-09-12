@@ -1,0 +1,24 @@
+{
+  "anvil_cost": 10,
+  "description": {
+    "translate": "enchantment.extra-enchantry.aetheric_inscription",
+    "color": "dark_purple",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 75,
+    "per_level_above_first": 0
+  },
+  "max_level": 1,
+  "min_cost": {
+    "base": 30,
+    "per_level_above_first": 0
+  },
+  "primary_items": "#minecraft:enchantable/armor",
+  "slots": [
+    "any"
+  ],
+  "supported_items": "#minecraft:enchantable/armor",
+  "weight": 1
+}

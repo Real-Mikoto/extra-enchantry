@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "S S",
+    "SSS",
+    " S "
+  ],
+  "key": {
+    "S": "extra-enchantry:sculk_silk"
+  },
+  "result": {
+    "id": "extra-enchantry:hush_cloak",
+    "count": 1
+  }
+}

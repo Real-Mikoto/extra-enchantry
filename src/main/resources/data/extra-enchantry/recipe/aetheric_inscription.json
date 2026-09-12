@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "MDM",
+    "DUB",
+    "MDM"
+  ],
+  "key": {
+    "M": "extra-enchantry:memory_dust",
+    "D": "extra-enchantry:abyssal_heart",
+    "U": "minecraft:enchanted_book",
+    "B": "extra-enchantry:aether_dust"
+  },
+  "result": {
+    "id": "minecraft:enchanted_book",
+    "count": 1,
+    "components": {
+      "minecraft:stored_enchantments": {
+        "extra-enchantry:aetheric_inscription": 1
+      }
+    }
+  }
+}

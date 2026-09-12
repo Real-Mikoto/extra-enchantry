@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.plume_ring"
+    "translate": "enchantment.extra-enchantry.plume_ring",
+    "color": "white",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:accessory/ring",
   "primary_items": "#extra-enchantry:accessory/ring",

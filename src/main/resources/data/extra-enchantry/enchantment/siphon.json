@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.siphon"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 65,
-		"per_level_above_first": 15
-	},
-	"max_level": 3,
-	"min_cost": {
-		"base": 15,
-		"per_level_above_first": 10
-	},
-	"primary_items": "#extra-enchantry:siphon_supported",
-	"slots": [
-		"mainhand"
-	],
-	"supported_items": "#extra-enchantry:siphon_supported",
-	"weight": 1
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.siphon",
+    "color": "green",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 65,
+    "per_level_above_first": 15
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 10
+  },
+  "primary_items": "#extra-enchantry:siphon_supported",
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#extra-enchantry:siphon_supported",
+  "weight": 1
 }

@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.sharp_fang"
+    "translate": "enchantment.extra-enchantry.sharp_fang",
+    "color": "gray",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:wolf_armor_supported",
   "primary_items": "#extra-enchantry:wolf_armor_supported",

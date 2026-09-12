@@ -44,6 +44,9 @@ public class ChronicleScrollItem extends Item {
 				out.append(Component.translatable("chronicle.extra-enchantry.line" + i)
 						.withStyle(ChatFormatting.GRAY)).append("\n");
 			}
+			// 1.8.0 §3.2：封印旋律的线索（八柱敲击顺序）——藏在编年史的第十五行
+			out.append(Component.translatable("chronicle.extra-enchantry.line15")
+					.withStyle(ChatFormatting.DARK_PURPLE)).append("\n");
 			out.append(Component.translatable("chronicle.extra-enchantry.footer")
 					.withStyle(ChatFormatting.DARK_GRAY));
 			serverPlayer.sendSystemMessage(out);

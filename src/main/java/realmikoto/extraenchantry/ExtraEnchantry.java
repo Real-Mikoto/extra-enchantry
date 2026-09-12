@@ -301,6 +301,79 @@ public class ExtraEnchantry implements ModInitializer {
 	public static final DataComponentType<Boolean> LIMIT_BREAK_SOURCE =
 			DataComponentType.<Boolean>builder().persistent(com.mojang.serialization.Codec.BOOL).build();
 
+	// ============ 1.8.0「幽渊 · 门」 ============
+
+	/** 深渊祭钥：远古城市仪式物品（消耗回响碎片 → 尖啸倒计时 → 开门传送） */
+	public static final Item ABYSS_GATE_KEY = new AbyssGateItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("abyss_gate_key")))
+					.stacksTo(1).rarity(Rarity.EPIC));
+
+	// ============ 1.8.1「声」：幽渊附魔键（JSON 于 1.8.3「藏」落地） ============
+
+	/** 静默 Stillness（靴子）：移动不产生声纹；失去回声视觉 */
+	public static final ResourceKey<Enchantment> STILLNESS =
+			ResourceKey.create(Registries.ENCHANTMENT, id("stillness"));
+
+	/** 回声 Echo（胸甲）：受击以声纹标记攻击者，使其显形并增伤 */
+	public static final ResourceKey<Enchantment> ECHO =
+			ResourceKey.create(Registries.ENCHANTMENT, id("echo"));
+
+	/** 共鸣 Resonance（武器）：命中产生声纹，目标显形并短暂失聪 */
+	public static final ResourceKey<Enchantment> RESONANCE_ENCH =
+			ResourceKey.create(Registries.ENCHANTMENT, id("resonance_ench"));
+
+	/** 深潜 Deepdive（头盔）：深息大幅延长；无光微光视野 */
+	public static final ResourceKey<Enchantment> DEEPDIVE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("deepdive"));
+
+	/** 溯忆 Reverie（任意护甲）：死亡留下记忆残影，原地拾回部分经验 */
+	public static final ResourceKey<Enchantment> REVERIE =
+			ResourceKey.create(Registries.ENCHANTMENT, id("reverie"));
+
+	/** 无相之铭 Aetheric Inscription（任意护甲，T0）：声纹完全隐匿 */
+	public static final ResourceKey<Enchantment> AETHERIC_INSCRIPTION =
+			ResourceKey.create(Registries.ENCHANTMENT, id("aetheric_inscription"));
+
+	// ============ 1.8.1「声」物品 ============
+
+	/** 回响灯：主动发声照明（大声纹 + 强光，高风险侦察） */
+	public static final Item ECHO_LANTERN = new EchoLanternItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("echo_lantern")))
+					.stacksTo(1).rarity(Rarity.RARE));
+
+	/** 幽匿共鸣器：中声纹扫描环境幽匿分布（低噪声测绘） */
+	public static final Item SCULK_RESONATOR = new SculkResonatorItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("sculk_resonator")))
+					.stacksTo(1).rarity(Rarity.UNCOMMON));
+
+	// ============ 1.8.2「群」刷怪蛋（管理/测试用，复用 1.7.3 的 ENTITY_DATA 组件机制） ============
+
+	/** 回响幽灵刷怪蛋 */
+	public static final Item ECHO_WRAITH_SPAWN_EGG = LordSpawnEggs.simpleEgg("echo_wraith_spawn_egg", () -> AbyssEntities.ECHO_WRAITH);
+	/** 渊息者刷怪蛋 */
+	public static final Item TIDEBORN_SPAWN_EGG = LordSpawnEggs.simpleEgg("tideborn_spawn_egg", () -> AbyssEntities.TIDEBORN);
+	/** 声纹兽刷怪蛋 */
+	public static final Item RESONANCE_BEAST_SPAWN_EGG = LordSpawnEggs.simpleEgg("resonance_beast_spawn_egg", () -> AbyssEntities.RESONANCE_BEAST);
+	/** 渊心守望者刷怪蛋（1.8.5：管理/测试入口） */
+	public static final Item HEART_WARDEN_SPAWN_EGG = LordSpawnEggs.simpleEgg("heart_warden_spawn_egg", () -> AbyssEntities.HEART_WARDEN);
+	/** 幽匿幼体刷怪蛋（1.8.2 补齐） */
+	public static final Item SCULK_LARVA_SPAWN_EGG = LordSpawnEggs.simpleEgg("sculk_larva_spawn_egg", () -> AbyssEntities.SCULK_LARVA);
+	/** 记忆残影刷怪蛋（1.8.4 补齐） */
+	public static final Item MEMORY_SHADE_SPAWN_EGG = LordSpawnEggs.simpleEgg("memory_shade_spawn_egg", () -> AbyssEntities.MEMORY_SHADE);
+	/** 无声者刷怪蛋（1.8.2 补齐） */
+	public static final Item SOUNDLESS_SPAWN_EGG = LordSpawnEggs.simpleEgg("soundless_spawn_egg", () -> AbyssEntities.SOUNDLESS);
+
+	// ============ 1.8.4「忆」 ============
+
+	/** 记忆残片：可玩化封印纪元闪回（记忆之尘×4 + 回响碎片×1 合成） */
+	public static final Item MEMORY_SHARD = new MemoryShardItem(
+			new Item.Properties()
+					.setId(ResourceKey.create(Registries.ITEM, id("memory_shard")))
+					.stacksTo(1).rarity(Rarity.RARE));
+
 	// ============ 1.3.0「铭刻与试炼」 ============
 
 	/** 共鸣秘典（八系共鸣状态入口：总览/家族详情/试炼三页，潜行右键切页）
@@ -382,6 +455,7 @@ public class ExtraEnchantry implements ModInitializer {
 		LoreTriggerManager.register();
 		AttunementManager.register();
 		AccessoryAttachments.register();
+		AbyssTuning.register();
 
 		ExtraEnchantryCreativeTab.register();
 		ExtraEnchantryEffects.register();
@@ -414,6 +488,137 @@ public class ExtraEnchantry implements ModInitializer {
 		// 环佩物品与组件（16 配饰 + 8 宝石 + socketed_gem 组件）
 		Accessories.register();
 
+		// ============ 1.8.0「幽渊 · 门」注册 ============
+
+		// 深渊祭钥（祭坛仪式 / 稳定态重开）+ 幽渊方块 + 祭坛结构 + 仪式状态机
+		Registry.register(BuiltInRegistries.ITEM, id("abyss_gate_key"), ABYSS_GATE_KEY);
+		AbyssBlocks.register();
+		AbyssStructures.register();
+		AbyssRitual.register();
+		AbyssNetworking.register();
+
+		// ============ 1.8.0.2 补完注册（倒悬城市/呼吸裂谷 feature + 门状态机 + 记忆闪回） ============
+
+		// 自定义地形 feature（倒悬城市 / 呼吸裂谷）
+		AbyssFeatures.register();
+
+		// 门呼吸状态机（闭合/待唤醒/开启/收束/稳定）+ 尖啸倒计时（三重共鸣仪式）
+		ServerTickEvents.END_SERVER_TICK.register(AbyssGateState::tick);
+		ServerTickEvents.END_SERVER_TICK.register(AbyssRitual::tickServer);
+
+		// 记忆闪回 tick + 记忆限制（可看、可走、不可改变）
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				MemoryFlashback.tick(player);
+			}
+		});
+		net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.BEFORE.register(
+				(level, player, pos, state, blockEntity) -> !(
+						player instanceof ServerPlayer sp && MemoryFlashback.isInFlashback(sp)));
+		net.fabricmc.fabric.api.event.player.BlockEvents.USE_ITEM_ON.register(
+				(stack, state, level, pos, player, hand, hitResult) -> {
+					if (player instanceof ServerPlayer sp && MemoryFlashback.isInFlashback(sp)) {
+						sp.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+								"message.extra-enchantry.memory.readonly"));
+						return net.minecraft.world.InteractionResult.FAIL;
+					}
+					return net.minecraft.world.InteractionResult.PASS;
+				});
+
+		// ============ 1.8.1「声」：全动作声纹（挖掘/放置/使用物品） ============
+
+		// 挖掘破坏 → 半径 8 的位置声源
+		net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.AFTER.register(
+				(level, player, pos, state, blockEntity) -> {
+					if (player instanceof ServerPlayer sp && level instanceof net.minecraft.server.level.ServerLevel sl) {
+						EchoManager.emitAt(sl, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 8.0F);
+					}
+				});
+		// 使用物品 → 半径 5
+		net.fabricmc.fabric.api.event.player.UseItemCallback.EVENT.register((player, level, hand) -> {
+			if (player instanceof ServerPlayer sp) {
+				EchoManager.emit(sp, 5.0F);
+			}
+			return net.minecraft.world.InteractionResult.PASS;
+		});
+
+		// ============ 1.8.1「声」注册 ============
+
+		// 声纹工具：回响灯 / 幽匿共鸣器
+		Registry.register(BuiltInRegistries.ITEM, id("echo_lantern"), ECHO_LANTERN);
+		Registry.register(BuiltInRegistries.ITEM, id("sculk_resonator"), SCULK_RESONATOR);
+
+		// 声纹系统：per-player 移动/凝视 tick + 服务器级风暴推进 + 登出清理
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			EchoManager.tickServer(server);
+			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+				EchoManager.tick(player);
+			}
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+				EchoManager.onDisconnect(handler.getPlayer().getUUID()));
+
+		// ============ 1.8.2「群」注册 ============
+
+		// 幽渊实体 + 声纹驱动生态刷新 + 渊心守望者挑战冷却 attachment
+		AbyssEntities.register();
+		HeartWardenEntity.register();
+		ServerTickEvents.END_SERVER_TICK.register(AbyssSpawning::tick);
+
+		// ============ 1.8.3「藏」注册 ============
+
+		// 幽渊资源（回响结晶 / 渊息之泪 / 幽匿丝 / 记忆之尘 / 深渊之心）
+		AbyssResources.register();
+
+		// ============ 1.8.4「忆」注册 ============
+
+		// 记忆残片：渊族叙事闪回
+		Registry.register(BuiltInRegistries.ITEM, id("memory_shard"), MEMORY_SHARD);
+
+		// ============ 1.8.5「心」注册 ============
+
+		// 渊心守望者刷怪蛋
+		Registry.register(BuiltInRegistries.ITEM, id("heart_warden_spawn_egg"), HEART_WARDEN_SPAWN_EGG);
+		Registry.register(BuiltInRegistries.ITEM, id("echo_wraith_spawn_egg"), ECHO_WRAITH_SPAWN_EGG);
+		Registry.register(BuiltInRegistries.ITEM, id("tideborn_spawn_egg"), TIDEBORN_SPAWN_EGG);
+		Registry.register(BuiltInRegistries.ITEM, id("resonance_beast_spawn_egg"), RESONANCE_BEAST_SPAWN_EGG);
+		Registry.register(BuiltInRegistries.ITEM, id("sculk_larva_spawn_egg"), SCULK_LARVA_SPAWN_EGG);
+		Registry.register(BuiltInRegistries.ITEM, id("memory_shade_spawn_egg"), MEMORY_SHADE_SPAWN_EGG);
+		Registry.register(BuiltInRegistries.ITEM, id("soundless_spawn_egg"), SOUNDLESS_SPAWN_EGG);
+
+		// 幽渊附魔获取：回声 / 静默 / 深潜 / 溯忆 / 共鸣 / 无相之铭
+		// 追加进远古城市宝箱（主题绑定深暗——不进附魔台，同渊息的事件追加法）
+		LootTableEvents.MODIFY.register((key, tableBuilder, source, registries) -> {
+			if (!source.isBuiltin()
+					|| (!key.equals(BuiltInLootTables.ANCIENT_CITY)
+							&& !key.equals(BuiltInLootTables.ANCIENT_CITY_ICE_BOX))) {
+				return;
+			}
+			var lookup = registries.lookupOrThrow(Registries.ENCHANTMENT);
+			Holder<Enchantment> echo = lookup.getOrThrow(ECHO);
+			Holder<Enchantment> stillness = lookup.getOrThrow(STILLNESS);
+			Holder<Enchantment> deepdive = lookup.getOrThrow(DEEPDIVE);
+			Holder<Enchantment> reverie = lookup.getOrThrow(REVERIE);
+			Holder<Enchantment> resonance = lookup.getOrThrow(RESONANCE_ENCH);
+			Holder<Enchantment> aetheric = lookup.getOrThrow(AETHERIC_INSCRIPTION);
+			// 每池：60% 空 / 8 类附魔书加权（无相之铭 1% 终局级稀有）
+			tableBuilder.withPool(LootPool.lootPool()
+					.setRolls(ConstantValue.exactly(1.0F))
+					.add(EmptyLootItem.emptyItem().setWeight(60))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(10)
+							.apply(new SetEnchantmentsFunction.Builder().withEnchantment(echo, UniformGenerator.between(1.0F, 3.0F))))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(8)
+							.apply(new SetEnchantmentsFunction.Builder().withEnchantment(stillness, UniformGenerator.between(1.0F, 2.0F))))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(8)
+							.apply(new SetEnchantmentsFunction.Builder().withEnchantment(deepdive, UniformGenerator.between(1.0F, 3.0F))))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(6)
+							.apply(new SetEnchantmentsFunction.Builder().withEnchantment(reverie, UniformGenerator.between(1.0F, 2.0F))))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(6)
+							.apply(new SetEnchantmentsFunction.Builder().withEnchantment(resonance, UniformGenerator.between(1.0F, 2.0F))))
+					.add(LootItem.lootTableItem(Items.ENCHANTED_BOOK).setWeight(1)
+							.apply(new SetEnchantmentsFunction.Builder().withEnchantment(aetheric, ConstantValue.exactly(1.0F)))));
+		});
+
 
 		// 配饰结算：属性类 + 自然恢复 tick（每玩家）
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -426,6 +631,29 @@ public class ExtraEnchantry implements ModInitializer {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (source.getEntity() instanceof ServerPlayer killer) {
 				AccessoryManager.onKillMob(killer, entity);
+			}
+		});
+
+		// 1.8.3 溯忆（Reverie）：死亡按护甲附魔等级原地补偿经验（0.15/级）
+		// §5.3「死亡留下记忆残影」：经验化作一道可拾取的记忆残影（溯忆之影）
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer dead
+					&& dead.level() instanceof net.minecraft.server.level.ServerLevel deathLevel) {
+				float keep = AbyssEnchantments.reverieExperienceKeep(dead);
+				if (keep > 0 && dead.experienceLevel > 0) {
+					int xp = Math.round(dead.experienceLevel * 7 * keep);
+					var shade = AbyssEntities.MEMORY_SHADE.create(deathLevel,
+							net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+					if (shade != null) {
+						shade.snapTo(dead.getX(), dead.getY(), dead.getZ(),
+								dead.getYRot(), 0.0F);
+						deathLevel.addFreshEntity(shade);
+					}
+					if (xp > 0) {
+						net.minecraft.world.entity.ExperienceOrb.award(
+								deathLevel, dead.position(), xp);
+					}
+				}
 			}
 		});
 
@@ -553,7 +781,12 @@ public class ExtraEnchantry implements ModInitializer {
 					FamilyResonanceManager.onServerStopped();
 					FamilyTrialsManager.onServerStopped();
 					DecoyManager.onServerStopped();
-					FxHelper.clearThrottle();
+				AbyssGateState.onServerStopped();
+				MemoryFlashback.onServerStopped();
+				EchoManager.onServerStopped();
+				HeartWardenEntity.HeartFightState.onServerStopped();
+				AbyssEnchantments.onServerStopped();
+				FxHelper.clearThrottle();
 				});
 
 		// 破限腿甲跨部位解锁：可附魔原版摔落保护（经 fabric-item-api 的官方事件，

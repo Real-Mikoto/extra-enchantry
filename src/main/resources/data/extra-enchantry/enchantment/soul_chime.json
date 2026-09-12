@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.soul_chime"
+    "translate": "enchantment.extra-enchantry.soul_chime",
+    "color": "light_purple",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:accessory/earring",
   "primary_items": "#extra-enchantry:accessory/earring",

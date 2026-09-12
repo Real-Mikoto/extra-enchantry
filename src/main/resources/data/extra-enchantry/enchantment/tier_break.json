@@ -1,21 +1,23 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.tier_break"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 25,
-		"per_level_above_first": 10
-	},
-	"max_level": 3,
-	"min_cost": {
-		"base": 10,
-		"per_level_above_first": 10
-	},
-	"slots": [
-		"mainhand"
-	],
-	"supported_items": "#minecraft:enchantable/mining_loot",
-	"weight": 2
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.tier_break",
+    "color": "red",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 10
+  },
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#minecraft:enchantable/mining_loot",
+  "weight": 2
 }

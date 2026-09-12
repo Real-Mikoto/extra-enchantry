@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:spike",
+  "config": {
+    "can_place_on": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "minecraft:deepslate",
+        "minecraft:bone_block",
+        "minecraft:sculk"
+      ]
+    },
+    "can_replace": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "minecraft:air",
+        "minecraft:deepslate"
+      ]
+    },
+    "state": {
+      "Name": "minecraft:bone_block"
+    }
+  }
+}

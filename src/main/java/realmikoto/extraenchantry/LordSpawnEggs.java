@@ -1,12 +1,17 @@
 package realmikoto.extraenchantry;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -66,6 +71,57 @@ public final class LordSpawnEggs {
 		return new LordEggItem(new Item.Properties()
 				.setId(ResourceKey.create(Registries.ITEM, ExtraEnchantry.id(id)))
 				.stacksTo(16).rarity(Rarity.EPIC), realmId, type);
+	}
+
+	/**
+	 * 简易刷怪蛋（1.8.2 幽渊生物用）：直接生成 {@code type} 实例（无领主工厂），
+	 * 依赖 26.2 SpawnEggItem 读取 {@code DataComponents.ENTITY_DATA} 的原版生成路径。
+	 */
+	public static Item simpleEgg(String id, Supplier<EntityType<? extends Mob>> type) {
+		return new SpawnEggItem(new Item.Properties()
+				.setId(ResourceKey.create(Registries.ITEM, ExtraEnchantry.id(id)))
+				.stacksTo(16)) {
+			@Override
+			public ItemStack getDefaultInstance() {
+				ItemStack stack = new ItemStack(this);
+				CompoundTag tag = new CompoundTag();
+				tag.putString("id", net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE
+						.getKey(type.get()).toString());
+				stack.set(DataComponents.ENTITY_DATA, TypedEntityData.of(type.get(), tag));
+				return stack;
+			}
+
+			/**
+			 * 直接生成实体（不依赖 ENTITY_DATA 组件）。
+			 *
+			 * 修复：旧实现只重写 getDefaultInstance()，依赖原版 SpawnEggItem 读取
+			 * {@code DataComponents.ENTITY_DATA}——而玩家实际手持的 ItemStack 不一定携带该组件
+			 * （创造栏取物 / 掉落物 / 重启存档后都可能丢失），导致"刷怪蛋无法使用"。
+			 * 改为与领主蛋（LordEggItem）一致的 useOn 直接生成路径，彻底移除组件依赖。
+			 */
+			@Override
+			public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
+				Level level = context.getLevel();
+				if (level instanceof ServerLevel server) {
+					EntityType<? extends Mob> entityType = type.get();
+					Mob mob = entityType.create(server, EntitySpawnReason.SPAWN_ITEM_USE);
+					if (mob != null) {
+						BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
+						mob.snapTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
+								server.getRandom().nextFloat() * 360.0F, 0.0F);
+						mob.finalizeSpawn(server, server.getCurrentDifficultyAt(pos),
+								EntitySpawnReason.SPAWN_ITEM_USE, null);
+						server.addFreshEntity(mob);
+						Player player = context.getPlayer();
+						if (player == null || !player.getAbilities().instabuild) {
+							context.getItemInHand().shrink(1);
+						}
+						return InteractionResult.SUCCESS;
+					}
+				}
+				return super.useOn(context);
+			}
+		};
 	}
 
 	/**

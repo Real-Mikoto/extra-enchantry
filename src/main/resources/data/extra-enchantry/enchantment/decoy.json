@@ -1,25 +1,27 @@
 {
-	"anvil_cost": 8,
-	"description": {
-		"translate": "enchantment.extra-enchantry.decoy"
-	},
-	"effects": {},
-	"exclusive_set": [
-		"minecraft:thorns"
-	],
-	"max_cost": {
-		"base": 60,
-		"per_level_above_first": 20
-	},
-	"max_level": 3,
-	"min_cost": {
-		"base": 10,
-		"per_level_above_first": 20
-	},
-	"primary_items": "#minecraft:enchantable/head_armor",
-	"slots": [
-		"head"
-	],
-	"supported_items": "#minecraft:enchantable/head_armor",
-	"weight": 1
+  "anvil_cost": 8,
+  "description": {
+    "translate": "enchantment.extra-enchantry.decoy",
+    "color": "yellow",
+    "italic": false
+  },
+  "effects": {},
+  "exclusive_set": [
+    "minecraft:thorns"
+  ],
+  "max_cost": {
+    "base": 60,
+    "per_level_above_first": 20
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 20
+  },
+  "primary_items": "#minecraft:enchantable/head_armor",
+  "slots": [
+    "head"
+  ],
+  "supported_items": "#minecraft:enchantable/head_armor",
+  "weight": 1
 }

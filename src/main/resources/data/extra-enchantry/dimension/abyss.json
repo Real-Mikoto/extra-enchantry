@@ -1,0 +1,11 @@
+{
+  "type": "extra-enchantry:abyss",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "extra-enchantry:abyss"
+    },
+    "settings": "extra-enchantry:abyss"
+  }
+}

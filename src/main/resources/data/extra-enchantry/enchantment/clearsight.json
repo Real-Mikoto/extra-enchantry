@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.clearsight"
+    "translate": "enchantment.extra-enchantry.clearsight",
+    "color": "gold",
+    "italic": false
   },
   "effects": {},
   "max_cost": {

@@ -1,0 +1,24 @@
+{
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.resonance_ench",
+    "color": "yellow",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 50,
+    "per_level_above_first": 12
+  },
+  "max_level": 2,
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 10
+  },
+  "primary_items": "#minecraft:enchantable/weapon",
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#minecraft:enchantable/weapon",
+  "weight": 2
+}

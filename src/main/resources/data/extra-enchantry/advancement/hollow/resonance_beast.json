@@ -1,0 +1,39 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:resonance_beast_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.resonance_beast.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.resonance_beast.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tamed": {
+      "trigger": "minecraft:player_interacted_with_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "extra-enchantry:resonance_beast"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "tamed"
+    ]
+  ],
+  "parent": "extra-enchantry:hollow/first_enter"
+}

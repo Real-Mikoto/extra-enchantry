@@ -1,6 +1,12 @@
 {
 	"values": [
 		"extra-enchantry:blazing_walker",
-		"extra-enchantry:tideheart"
+		"extra-enchantry:tideheart",
+		"extra-enchantry:echo",
+		"extra-enchantry:stillness",
+		"extra-enchantry:deepdive",
+		"extra-enchantry:reverie",
+		"extra-enchantry:resonance_ench",
+		"extra-enchantry:aetheric_inscription"
 	]
 }

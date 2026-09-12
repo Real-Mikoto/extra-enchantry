@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:abyssal_heart"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.layer_heart.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.layer_heart.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "extra-enchantry:hollow/layer_memory",
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ]
+}

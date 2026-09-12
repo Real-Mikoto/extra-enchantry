@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:lantern",
+    "extra-enchantry:echo_crystal",
+    "extra-enchantry:echo_crystal",
+    "extra-enchantry:echo_crystal",
+    "extra-enchantry:echo_crystal"
+  ],
+  "result": {
+    "id": "extra-enchantry:echo_lantern",
+    "count": 1
+  }
+}

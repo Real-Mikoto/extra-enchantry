@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 2,
-	"description": {
-		"translate": "enchantment.extra-enchantry.bulwark"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 60,
-		"per_level_above_first": 100
-	},
-	"max_level": 10,
-	"min_cost": {
-		"base": 5,
-		"per_level_above_first": 100
-	},
-	"primary_items": "#minecraft:enchantable/chest_armor",
-	"slots": [
-		"chest"
-	],
-	"supported_items": "#extra-enchantry:bulwark_supported",
-	"weight": 5
+  "anvil_cost": 2,
+  "description": {
+    "translate": "enchantment.extra-enchantry.bulwark",
+    "color": "gold",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 60,
+    "per_level_above_first": 100
+  },
+  "max_level": 10,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 100
+  },
+  "primary_items": "#minecraft:enchantable/chest_armor",
+  "slots": [
+    "chest"
+  ],
+  "supported_items": "#extra-enchantry:bulwark_supported",
+  "weight": 5
 }

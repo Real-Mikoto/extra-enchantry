@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:memory_shade_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.bestiary_shade.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.bestiary_shade.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "parent": "extra-enchantry:hollow/first_enter",
+  "criteria": {
+    "talked": {
+      "trigger": "minecraft:player_interacted_with_entity",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "minecraft:entity_type": "extra-enchantry:memory_shade"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "talked"
+    ]
+  ]
+}

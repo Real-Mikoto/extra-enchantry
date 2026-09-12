@@ -1,23 +1,24 @@
 {
-	"required": true,
-	"package": "realmikoto.extraenchantry.client.mixin",
-	"compatibilityLevel": "JAVA_25",
-	"client": [
-		"ExampleClientMixin",
-		"FontPreparedTextBuilderMixin",
-		"HudMixin",
-		"LocalPlayerMixin",
-		"ClientAdvancementsAccessor",
-		"ItemStackFoilMixin",
-		"SlotMixin",
-		"InventoryScreenMixin",
-		"CreativeModeInventoryScreenMixin",
-		"AbstractContainerScreenMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+  "required": true,
+  "package": "realmikoto.extraenchantry.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "ExampleClientMixin",
+    "FontPreparedTextBuilderMixin",
+    "HudMixin",
+    "LocalPlayerMixin",
+    "ClientAdvancementsAccessor",
+    "ItemStackFoilMixin",
+    "SlotMixin",
+    "InventoryScreenMixin",
+    "CreativeModeInventoryScreenMixin",
+    "AbstractContainerScreenMixin",
+    "LightmapRenderStateExtractorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
 }

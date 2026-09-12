@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 2,
-	"description": {
-		"translate": "enchantment.extra-enchantry.loam"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 45,
-		"per_level_above_first": 12
-	},
-	"max_level": 3,
-	"min_cost": {
-		"base": 5,
-		"per_level_above_first": 8
-	},
-	"primary_items": "#minecraft:hoes",
-	"slots": [
-		"mainhand"
-	],
-	"supported_items": "#minecraft:hoes",
-	"weight": 5
+  "anvil_cost": 2,
+  "description": {
+    "translate": "enchantment.extra-enchantry.loam",
+    "color": "green",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 45,
+    "per_level_above_first": 12
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 8
+  },
+  "primary_items": "#minecraft:hoes",
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#minecraft:hoes",
+  "weight": 5
 }

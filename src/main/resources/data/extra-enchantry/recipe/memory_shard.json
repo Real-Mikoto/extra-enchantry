@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "extra-enchantry:memory_dust",
+    "extra-enchantry:memory_dust",
+    "extra-enchantry:memory_dust",
+    "extra-enchantry:memory_dust",
+    "minecraft:echo_shard"
+  ],
+  "result": {
+    "id": "extra-enchantry:memory_shard",
+    "count": 1
+  }
+}

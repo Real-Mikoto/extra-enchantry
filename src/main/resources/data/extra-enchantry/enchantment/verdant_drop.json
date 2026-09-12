@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.verdant_drop"
+    "translate": "enchantment.extra-enchantry.verdant_drop",
+    "color": "green",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:accessory/necklace",
   "primary_items": "#extra-enchantry:accessory/necklace",

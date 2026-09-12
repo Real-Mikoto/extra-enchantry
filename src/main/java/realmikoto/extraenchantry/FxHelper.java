@@ -71,6 +71,13 @@ public final class FxHelper {
 				sound, SoundSource.PLAYERS, volume, pitch);
 	}
 
+	/** 在指定方块位置播放音效（无实体锚点时使用，如门状态切换） */
+	public static void playAt(ServerLevel level, net.minecraft.core.BlockPos pos, SoundEvent sound,
+			float volume, float pitch) {
+		level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+				sound, net.minecraft.sounds.SoundSource.BLOCKS, volume, pitch);
+	}
+
 	/** 在实体位置播放音效（Holder 形态：NOTE_BLOCK_* / SHIELD_BLOCK / SOUL_ESCAPE 等） */
 	public static void play(ServerLevel level, Entity entity, Holder<SoundEvent> sound, float volume, float pitch) {
 		level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),

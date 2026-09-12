@@ -1,23 +1,25 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.unseen"
-	},
-	"effects": {},
-	"exclusive_set": "#minecraft:exclusive_set/boots",
-	"max_cost": {
-		"base": 40,
-		"per_level_above_first": 20
-	},
-	"max_level": 2,
-	"min_cost": {
-		"base": 10,
-		"per_level_above_first": 20
-	},
-	"primary_items": "#minecraft:enchantable/foot_armor",
-	"slots": [
-		"feet"
-	],
-	"supported_items": "#minecraft:enchantable/foot_armor",
-	"weight": 1
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.unseen",
+    "color": "light_purple",
+    "italic": false
+  },
+  "effects": {},
+  "exclusive_set": "#minecraft:exclusive_set/boots",
+  "max_cost": {
+    "base": 40,
+    "per_level_above_first": 20
+  },
+  "max_level": 2,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 20
+  },
+  "primary_items": "#minecraft:enchantable/foot_armor",
+  "slots": [
+    "feet"
+  ],
+  "supported_items": "#minecraft:enchantable/foot_armor",
+  "weight": 1
 }

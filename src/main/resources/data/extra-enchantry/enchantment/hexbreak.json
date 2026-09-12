@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.hexbreak"
+    "translate": "enchantment.extra-enchantry.hexbreak",
+    "color": "green",
+    "italic": false
   },
   "effects": {},
   "max_cost": {

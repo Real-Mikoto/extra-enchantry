@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.windrider"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 50,
-		"per_level_above_first": 15
-	},
-	"max_level": 3,
-	"min_cost": {
-		"base": 10,
-		"per_level_above_first": 15
-	},
-	"primary_items": "minecraft:elytra",
-	"slots": [
-		"chest"
-	],
-	"supported_items": "minecraft:elytra",
-	"weight": 2
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.windrider",
+    "color": "white",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 50,
+    "per_level_above_first": 15
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 15
+  },
+  "primary_items": "minecraft:elytra",
+  "slots": [
+    "chest"
+  ],
+  "supported_items": "minecraft:elytra",
+  "weight": 2
 }

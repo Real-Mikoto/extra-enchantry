@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.realms_unity"
+    "translate": "enchantment.extra-enchantry.realms_unity",
+    "color": "dark_purple",
+    "italic": false
   },
   "effects": {},
   "max_cost": {

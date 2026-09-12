@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.renewal"
+    "translate": "enchantment.extra-enchantry.renewal",
+    "color": "green",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:wolf_armor_supported",
   "primary_items": "#extra-enchantry:wolf_armor_supported",

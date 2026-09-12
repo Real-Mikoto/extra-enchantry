@@ -1,0 +1,7 @@
+{
+  "type": "extra-enchantry:abyssal_altar",
+  "biomes": "#minecraft:has_structure/ancient_city",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

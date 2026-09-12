@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.gale"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 55,
-		"per_level_above_first": 25
-	},
-	"max_level": 3,
-	"min_cost": {
-		"base": 5,
-		"per_level_above_first": 25
-	},
-	"primary_items": "#minecraft:enchantable/leg_armor",
-	"slots": [
-		"legs"
-	],
-	"supported_items": "#minecraft:enchantable/leg_armor",
-	"weight": 5
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.gale",
+    "color": "white",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 55,
+    "per_level_above_first": 25
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 25
+  },
+  "primary_items": "#minecraft:enchantable/leg_armor",
+  "slots": [
+    "legs"
+  ],
+  "supported_items": "#minecraft:enchantable/leg_armor",
+  "weight": 5
 }

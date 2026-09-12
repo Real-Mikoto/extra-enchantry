@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:echo_crystal"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.anchor.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.anchor.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "anchor": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "anchor"
+    ]
+  ],
+  "parent": "extra-enchantry:hollow/first_enter"
+}

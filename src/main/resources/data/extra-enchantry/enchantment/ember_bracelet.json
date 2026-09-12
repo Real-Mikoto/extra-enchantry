@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.ember_bracelet"
+    "translate": "enchantment.extra-enchantry.ember_bracelet",
+    "color": "red",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:accessory/bracelet",
   "primary_items": "#extra-enchantry:accessory/bracelet",

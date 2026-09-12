@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "extra-enchantry:abyss_gate_key"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.silent_walker.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.silent_walker.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "extra-enchantry:hollow/first_enter",
+  "criteria": {
+    "silent": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "silent"
+    ]
+  ]
+}

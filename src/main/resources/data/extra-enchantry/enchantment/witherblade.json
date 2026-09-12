@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.witherblade"
+    "translate": "enchantment.extra-enchantry.witherblade",
+    "color": "gray",
+    "italic": false
   },
   "effects": {},
   "max_cost": {

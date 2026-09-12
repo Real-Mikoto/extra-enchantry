@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.tidesurge"
+    "translate": "enchantment.extra-enchantry.tidesurge",
+    "color": "aqua",
+    "italic": false
   },
   "effects": {},
   "max_cost": {

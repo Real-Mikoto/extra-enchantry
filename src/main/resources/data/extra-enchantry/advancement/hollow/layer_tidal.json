@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:prismarine_shard"
+    },
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.layer_tidal.title"
+    },
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.layer_tidal.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "parent": "extra-enchantry:hollow/first_enter",
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ]
+}

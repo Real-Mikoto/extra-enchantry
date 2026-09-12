@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "extra-enchantry:item/resonance_beast_spawn_egg"
+  }
+}

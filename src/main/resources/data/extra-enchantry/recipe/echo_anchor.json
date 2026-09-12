@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SES",
+    "ECE",
+    "SES"
+  ],
+  "key": {
+    "S": "extra-enchantry:sculk_silk",
+    "E": "extra-enchantry:echo_crystal",
+    "C": "minecraft:echo_shard"
+  },
+  "result": {
+    "id": "extra-enchantry:echo_anchor",
+    "count": 1
+  },
+  "show_notification": true
+}

@@ -75,7 +75,14 @@ public final class ExtraEnchantryCreativeTab {
 			new EnchantmentEntry(ExtraEnchantry.TIDESURGE, 3),
 			new EnchantmentEntry(ExtraEnchantry.HEXBREAK, 3),
 			new EnchantmentEntry(ExtraEnchantry.VOIDBLINK, 2),
-			new EnchantmentEntry(ExtraEnchantry.REALMS_UNITY, 1)
+			new EnchantmentEntry(ExtraEnchantry.REALMS_UNITY, 1),
+			// 1.8.1/1.8.3「幽渊」六附魔（47–52）
+			new EnchantmentEntry(ExtraEnchantry.ECHO, 3),
+			new EnchantmentEntry(ExtraEnchantry.STILLNESS, 2),
+			new EnchantmentEntry(ExtraEnchantry.DEEPDIVE, 3),
+			new EnchantmentEntry(ExtraEnchantry.REVERIE, 2),
+			new EnchantmentEntry(ExtraEnchantry.RESONANCE_ENCH, 2),
+			new EnchantmentEntry(ExtraEnchantry.AETHERIC_INSCRIPTION, 1)
 	);
 
 	public static final ResourceKey<CreativeModeTab> TAB_KEY =
@@ -121,6 +128,25 @@ public final class ExtraEnchantryCreativeTab {
 					// 1.7.0「谱系与传承」：谱系回响匣 + 遗辉纹饰模板
 					output.accept(new ItemStack(LineageEchoItem.LINEAGE_ECHO));
 					output.accept(new ItemStack(AfterglowTrim.TEMPLATE));
+					// 1.8.0「幽渊 · 门」：深渊祭钥
+					output.accept(new ItemStack(ExtraEnchantry.ABYSS_GATE_KEY));
+					// 1.8.1「声」：回响灯 / 幽匿共鸣器
+					output.accept(new ItemStack(ExtraEnchantry.ECHO_LANTERN));
+					output.accept(new ItemStack(ExtraEnchantry.SCULK_RESONATOR));
+					// 1.8.2「群」：幽渊生物刷怪蛋（七族全量）
+					output.accept(new ItemStack(ExtraEnchantry.ECHO_WRAITH_SPAWN_EGG));
+					output.accept(new ItemStack(ExtraEnchantry.TIDEBORN_SPAWN_EGG));
+					output.accept(new ItemStack(ExtraEnchantry.RESONANCE_BEAST_SPAWN_EGG));
+					output.accept(new ItemStack(ExtraEnchantry.SCULK_LARVA_SPAWN_EGG));
+					output.accept(new ItemStack(ExtraEnchantry.MEMORY_SHADE_SPAWN_EGG));
+					output.accept(new ItemStack(ExtraEnchantry.SOUNDLESS_SPAWN_EGG));
+					output.accept(new ItemStack(ExtraEnchantry.HEART_WARDEN_SPAWN_EGG));
+					// 1.8.4「忆」：记忆残片
+					output.accept(new ItemStack(ExtraEnchantry.MEMORY_SHARD));
+					// 1.8.3「藏」：幽渊资源
+					for (Item resource : AbyssResources.ALL) {
+						output.accept(new ItemStack(resource));
+					}
 					for (EnchantmentEntry entry : ENCHANTMENTS) {
 						Holder<Enchantment> holder = parameters.holders()
 								.lookupOrThrow(Registries.ENCHANTMENT)

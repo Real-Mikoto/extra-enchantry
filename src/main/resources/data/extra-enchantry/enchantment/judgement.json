@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.judgement"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 65,
-		"per_level_above_first": 20
-	},
-	"max_level": 2,
-	"min_cost": {
-		"base": 20,
-		"per_level_above_first": 20
-	},
-	"primary_items": "#extra-enchantry:cleave_supported",
-	"slots": [
-		"mainhand"
-	],
-	"supported_items": "#extra-enchantry:cleave_supported",
-	"weight": 1
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.judgement",
+    "color": "light_purple",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 65,
+    "per_level_above_first": 20
+  },
+  "max_level": 2,
+  "min_cost": {
+    "base": 20,
+    "per_level_above_first": 20
+  },
+  "primary_items": "#extra-enchantry:cleave_supported",
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#extra-enchantry:cleave_supported",
+  "weight": 1
 }

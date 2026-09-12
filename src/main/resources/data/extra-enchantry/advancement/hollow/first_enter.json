@@ -1,0 +1,30 @@
+{
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.first_enter.description"
+    },
+    "frame": "task",
+    "icon": {
+      "id": "minecraft:echo_shard"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.first_enter.title"
+    }
+  },
+  "parent": "extra-enchantry:hollow/root",
+  "criteria": {
+    "location": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "extra-enchantry:abyss"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "location"
+    ]
+  ]
+}

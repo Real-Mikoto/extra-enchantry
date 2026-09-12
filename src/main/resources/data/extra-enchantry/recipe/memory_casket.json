@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "MMM",
+    "MCM",
+    "MMM"
+  ],
+  "key": {
+    "M": "extra-enchantry:memory_dust",
+    "C": "minecraft:chest"
+  },
+  "result": {
+    "id": "extra-enchantry:memory_casket",
+    "count": 1
+  }
+}

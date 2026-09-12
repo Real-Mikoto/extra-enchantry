@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.vigil"
+    "translate": "enchantment.extra-enchantry.vigil",
+    "color": "gold",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:wolf_armor_supported",
   "primary_items": "#extra-enchantry:wolf_armor_supported",

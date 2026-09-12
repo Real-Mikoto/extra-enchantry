@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.blade_ring"
+    "translate": "enchantment.extra-enchantry.blade_ring",
+    "color": "gray",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:accessory/ring",
   "primary_items": "#extra-enchantry:accessory/ring",

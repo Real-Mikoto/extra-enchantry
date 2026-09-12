@@ -1,6 +1,8 @@
 {
   "description": {
-    "translate": "enchantment.extra-enchantry.thunder_clasp"
+    "translate": "enchantment.extra-enchantry.thunder_clasp",
+    "color": "yellow",
+    "italic": false
   },
   "supported_items": "#extra-enchantry:accessory/necklace",
   "primary_items": "#extra-enchantry:accessory/necklace",

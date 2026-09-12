@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:simple_block",
+  "config": {
+    "place_too_close_to_border": true,
+    "to_place": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "extra-enchantry:memory_gate"
+      }
+    }
+  }
+}

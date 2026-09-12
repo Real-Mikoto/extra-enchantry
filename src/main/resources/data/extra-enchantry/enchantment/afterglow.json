@@ -1,22 +1,24 @@
 {
-	"anvil_cost": 4,
-	"description": {
-		"translate": "enchantment.extra-enchantry.afterglow"
-	},
-	"effects": {},
-	"max_cost": {
-		"base": 65,
-		"per_level_above_first": 0
-	},
-	"max_level": 1,
-	"min_cost": {
-		"base": 15,
-		"per_level_above_first": 0
-	},
-	"primary_items": "minecraft:totem_of_undying",
-	"slots": [
-		"hand"
-	],
-	"supported_items": "minecraft:totem_of_undying",
-	"weight": 2
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.extra-enchantry.afterglow",
+    "color": "light_purple",
+    "italic": false
+  },
+  "effects": {},
+  "max_cost": {
+    "base": 65,
+    "per_level_above_first": 0
+  },
+  "max_level": 1,
+  "min_cost": {
+    "base": 15,
+    "per_level_above_first": 0
+  },
+  "primary_items": "minecraft:totem_of_undying",
+  "slots": [
+    "hand"
+  ],
+  "supported_items": "minecraft:totem_of_undying",
+  "weight": 2
 }

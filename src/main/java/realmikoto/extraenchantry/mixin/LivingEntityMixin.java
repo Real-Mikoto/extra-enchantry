@@ -46,7 +46,7 @@ import realmikoto.extraenchantry.ShieldChargeManager;
 import realmikoto.extraenchantry.StormsurgeManager;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin {
+public abstract class LivingEntityMixin implements realmikoto.extraenchantry.EquipmentReady {
 
 	/**
 	 * dropExperience 声明于 LivingEntity 自身（protected），@Shadow 可正常解析，
@@ -88,12 +88,8 @@ public abstract class LivingEntityMixin {
 		this.extraenchantry$equipmentReady = true;
 	}
 
-	/** 供 EntityMixin 查询装备是否可安全读取（Entity 构造期 = false）；duck 接口供跨 Mixin cast */
-	public interface EquipmentReady {
-		boolean extraenchantry$isEquipmentReady();
-	}
-
-	@Unique
+	/** 供 EntityMixin 查询装备是否可安全读取（Entity 构造期 = false）；duck 接口见 realmikoto.extraenchantry.EquipmentReady */
+	@Override
 	public boolean extraenchantry$isEquipmentReady() {
 		return this.extraenchantry$equipmentReady;
 	}
@@ -289,11 +285,15 @@ public abstract class LivingEntityMixin {
 	/**
 	 * 配饰受伤减免（盾坠/盾纹玉全伤害、羽环/风羽晶弹射物、烬镯/烬心石火）：
 	 * victim 侧 ModifyVariable，结算全部收敛在 AccessoryManager。
+	 * 1.8.5「心」：渊心守望者「越响越强」——愤怒值放大它对玩家造成的伤害（§6.7）。
 	 */
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float extraenchantry$accessoryIncoming(float amount, ServerLevel level, DamageSource source) {
 		if (amount <= 0.0F || !((Object) this instanceof net.minecraft.server.level.ServerPlayer)) {
 			return amount;
+		}
+		if (source.getEntity() instanceof realmikoto.extraenchantry.HeartWardenEntity warden) {
+			amount *= warden.rageMultiplier();
 		}
 		return realmikoto.extraenchantry.AccessoryManager.incomingDamage((LivingEntity) (Object) this, amount, source);
 	}
@@ -319,12 +319,19 @@ public abstract class LivingEntityMixin {
 		} else if (attacker instanceof net.minecraft.world.entity.monster.Witch) {
 			realmikoto.extraenchantry.EliteEncounterManager.noteWitchPotionHit(player);
 		}
+		// 1.8.3「藏」：回声附魔（胸甲）——受击声纹反击（受伤本身也计入声纹）
+		if (attacker instanceof LivingEntity livingAttacker) {
+			realmikoto.extraenchantry.AbyssEnchantments.onPlayerHurt(player, livingAttacker);
+		}
+		realmikoto.extraenchantry.EchoManager.emit(player, 12.0F);
 	}
 
 	/**
 	 * 配饰造成伤害加成（雷鸣扣：雷雨天气全伤害 +4%/级）：
 	 * hurtServer 的 this 是受害者，攻击者必须从 source.getEntity() 取——
 	 * 修复：旧实现把受害者当攻击者，导致雷雨天"受到的伤害"+4%/级（效果完全反向）。
+	 * 1.8.3「藏」：共鸣 Resonance（武器）对任意目标生效（§5.3）；
+	 * 回声 Echo（胸甲）标记期目标增伤（§5.3「对其增伤」）。
 	 */
 	@ModifyVariable(method = "hurtServer", at = @At("HEAD"), argsOnly = true)
 	private float extraenchantry$accessoryOutgoing(float amount, ServerLevel level, DamageSource source) {
@@ -336,7 +343,24 @@ public abstract class LivingEntityMixin {
 				|| source.getEntity() == (Object) this) {
 			return amount;
 		}
-		return realmikoto.extraenchantry.AccessoryManager.outgoingDamage(attacker, amount, source);
+		LivingEntity victim = (LivingEntity) (Object) this;
+		// 1.8.4「忆」：轰鸣调式被动——近战伤害 +10%（直接实体 = 攻击者本人时视为近战）
+		if (source.getDirectEntity() == source.getEntity()) {
+			amount *= realmikoto.extraenchantry.AbyssTuning.attackBonus(attacker);
+		}
+		if (victim instanceof realmikoto.extraenchantry.HeartWardenEntity heartWarden) {
+			// 1.8.5：受击仅累积少量愤怒（响动引它注意）；伤害不加成——
+			// 「越响越强」的愤怒作用于 Boss 输出侧（见 accessoryIncoming）
+			heartWarden.noteStruck(amount);
+			return realmikoto.extraenchantry.AccessoryManager.outgoingDamage(attacker,
+					amount * realmikoto.extraenchantry.AbyssEnchantments.echoDamageBonus(attacker, victim), source);
+		}
+		// 1.8.3：共鸣附魔对任意近战目标生效（emit 内部校验幽渊维度）
+		realmikoto.extraenchantry.AbyssEnchantments.onWeaponHit(attacker, victim);
+		// 1.8.1：普通攻击也是响动（§6.1：攻击产生声纹，共鸣附魔在此基础上叠加）
+		realmikoto.extraenchantry.EchoManager.emit(attacker, 6.0F);
+		return realmikoto.extraenchantry.AccessoryManager.outgoingDamage(attacker,
+				amount * realmikoto.extraenchantry.AbyssEnchantments.echoDamageBonus(attacker, victim), source);
 	}
 
 	/**

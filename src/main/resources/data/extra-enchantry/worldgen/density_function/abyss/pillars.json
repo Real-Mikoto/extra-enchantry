@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:add",
+  "argument1": {
+    "type": "minecraft:noise",
+    "noise": "extra-enchantry:abyss_pillar",
+    "xz_scale": 0.6,
+    "y_scale": 0.35
+  },
+  "argument2": {
+    "type": "minecraft:noise",
+    "noise": "extra-enchantry:abyss_terrain",
+    "xz_scale": 1.0,
+    "y_scale": 1.0
+  }
+}

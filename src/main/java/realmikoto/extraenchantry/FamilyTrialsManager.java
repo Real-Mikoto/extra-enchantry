@@ -208,7 +208,14 @@ public final class FamilyTrialsManager {
 		FamilyResonanceManager.Family water = FamilyResonanceManager.Family.WATER;
 		if (eligible(player, water)) {
 			ResonanceConfig.FamilyRules rules = ResonanceConfig.rules(water);
-			if (player.isEyeInFluid(FluidTags.WATER)) {
+			// 渊族联动（1.8.0.2，设计稿 §11）：在幽渊"深潜"亦可推进水·深潜试炼——
+			// 条件：位于幽渊 + 潮汐层以下（Y<64）+ 眼睛在水中或持有深潜手段
+			boolean abyssDeepDive = AbyssKey.isIn(player)
+					&& player.getBlockY() < AbyssSpawning.LAYER_TIDAL_MAX
+					&& (player.isEyeInFluid(FluidTags.WATER)
+							|| AbyssGearItem.holds(player, AbyssGearItem.Effect.DEEPDIVE)
+							|| AbyssEnchantments.hasDeepdive(player));
+			if (player.isEyeInFluid(FluidTags.WATER) || abyssDeepDive) {
 				if (s.waterDiveStart < 0L) {
 					s.waterDiveStart = gameTime;
 				}

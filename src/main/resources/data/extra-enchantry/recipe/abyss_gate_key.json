@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SES",
+    "ECE",
+    "SES"
+  ],
+  "key": {
+    "S": "minecraft:echo_shard",
+    "E": "minecraft:end_stone",
+    "C": "minecraft:sculk_catalyst"
+  },
+  "result": {
+    "id": "extra-enchantry:abyss_gate_key",
+    "count": 1
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:spike",
+  "config": {
+    "can_place_on": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "minecraft:deepslate",
+        "minecraft:sculk",
+        "minecraft:cobbled_deepslate"
+      ]
+    },
+    "can_replace": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "minecraft:air",
+        "minecraft:deepslate",
+        "minecraft:sculk"
+      ]
+    },
+    "state": {
+      "Name": "minecraft:sculk"
+    }
+  }
+}

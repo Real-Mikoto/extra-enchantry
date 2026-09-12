@@ -1,0 +1,26 @@
+{
+  "display": {
+    "announce_to_chat": true,
+    "background": "minecraft:gui/advancements/backgrounds/adventure",
+    "description": {
+      "translate": "advancement.extra-enchantry.hollow.root.description"
+    },
+    "icon": {
+      "id": "extra-enchantry:abyss_gate_key"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancement.extra-enchantry.hollow.root.title"
+    }
+  },
+  "criteria": {
+    "tick": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "tick"
+    ]
+  ]
+}
